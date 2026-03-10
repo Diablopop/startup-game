@@ -1,0 +1,285 @@
+{
+  "cards": [
+    {
+      "id": 1,
+      "name": "Design Camp Grad",
+      "type": "Product/Design",
+      "cost": 1,
+      "tier": 1,
+      "operation": { "type": "add", "value": 0.5 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 0,
+      "description": "Knows just enough Figma to be dangerous"
+    },
+    {
+      "id": 2,
+      "name": "Junior Engineer",
+      "type": "Engineering",
+      "cost": 1,
+      "tier": 1,
+      "operation": { "type": "add", "value": 0.5 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 0,
+      "description": "Will mass-refactor your codebase on day one"
+    },
+    {
+      "id": 3,
+      "name": "BD Spammer",
+      "type": "Sales",
+      "cost": 1,
+      "tier": 1,
+      "operation": { "type": "add", "value": 1 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 50,
+      "description": "Sends 400 cold emails per day. Gets 2 replies."
+    },
+    {
+      "id": 4,
+      "name": "Tech Hipster",
+      "type": "Product/Design",
+      "cost": 2,
+      "tier": 1,
+      "operation": { "type": "add", "value": 1 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 100,
+      "description": "Stood in line for the latest Apple Pencil."
+    },
+    {
+      "id": 5,
+      "name": "Sales Hotshot",
+      "type": "Sales",
+      "cost": 2,
+      "tier": 1,
+      "operation": { "type": "multiply", "value": 1.5 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 100,
+      "description": "Could sell sand to a beach, but mostly sells vaporware"
+    },
+    {
+      "id": 6,
+      "name": "Mom & Dad",
+      "type": "Investor",
+      "cost": 1,
+      "tier": 1,
+      "operation": { "type": "add", "value": 2 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 0,
+      "description": "They believe in you. They don't understand what you do."
+    },
+    {
+      "id": 7,
+      "name": "Energy Drink Addict",
+      "type": "Engineering",
+      "cost": 2,
+      "tier": 1,
+      "operation": { "type": "multiply", "value": 1.5 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 100,
+      "description": "Commits code at 3am. Reverts it at 9am."
+    },
+    {
+      "id": 8,
+      "name": "Scrappy CMO",
+      "type": "C-Suite",
+      "cost": 4,
+      "tier": 2,
+      "operation": { "type": "add", "value": 1 },
+      "specialEffect": {
+        "type": "modify_type",
+        "targetType": "Sales",
+        "operationBonus": { "type": "multiply", "value": 2 },
+        "valueBonus": 50,
+        "scope": "all_rows"
+      },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 300,
+      "description": "Will rebrand the company three times before Series A"
+    },
+    {
+      "id": 9,
+      "name": "Detached CTO",
+      "type": "C-Suite",
+      "cost": 4,
+      "tier": 2,
+      "operation": { "type": "add", "value": 1 },
+      "specialEffect": {
+        "type": "modify_type",
+        "targetType": "Engineering",
+        "operationBonus": { "type": "add", "value": 1 },
+        "valueBonus": 0,
+        "scope": "all_rows"
+      },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 300,
+      "description": "Hasn't opened a pull request in two years"
+    },
+    {
+      "id": 10,
+      "name": "Design Intern",
+      "type": "Product/Design",
+      "cost": 1,
+      "tier": 1,
+      "operation": { "type": "add", "value": 0.5 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 0,
+      "description": "Knows Figma. Ships nothing."
+    },
+    {
+      "id": 11,
+      "name": "Product Manager",
+      "type": "Product/Design",
+      "cost": 2,
+      "tier": 1,
+      "operation": { "type": "add", "value": 1 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 100,
+      "description": "Writes specs no one reads"
+    },
+    {
+      "id": 12,
+      "name": "UX Researcher",
+      "type": "Product/Design",
+      "cost": 3,
+      "tier": 1,
+      "operation": { "type": "multiply", "value": 1.5 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 150,
+      "description": "Conducted 47 interviews. Built nothing."
+    },
+    {
+      "id": 13,
+      "name": "10x Engineer",
+      "type": "Engineering",
+      "cost": 3,
+      "tier": 1,
+      "operation": { "type": "multiply", "value": 2 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 200,
+      "description": "Works 80 hours. Breaks everything."
+    },
+    {
+      "id": 14,
+      "name": "DevOps Guy",
+      "type": "Engineering",
+      "cost": 2,
+      "tier": 1,
+      "operation": { "type": "add", "value": 1 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 100,
+      "description": "It works on my machine"
+    },
+    {
+      "id": 15,
+      "name": "Hustler",
+      "type": "Sales",
+      "cost": 2,
+      "tier": 1,
+      "operation": { "type": "add", "value": 1 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 100,
+      "description": "Slides in DMs before the pitch deck exists"
+    },
+    {
+      "id": 16,
+      "name": "Account Executive",
+      "type": "Sales",
+      "cost": 3,
+      "tier": 1,
+      "operation": { "type": "multiply", "value": 2 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 200,
+      "description": "Promised features you haven't built yet"
+    },
+    {
+      "id": 17,
+      "name": "Angel Investor",
+      "type": "Investor",
+      "cost": 2,
+      "tier": 1,
+      "operation": { "type": "add", "value": 2 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 150,
+      "description": "Writes $25k checks and talks like Sequoia"
+    },
+    {
+      "id": 18,
+      "name": "VC Associate",
+      "type": "Investor",
+      "cost": 2,
+      "tier": 1,
+      "operation": { "type": "add", "value": 1 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 100,
+      "description": "Carries a Patagonia vest. Calls it networking."
+    },
+    {
+      "id": 19,
+      "name": "Serial Entrepreneur",
+      "type": "Boardmember",
+      "cost": 3,
+      "tier": 1,
+      "operation": { "type": "add", "value": 2 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 200,
+      "description": "Has an exit, a podcast, and an opinion on everything"
+    },
+    {
+      "id": 20,
+      "name": "AWS Contract",
+      "type": "Services & Technology",
+      "cost": 2,
+      "tier": 1,
+      "operation": { "type": "multiply", "value": 1.5 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 100,
+      "description": "Burns cash faster than your engineers"
+    },
+    {
+      "id": 21,
+      "name": "Slack Premium",
+      "type": "Services & Technology",
+      "cost": 1,
+      "tier": 1,
+      "operation": { "type": "add", "value": 0.5 },
+      "eligibleRows": ["cash", "ip", "resources"],
+      "baseValue": 0,
+      "description": "Because you need all 3 years of arguments on record"
+    },
+    {
+      "id": 22,
+      "name": "Project Manager",
+      "type": "Product/Design",
+      "cost": 2,
+      "tier": 1,
+      "operation": { "type": "add", "value": 1 },
+      "eligibleRows": ["cash", "resources"],
+      "baseValue": 100,
+      "description": "Don't we already have a PM?",
+      "triggerEffect": { "type": "gain_cash", "amount": 25 }
+    },
+    {
+      "id": 23,
+      "name": "Headhunter",
+      "type": "Sales",
+      "cost": 3,
+      "tier": 1,
+      "operation": { "type": "add", "value": 1 },
+      "eligibleRows": ["cash", "resources"],
+      "baseValue": 150,
+      "description": "Finds talent. Bills you for the search.",
+      "triggerEffect": { "type": "spend_cash_draw_resource", "cost": 25, "draws": 1 }
+    },
+    {
+      "id": 24,
+      "name": "Board Observer",
+      "type": "Boardmember",
+      "cost": 3,
+      "tier": 1,
+      "operation": { "type": "add", "value": 1 },
+      "eligibleRows": ["cash", "resources"],
+      "baseValue": 150,
+      "description": "Sits in on meetings. Shuffles the deck.",
+      "triggerEffect": { "type": "swap_csuite" }
+    }
+  ]
+}
