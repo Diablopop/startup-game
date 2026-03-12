@@ -41,7 +41,6 @@ const COLORS = {
   cardPlaced:     0x2b4d6b,
   ipCardPlaced:   0x1e1840,
   resCardPlaced:  0x3d2800,
-  tierTwoGlow:    0xe9c46a,
   ipAccent:       0xcd84ff,
   resAccent:      0xffaa44,
   typeColors: {
@@ -285,15 +284,6 @@ class GameScene extends Phaser.Scene {
       this.ipSlotObjects.push(this.buildIPSlot(x, rowY, i));
     }
 
-    // Live multiplier display to the right of the slots
-    const multX = startX + 5 * (SLOT_W + 8) + 10;
-    this.add.text(multX, rowY - 20, 'CHAIN', {
-      fontSize: '9px', fontFamily: 'monospace', color: '#7755aa', align: 'center'
-    }).setOrigin(0.5, 0.5);
-
-    this.ipMultiplierDisplay = this.add.text(multX, rowY + 4, '1.0×', {
-      fontSize: '22px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
-    }).setOrigin(0.5, 0.5);
   }
 
   buildIPSlot(x, y, index) {
@@ -538,10 +528,9 @@ class GameScene extends Phaser.Scene {
     container.cardId = card.id;
 
     const typeColor = COLORS.typeColors[card.type] || 0x888888;
-    const isTier2   = card.tier === 2;
 
     const bg = this.add.rectangle(0, 0, CARD_W, CARD_H, COLORS.cardBg)
-      .setStrokeStyle(isTier2 ? 2 : 1, isTier2 ? COLORS.tierTwoGlow : typeColor);
+      .setStrokeStyle(1, typeColor);
     container.cardBg = bg;
 
     const bar = this.add.rectangle(0, -CARD_H / 2 + 6, CARD_W, 12, typeColor).setOrigin(0.5, 0.5);
@@ -562,7 +551,7 @@ class GameScene extends Phaser.Scene {
 
     container.add([bg, bar, typeLabel, nameText, divider, opText]);
 
-    if (isTier2 && card.specialEffect) {
+    if (card.specialEffect) {
       container.add(this.add.text(0, -CARD_H / 2 + 84, this.specialEffectLabel(card.specialEffect), {
         fontSize: '7px', fontFamily: 'monospace', color: '#e9c46a', align: 'center',
         wordWrap: { width: CARD_W - 12 }
@@ -595,7 +584,7 @@ class GameScene extends Phaser.Scene {
         if (this.state.phase === 'playing') bg.setStrokeStyle(2, 0xffffff);
       });
       container.on('pointerout', () => {
-        bg.setStrokeStyle(isTier2 ? 2 : 1, isTier2 ? COLORS.tierTwoGlow : typeColor);
+        bg.setStrokeStyle(1, typeColor);
       });
     }
 
@@ -609,11 +598,16 @@ class GameScene extends Phaser.Scene {
   }
 
   specialEffectLabel(fx) {
-    if (fx.type !== 'modify_type') return '';
-    const b      = fx.operationBonus;
-    const opStr  = b.type === 'multiply' ? `×${b.value} ${fx.targetType} ops` : `+${b.value} to ${fx.targetType} ops`;
-    const valStr = fx.valueBonus > 0 ? `\n+$${fx.valueBonus}k val` : '';
-    return opStr + valStr;
+    const labelOne = (f) => {
+      if (f.type !== 'modify_type') return '';
+      const b      = f.operationBonus;
+      const target = f.targetRole || f.targetType || '?';
+      const opStr  = b.type === 'multiply' ? `×${b.value} ${target} ops` : `${b.value >= 0 ? '+' : ''}${b.value} to ${target} ops`;
+      const valStr = f.valueBonus > 0 ? `\n+$${f.valueBonus}k val` : '';
+      return opStr + valStr;
+    };
+    if (Array.isArray(fx)) return fx.map(labelOne).join('\n');
+    return labelOne(fx);
   }
 
   triggerEffectLabel(fx) {
@@ -669,6 +663,37 @@ class GameScene extends Phaser.Scene {
                    : this.slotObjects;
     const slot     = slotList[slotIndex];
 
+    // ── Role enforcement for C-Suite cards ──────────────────
+    if (card.role) {
+      const rowKeys = ['cashRow', 'ipRow', 'resourcesRow'];
+      let existingRowKey = null, existingSlotIdx = null;
+      for (const key of rowKeys) {
+        const idx = state[key].findIndex(id => {
+          if (!id) return false;
+          const c = this.cardsData.find(c => c.id === id);
+          return c.role === card.role;
+        });
+        if (idx !== -1) { existingRowKey = key; existingSlotIdx = idx; break; }
+      }
+
+      if (existingRowKey) {
+        const existingRowType = existingRowKey === 'cashRow' ? 'cash'
+                              : existingRowKey === 'ipRow'   ? 'ip' : 'resources';
+        if (existingRowType !== rowType || existingSlotIdx !== slotIndex) {
+          const existingSlotList = existingRowKey === 'cashRow'   ? this.slotObjects
+                                 : existingRowKey === 'ipRow'     ? this.ipSlotObjects
+                                 : this.resSlotObjects;
+          const existingSlotObj = existingSlotList[existingSlotIdx];
+          this.showFloat(existingSlotObj.x, existingSlotObj.y - 90, `REPLACE ${card.role}`, '#ff6b6b');
+          this.snapBack(cardId);
+          return;
+        }
+        // Correct slot — discard old card, fall through to placement
+        state[existingRowKey][existingSlotIdx] = null;
+      }
+    }
+    // ────────────────────────────────────────────────────────
+
     if (rowArray[slotIndex] !== null) {
       this.showFloat(slot.x, slot.y - 90, 'SLOT OCCUPIED', '#ff6b6b');
       this.snapBack(cardId);
@@ -710,11 +735,10 @@ class GameScene extends Phaser.Scene {
   renderSlotCard(slotIndex, card) {
     const slot      = this.slotObjects[slotIndex];
     const typeColor = COLORS.typeColors[card.type] || 0x888888;
-    const isTier2   = card.tier === 2;
 
     slot.slotLabel.setVisible(false);
     slot.slotBg.setFillStyle(COLORS.cardPlaced)
-      .setStrokeStyle(isTier2 ? 2 : 1, isTier2 ? COLORS.tierTwoGlow : typeColor);
+      .setStrokeStyle(1, typeColor);
 
     slot.add(this.add.rectangle(0, -SLOT_H / 2 + 6, SLOT_W, 12, typeColor).setOrigin(0.5, 0.5));
     slot.add(this.add.text(0, -SLOT_H / 2 + 6, card.type.toUpperCase(), {
@@ -723,7 +747,7 @@ class GameScene extends Phaser.Scene {
 
     slot.add(this.add.text(0, -SLOT_H / 2 + 22, card.name, {
       fontSize: '8px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
-      align: 'center', wordWrap: { width: SLOT_W - 12 }
+      align: 'center', wordWrap: { width: SLOT_W - 12, useAdvancedWrap: true }
     }).setOrigin(0.5, 0));
 
     const cashOpText = this.add.text(0, 8, this.operationLabel(card.operation), {
@@ -732,16 +756,24 @@ class GameScene extends Phaser.Scene {
     slot.add(cashOpText);
     slot.opText = cashOpText;
 
+    let yBot = SLOT_H / 2 - 14;
+    if (card.baseValue > 0) {
+      slot.add(this.add.text(0, yBot, `$${card.baseValue}k`, {
+        fontSize: '9px', fontFamily: 'monospace', color: '#80ffaa', align: 'center'
+      }).setOrigin(0.5, 0.5));
+      yBot -= 14;
+    }
     if (card.triggerEffect) {
-      slot.add(this.add.text(0, SLOT_H / 2 - 28, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
+      slot.add(this.add.text(0, yBot, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
         fontSize: '6px', fontFamily: 'monospace', color: '#00ffff',
         align: 'center', wordWrap: { width: SLOT_W - 12 }
       }).setOrigin(0.5, 0.5));
+      yBot -= 14;
     }
-
-    if (card.baseValue > 0) {
-      slot.add(this.add.text(0, SLOT_H / 2 - 14, `$${card.baseValue}k`, {
-        fontSize: '9px', fontFamily: 'monospace', color: '#80ffaa', align: 'center'
+    if (card.specialEffect) {
+      slot.add(this.add.text(0, yBot, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
+        fontSize: '6px', fontFamily: 'monospace', color: '#e9c46a',
+        align: 'center', wordWrap: { width: SLOT_W - 12 }
       }).setOrigin(0.5, 0.5));
     }
 
@@ -751,11 +783,10 @@ class GameScene extends Phaser.Scene {
   renderIPSlotCard(slotIndex, card) {
     const slot      = this.ipSlotObjects[slotIndex];
     const typeColor = COLORS.typeColors[card.type] || 0x888888;
-    const isTier2   = card.tier === 2;
 
     slot.slotLabel.setVisible(false);
     slot.slotBg.setFillStyle(COLORS.ipCardPlaced)
-      .setStrokeStyle(isTier2 ? 2 : 1, isTier2 ? COLORS.tierTwoGlow : COLORS.ipAccent);
+      .setStrokeStyle(1, COLORS.ipAccent);
 
     slot.add(this.add.rectangle(0, -SLOT_H / 2 + 6, SLOT_W, 12, typeColor).setOrigin(0.5, 0.5));
     slot.add(this.add.text(0, -SLOT_H / 2 + 6, card.type.toUpperCase(), {
@@ -764,7 +795,7 @@ class GameScene extends Phaser.Scene {
 
     slot.add(this.add.text(0, -SLOT_H / 2 + 22, card.name, {
       fontSize: '8px', fontFamily: 'monospace', color: '#ddccff', fontStyle: 'bold',
-      align: 'center', wordWrap: { width: SLOT_W - 12 }
+      align: 'center', wordWrap: { width: SLOT_W - 12, useAdvancedWrap: true }
     }).setOrigin(0.5, 0));
 
     // Show operation in purple tint (IP context)
@@ -774,16 +805,24 @@ class GameScene extends Phaser.Scene {
     slot.add(ipOpText);
     slot.opText = ipOpText;
 
+    let yBot = SLOT_H / 2 - 14;
+    if (card.baseValue > 0) {
+      slot.add(this.add.text(0, yBot, `$${card.baseValue}k`, {
+        fontSize: '9px', fontFamily: 'monospace', color: '#cd84ff', align: 'center'
+      }).setOrigin(0.5, 0.5));
+      yBot -= 14;
+    }
     if (card.triggerEffect) {
-      slot.add(this.add.text(0, SLOT_H / 2 - 28, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
+      slot.add(this.add.text(0, yBot, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
         fontSize: '6px', fontFamily: 'monospace', color: '#00ffff',
         align: 'center', wordWrap: { width: SLOT_W - 12 }
       }).setOrigin(0.5, 0.5));
+      yBot -= 14;
     }
-
-    if (card.baseValue > 0) {
-      slot.add(this.add.text(0, SLOT_H / 2 - 14, `$${card.baseValue}k`, {
-        fontSize: '9px', fontFamily: 'monospace', color: '#cd84ff', align: 'center'
+    if (card.specialEffect) {
+      slot.add(this.add.text(0, yBot, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
+        fontSize: '6px', fontFamily: 'monospace', color: '#e9c46a',
+        align: 'center', wordWrap: { width: SLOT_W - 12 }
       }).setOrigin(0.5, 0.5));
     }
 
@@ -793,11 +832,10 @@ class GameScene extends Phaser.Scene {
   renderResSlotCard(slotIndex, card) {
     const slot      = this.resSlotObjects[slotIndex];
     const typeColor = COLORS.typeColors[card.type] || 0x888888;
-    const isTier2   = card.tier === 2;
 
     slot.slotLabel.setVisible(false);
     slot.slotBg.setFillStyle(COLORS.resCardPlaced)
-      .setStrokeStyle(isTier2 ? 2 : 1, isTier2 ? COLORS.tierTwoGlow : COLORS.resAccent);
+      .setStrokeStyle(1, COLORS.resAccent);
 
     slot.add(this.add.rectangle(0, -SLOT_H / 2 + 6, SLOT_W, 12, typeColor).setOrigin(0.5, 0.5));
     slot.add(this.add.text(0, -SLOT_H / 2 + 6, card.type.toUpperCase(), {
@@ -806,7 +844,7 @@ class GameScene extends Phaser.Scene {
 
     slot.add(this.add.text(0, -SLOT_H / 2 + 22, card.name, {
       fontSize: '8px', fontFamily: 'monospace', color: '#ffddaa', fontStyle: 'bold',
-      align: 'center', wordWrap: { width: SLOT_W - 12 }
+      align: 'center', wordWrap: { width: SLOT_W - 12, useAdvancedWrap: true }
     }).setOrigin(0.5, 0));
 
     const resOpText = this.add.text(0, 8, this.operationLabel(card.operation), {
@@ -815,16 +853,24 @@ class GameScene extends Phaser.Scene {
     slot.add(resOpText);
     slot.opText = resOpText;
 
+    let yBot = SLOT_H / 2 - 14;
+    if (card.baseValue > 0) {
+      slot.add(this.add.text(0, yBot, `$${card.baseValue}k`, {
+        fontSize: '9px', fontFamily: 'monospace', color: '#ffaa44', align: 'center'
+      }).setOrigin(0.5, 0.5));
+      yBot -= 14;
+    }
     if (card.triggerEffect) {
-      slot.add(this.add.text(0, SLOT_H / 2 - 28, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
+      slot.add(this.add.text(0, yBot, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
         fontSize: '6px', fontFamily: 'monospace', color: '#00ffff',
         align: 'center', wordWrap: { width: SLOT_W - 12 }
       }).setOrigin(0.5, 0.5));
+      yBot -= 14;
     }
-
-    if (card.baseValue > 0) {
-      slot.add(this.add.text(0, SLOT_H / 2 - 14, `$${card.baseValue}k`, {
-        fontSize: '9px', fontFamily: 'monospace', color: '#ffaa44', align: 'center'
+    if (card.specialEffect) {
+      slot.add(this.add.text(0, yBot, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
+        fontSize: '6px', fontFamily: 'monospace', color: '#e9c46a',
+        align: 'center', wordWrap: { width: SLOT_W - 12 }
       }).setOrigin(0.5, 0.5));
     }
 
@@ -908,6 +954,60 @@ class GameScene extends Phaser.Scene {
     return steps;
   }
 
+  animateIPChain() {
+    let m = 1;
+    const effectiveOps = this.getModifiedOps(this.state.ipRow.filter(Boolean));
+
+    this.showFloat(740, ROW_IP_Y, 'IP CHAIN ×1', '#cd84ff', 1000);
+
+    const STEP_DELAY = 700;
+
+    const processCard = (index) => {
+      if (index >= 5) {
+        this.finalizeIPChain(m);
+        return;
+      }
+
+      const cardId = this.state.ipRow[index];
+      if (cardId === null) { processCard(index + 1); return; }
+
+      const slot = this.ipSlotObjects[index];
+      this.tweens.add({
+        targets: slot.slotBg, alpha: 0.3, yoyo: true, duration: 220,
+        onComplete: () => slot.slotBg.setAlpha(1)
+      });
+
+      const op = effectiveOps[cardId];
+      if (op.type === 'add')      m = Math.round((m + op.value) * 100) / 100;
+      else if (op.type === 'multiply') m = Math.round(m * op.value * 100) / 100;
+
+      const label = op.type === 'multiply'
+        ? `×${op.value}  →  ×${m}`
+        : `+${op.value}  →  ×${m}`;
+      this.showFloat(slot.x, slot.y - 90, label, '#cd84ff', 900);
+
+      this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
+    };
+
+    this.time.delayedCall(600, () => processCard(0));
+  }
+
+  finalizeIPChain(multiplier) {
+    const flash = this.add.text(740, ROW_IP_Y, `×${multiplier}`, {
+      fontSize: '52px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5, 0.5).setAlpha(0);
+
+    this.tweens.add({
+      targets: flash, alpha: 1, scaleX: 1.15, scaleY: 1.15, duration: 280, ease: 'Back.Out',
+      onComplete: () => {
+        this.tweens.add({
+          targets: flash, alpha: 0, y: flash.y - 50, duration: 700, delay: 500,
+          onComplete: () => { flash.destroy(); this.triggerValuation(); }
+        });
+      }
+    });
+  }
+
   // ── Turn Management ───────────────────────────────────────
   advanceTurn() {
     this.state.turn++;
@@ -915,7 +1015,7 @@ class GameScene extends Phaser.Scene {
 
     if (this.state.turn > this.state.maxTurns) {
       this.state.phase = 'valuation';
-      this.time.delayedCall(500, () => this.triggerValuation());
+      this.time.delayedCall(500, () => this.animateIPChain());
     }
   }
 
@@ -995,14 +1095,19 @@ class GameScene extends Phaser.Scene {
 
     allBoardIds.forEach(id => {
       const card = this.cardsData.find(c => c.id === id);
-      if (!card.specialEffect || card.specialEffect.type !== 'modify_type') return;
-      const fx = card.specialEffect;
-      targetIds.forEach(tid => {
-        const tc = this.cardsData.find(c => c.id === tid);
-        if (tc.type !== fx.targetType) return;
-        const b = fx.operationBonus;
-        if (b.type === 'multiply') ops[tid].value *= b.value;
-        else if (b.type === 'add')  ops[tid].value += b.value;
+      if (!card.specialEffect) return;
+      const effects = Array.isArray(card.specialEffect) ? card.specialEffect : [card.specialEffect];
+      effects.forEach(fx => {
+        if (fx.type !== 'modify_type') return;
+        targetIds.forEach(tid => {
+          const tc = this.cardsData.find(c => c.id === tid);
+          const matchesType = fx.targetType && tc.type === fx.targetType;
+          const matchesRole = fx.targetRole && tc.role === fx.targetRole;
+          if (!matchesType && !matchesRole) return;
+          const b = fx.operationBonus;
+          if (b.type === 'multiply') ops[tid].value *= b.value;
+          else if (b.type === 'add')  ops[tid].value += b.value;
+        });
       });
     });
 
@@ -1049,21 +1154,90 @@ class GameScene extends Phaser.Scene {
   onHireClicked() {
     if (this.state.phase !== 'playing') return;
     this.state.phase = 'drawing';
-    this.hireTile.tileBg.setFillStyle(COLORS.resTileActive);
+    this.runResActivationSequence();
+  }
 
-    // Calculate draw count: base 1, then Resources row card ops
-    const resIds = this.state.resourcesRow.filter(Boolean);
-    const ops    = this.getModifiedOps(resIds);
-    let drawCount = 1;
-    for (let i = 0; i < 5; i++) {
-      const id = this.state.resourcesRow[i];
-      if (!id) continue;
-      const op = ops[id];
+  runResActivationSequence() {
+    const BASE = 1;
+    let drawCount = BASE;
+
+    const effectiveOps = this.getModifiedOps(this.state.resourcesRow.filter(Boolean));
+
+    this.hireTile.tileBg.setFillStyle(COLORS.resTileActive);
+    this.showFloat(this.hireTile.x, this.hireTile.y - 90, 'BASE +1 draw', '#ffaa44', 900);
+
+    const STEP_DELAY = 700;
+
+    const processCard = (index) => {
+      if (index >= 5) {
+        this.finalizeDrawCount(drawCount);
+        return;
+      }
+
+      const cardId = this.state.resourcesRow[index];
+      if (cardId === null) { processCard(index + 1); return; }
+
+      const slot = this.resSlotObjects[index];
+      this.tweens.add({
+        targets: slot.slotBg, alpha: 0.3, yoyo: true, duration: 220,
+        onComplete: () => slot.slotBg.setAlpha(1)
+      });
+
+      const op     = effectiveOps[cardId];
+      const before = drawCount;
+
       if (op.type === 'add')      drawCount = Math.round(drawCount + op.value);
       else if (op.type === 'multiply') drawCount = Math.round(drawCount * op.value);
-    }
 
-    this.showDrawModal(Math.max(1, drawCount));
+      const diff  = drawCount - before;
+      const label = op.type === 'multiply'
+        ? `×${op.value}  →  ${drawCount} draws`
+        : `+${diff} draw`;
+      this.showFloat(slot.x, slot.y - 90, label, '#ffaa44', 900);
+
+      const card = this.cardsData.find(c => c.id === cardId);
+      if (card.triggerEffect) {
+        if (card.triggerEffect.type === 'gain_cash') {
+          // Pass current cash as payout so the modal shows correct cash values.
+          // On resolve, write updated cash back to state; drawCount is unchanged.
+          this.showTriggerModal(card, this.state.cash, (updatedCash) => {
+            this.state.cash = updatedCash;
+            this.updateHUD();
+            this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
+          });
+        } else {
+          // spend_cash_draw_resource: pendingDraws returned by modal go directly into drawCount.
+          // swap_csuite: payout passed through unchanged, no draw change.
+          this.showTriggerModal(card, drawCount, (_updatedValue, pendingDraws) => {
+            if (pendingDraws) drawCount += pendingDraws;
+            this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
+          });
+        }
+      } else {
+        this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
+      }
+    };
+
+    this.time.delayedCall(600, () => processCard(0));
+  }
+
+  finalizeDrawCount(drawCount) {
+    const count = Math.max(1, drawCount);
+    this.hireTile.tileBg.setFillStyle(COLORS.resTile);
+
+    const flash = this.add.text(740, ROW_RES_Y, `DRAW ${count}`, {
+      fontSize: '52px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5, 0.5).setAlpha(0);
+
+    this.tweens.add({
+      targets: flash, alpha: 1, scaleX: 1.15, scaleY: 1.15, duration: 280, ease: 'Back.Out',
+      onComplete: () => {
+        this.tweens.add({
+          targets: flash, alpha: 0, y: flash.y - 50, duration: 700, delay: 500,
+          onComplete: () => { flash.destroy(); this.showDrawModal(count); }
+        });
+      }
+    });
   }
 
   showDrawModal(drawsRemaining) {
@@ -1170,7 +1344,6 @@ class GameScene extends Phaser.Scene {
 
     const card      = this.cardsData.find(c => c.id === id);
     const typeColor = COLORS.typeColors[card.type] || 0x888888;
-    const isTier2   = card.tier === 2;
 
     // Build full card visual (same as hand carousel) and move it into the modal container
     const cardContainer = this.buildCardVisual(card, x, y, false);
@@ -1180,7 +1353,7 @@ class GameScene extends Phaser.Scene {
     cardContainer.setSize(CARD_W, CARD_H).setInteractive({ useHandCursor: true });
     cardContainer.on('pointerover', () => cardContainer.cardBg.setStrokeStyle(2, 0xffffff));
     cardContainer.on('pointerout',  () => {
-      cardContainer.cardBg.setStrokeStyle(isTier2 ? 2 : 1, isTier2 ? COLORS.tierTwoGlow : typeColor);
+      cardContainer.cardBg.setStrokeStyle(1, typeColor);
     });
     cardContainer.on('pointerdown', () => this.takeFaceUpCard(id, revealedIndex, modal));
   }
@@ -1655,12 +1828,17 @@ class GameScene extends Phaser.Scene {
     const valueBonuses = {};
     allIds.forEach(id => {
       const card = this.cardsData.find(c => c.id === id);
-      if (!card.specialEffect || card.specialEffect.type !== 'modify_type') return;
-      const fx = card.specialEffect;
-      allIds.forEach(tid => {
-        const tc = this.cardsData.find(c => c.id === tid);
-        if (tc.type === fx.targetType && fx.valueBonus > 0)
-          valueBonuses[tid] = (valueBonuses[tid] || 0) + fx.valueBonus;
+      if (!card.specialEffect) return;
+      const effects = Array.isArray(card.specialEffect) ? card.specialEffect : [card.specialEffect];
+      effects.forEach(fx => {
+        if (fx.type !== 'modify_type') return;
+        allIds.forEach(tid => {
+          const tc = this.cardsData.find(c => c.id === tid);
+          const matchesType = fx.targetType && tc.type === fx.targetType;
+          const matchesRole = fx.targetRole && tc.role === fx.targetRole;
+          if ((matchesType || matchesRole) && fx.valueBonus > 0)
+            valueBonuses[tid] = (valueBonuses[tid] || 0) + fx.valueBonus;
+        });
       });
     });
 
@@ -1721,7 +1899,6 @@ class GameScene extends Phaser.Scene {
 
     const mult = this.computeIPMultiplier();
     this.hudIPMultiplier.setText(`${mult}×`);
-    if (this.ipMultiplierDisplay) this.ipMultiplierDisplay.setText(`${mult}×`);
 
     if (this.hudDrawPile) this.hudDrawPile.setText(`${state.drawPile.length} cards`);
   }
