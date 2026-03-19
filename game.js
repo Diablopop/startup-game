@@ -12,14 +12,15 @@ const SLOT_W = 120;
 const SLOT_H = 145;   // reduced from 165 to fit three rows
 const CAROUSEL_VISIBLE = 6;
 
-// Row layout positions (top to bottom: IP → Cash → Resources)
-const ROW_IP_Y        = 110;
+// Row layout positions (top to bottom: Product → Cash → Resources)
+const ROW_PROD_Y      = 110;
 const ROW_CASH_Y      = 275;
 const ROW_RES_Y       = 440;
 const ROW_SLOT_X      = 400;   // x of first slot center
 const ACTIVATE_TILE_X = 284;   // x of activate tile / row label block
 
-const TURNS_PER_ROUND = [7, 6, 5];
+const TURNS_PER_ROUND     = [7, 6, 5];
+const BASE_CASH_PER_ROUND = [25, 50, 75, 100, 100];
 
 const COLORS = {
   bg:             0x1a1a2e,
@@ -27,8 +28,8 @@ const COLORS = {
   panelBorder:    0x0f3460,
   slotEmpty:      0x0d1f10,
   slotBorder:     0x2d6a4f,
-  ipSlotEmpty:    0x1a1430,
-  ipSlotBorder:   0x5544aa,
+  productSlotEmpty:    0x1a1430,
+  productSlotBorder:   0x5544aa,
   resSlotEmpty:   0x1a1000,
   resSlotBorder:  0xaa7722,
   activateTile:   0x1a472a,
@@ -39,9 +40,9 @@ const COLORS = {
   resTileActive:  0xaa6600,
   cardBg:         0x0d1b2a,
   cardPlaced:     0x2b4d6b,
-  ipCardPlaced:   0x1e1840,
+  productCardPlaced:   0x1e1840,
   resCardPlaced:  0x3d2800,
-  ipAccent:       0xcd84ff,
+  productAccent:       0xcd84ff,
   resAccent:      0xffaa44,
   typeColors: {
     'Product/Design':        0x6a9eff,
@@ -92,14 +93,15 @@ class GameScene extends Phaser.Scene {
         maxTurns:     TURNS_PER_ROUND[round - 1],
         cash:         carryOver.cash,
         hand:         [...carryOver.hand],
-        cashRow:      [...carryOver.cashRow],
-        ipRow:        [...carryOver.ipRow],
-        resourcesRow: [...carryOver.resourcesRow],
-        drawPile:     [...carryOver.drawPile],
-        revealedCards:[...carryOver.revealedCards],
-        phase:        'playing',
-        cardOpBoosts: { ...(carryOver.cardOpBoosts || {}) },
-        valueBonuses: { ...(carryOver.valueBonuses || {}) },
+        cashRow:        [...carryOver.cashRow],
+        productRow:     [...carryOver.productRow],
+        resourcesRow:   [...carryOver.resourcesRow],
+        drawPile:       [...carryOver.drawPile],
+        revealedCards:  [...carryOver.revealedCards],
+        phase:          'playing',
+        cardOpBoosts:   { ...(carryOver.cardOpBoosts || {}) },
+        valueBonuses:   { ...(carryOver.valueBonuses || {}) },
+        productMultiplier: carryOver.productMultiplier,
       };
     } else {
       // Fresh game — shuffle deck, deal 4 to hand, 2 face-up, rest to draw pile
@@ -109,25 +111,25 @@ class GameScene extends Phaser.Scene {
         round:        1,
         turn:         1,
         maxTurns:     TURNS_PER_ROUND[0],
-        cash:         200,
+        cash:         75,
         hand:         shuffled.slice(0, 4),
-        cashRow:      [null, null, null, null, null],
-        ipRow:        [null, null, null, null, null],
-        resourcesRow: [null, null, null, null, null],
-        drawPile:     shuffled.slice(6),
-        revealedCards:shuffled.slice(4, 6),
-        phase:        'playing',
-        cardOpBoosts: {},
-        valueBonuses: {},
+        cashRow:        [null, null, null, null, null],
+        productRow:     [null, null, null, null, null],
+        resourcesRow:   [null, null, null, null, null],
+        drawPile:       shuffled.slice(6),
+        revealedCards:  shuffled.slice(4, 6),
+        phase:          'playing',
+        cardOpBoosts:   {},
+        valueBonuses:   {},
+        productMultiplier: 0,
       };
     }
 
     this.cardObjects     = {};
-    this.slotObjects     = [];
-    this.ipSlotObjects   = [];
-    this.resSlotObjects  = [];
-    this.handOffset      = 0;
-    this.ipMultiplierDisplay = null;
+    this.slotObjects         = [];
+    this.productSlotObjects  = [];
+    this.resSlotObjects      = [];
+    this.handOffset          = 0;
     this.drawModal       = null;
     this.pendingDrawCount = 0;
     this.triggerModal    = null;
@@ -181,12 +183,12 @@ class GameScene extends Phaser.Scene {
     // Divider
     this.add.rectangle(110, 168, 160, 1, 0x333355).setOrigin(0.5, 0.5);
 
-    // IP multiplier
-    this.add.text(110, 182, 'IP MULTIPLIER', {
+    // Product multiplier
+    this.add.text(110, 182, 'PRODUCT MULT', {
       fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    this.hudIPMultiplier = this.add.text(110, 206, '1.0×', {
+    this.hudProductMultiplier = this.add.text(110, 206, '0×', {
       fontSize: '28px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
@@ -210,7 +212,7 @@ class GameScene extends Phaser.Scene {
     eyeBg.on('pointerdown', () => this.showDrawPileViewer());
 
     // Rows
-    this.buildIPRow();
+    this.buildProductRow();
     this.buildCashRow();
     this.buildResourcesRow();
 
@@ -263,38 +265,62 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  // ── IP Row (passive, top) ─────────────────────────────────
-  buildIPRow() {
-    const rowY   = ROW_IP_Y;
+  // ── Product Row (active, top) ────────────────────────────
+  buildProductRow() {
+    const rowY   = ROW_PROD_Y;
     const startX = ROW_SLOT_X;
 
-    // Row label block (mirrors activate tile position but passive)
-    this.add.rectangle(ACTIVATE_TILE_X, rowY, 90, SLOT_H, COLORS.ipSlotEmpty)
-      .setStrokeStyle(1, COLORS.ipSlotBorder);
+    this.buildProductActivateTile(ACTIVATE_TILE_X, rowY);
 
-    this.add.text(ACTIVATE_TILE_X, rowY - 38, 'IP', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#cd84ff', align: 'center', fontStyle: 'bold'
-    }).setOrigin(0.5, 0.5);
-
-    this.add.text(ACTIVATE_TILE_X, rowY - 16, 'Passive · Mult ×', {
-      fontSize: '8px', fontFamily: 'monospace', color: '#7755aa', align: 'center'
-    }).setOrigin(0.5, 0.5);
-
-
-    // 5 passive slots
-    this.ipSlotObjects = [];
+    this.productSlotObjects = [];
     for (let i = 0; i < 5; i++) {
       const x = startX + i * (SLOT_W + 8);
-      this.ipSlotObjects.push(this.buildIPSlot(x, rowY, i));
+      this.productSlotObjects.push(this.buildProductSlot(x, rowY, i));
     }
-
   }
 
-  buildIPSlot(x, y, index) {
+  buildProductActivateTile(x, y) {
     const container = this.add.container(x, y);
 
-    const bg = this.add.rectangle(0, 0, SLOT_W, SLOT_H, COLORS.ipSlotEmpty)
-      .setStrokeStyle(1, COLORS.ipSlotBorder);
+    const bg = this.add.rectangle(0, 0, 90, SLOT_H, COLORS.productSlotEmpty)
+      .setStrokeStyle(1, COLORS.productSlotBorder);
+
+    const title = this.add.text(0, -SLOT_H / 2 + 18, 'Product', {
+      fontSize: '13px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5, 0.5);
+
+    const subtitle = this.add.text(0, -SLOT_H / 2 + 36, 'Base: 1×', {
+      fontSize: '9px', fontFamily: 'monospace', color: '#9966cc', align: 'center'
+    }).setOrigin(0.5, 0.5);
+
+    const btnBg = this.add.rectangle(0, SLOT_H / 2 - 28, 70, 30, 0x3d1a5e)
+      .setStrokeStyle(1, COLORS.productSlotBorder);
+    const btnText = this.add.text(0, SLOT_H / 2 - 28, 'SHIP', {
+      fontSize: '9px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5, 0.5);
+
+    container.add([bg, title, subtitle, btnBg, btnText]);
+    container.tileBg = bg;
+    container.btnBg  = btnBg;
+
+    container.setInteractive(
+      new Phaser.Geom.Rectangle(-45, -SLOT_H / 2, 90, SLOT_H),
+      Phaser.Geom.Rectangle.Contains
+    );
+    container.on('pointerover', () => {
+      if (this.state.phase === 'playing') btnBg.setFillStyle(0x5c2080);
+    });
+    container.on('pointerout',  () => btnBg.setFillStyle(0x3d1a5e));
+    container.on('pointerdown', () => this.onActivateProductClicked());
+
+    this.productActivateTile = container;
+  }
+
+  buildProductSlot(x, y, index) {
+    const container = this.add.container(x, y);
+
+    const bg = this.add.rectangle(0, 0, SLOT_W, SLOT_H, COLORS.productSlotEmpty)
+      .setStrokeStyle(1, COLORS.productSlotBorder);
 
     const label = this.add.text(0, 8, `SLOT ${index + 1}`, {
       fontSize: '9px', fontFamily: 'monospace', color: '#443366', align: 'center'
@@ -307,7 +333,7 @@ class GameScene extends Phaser.Scene {
     container.cardId    = null;
 
     const zone = this.add.zone(x, y, SLOT_W, SLOT_H).setRectangleDropZone(SLOT_W, SLOT_H);
-    zone.rowType   = 'ip';
+    zone.rowType   = 'product';
     zone.slotIndex = index;
 
     return container;
@@ -365,14 +391,15 @@ class GameScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5);
 
     // Subtitle
-    const subtitle = this.add.text(0, -SLOT_H / 2 + 36, 'Base: $100k', {
+    const subtitle = this.add.text(0, -SLOT_H / 2 + 36, `Base: $${BASE_CASH_PER_ROUND[0]}k`, {
       fontSize: '9px', fontFamily: 'monospace', color: '#52b788', align: 'center'
     }).setOrigin(0.5, 0.5);
+    this.cashSubtitle = subtitle;
 
     // Button
     const btnBg = this.add.rectangle(0, SLOT_H / 2 - 28, 70, 30, COLORS.activateTile)
       .setStrokeStyle(1, 0x40916c);
-    const btnText = this.add.text(0, SLOT_H / 2 - 28, 'ACTIVATE', {
+    const btnText = this.add.text(0, SLOT_H / 2 - 28, 'RAISE $', {
       fontSize: '9px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
@@ -452,7 +479,7 @@ class GameScene extends Phaser.Scene {
     // Button
     const btnBg = this.add.rectangle(0, SLOT_H / 2 - 28, 70, 30, COLORS.resTile)
       .setStrokeStyle(1, COLORS.resAccent);
-    const btnText = this.add.text(0, SLOT_H / 2 - 28, 'ACTIVATE', {
+    const btnText = this.add.text(0, SLOT_H / 2 - 28, 'RECRUIT', {
       fontSize: '9px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
@@ -478,8 +505,8 @@ class GameScene extends Phaser.Scene {
     this.state.cashRow.forEach((id, i) => {
       if (id) this.renderSlotCard(i, this.cardsData.find(c => c.id === id));
     });
-    this.state.ipRow.forEach((id, i) => {
-      if (id) this.renderIPSlotCard(i, this.cardsData.find(c => c.id === id));
+    this.state.productRow.forEach((id, i) => {
+      if (id) this.renderProductSlotCard(i, this.cardsData.find(c => c.id === id));
     });
     this.state.resourcesRow.forEach((id, i) => {
       if (id) this.renderResSlotCard(i, this.cardsData.find(c => c.id === id));
@@ -679,7 +706,7 @@ class GameScene extends Phaser.Scene {
     const card = this.cardsData.find(c => c.id === cardId);
     let effectiveCost = card.cost * 100;
     // Apply costDiscount from board specialEffects
-    [...state.cashRow, ...state.ipRow, ...state.resourcesRow].filter(Boolean).forEach(bid => {
+    [...state.cashRow, ...state.productRow, ...state.resourcesRow].filter(Boolean).forEach(bid => {
       const bc = this.cardsData.find(c => c.id === bid);
       if (!bc || !bc.specialEffect) return;
       const effects = Array.isArray(bc.specialEffect) ? bc.specialEffect : [bc.specialEffect];
@@ -690,17 +717,17 @@ class GameScene extends Phaser.Scene {
       });
     });
 
-    const rowArray = rowType === 'ip'        ? state.ipRow
+    const rowArray = rowType === 'product'   ? state.productRow
                    : rowType === 'resources' ? state.resourcesRow
                    : state.cashRow;
-    const slotList = rowType === 'ip'        ? this.ipSlotObjects
+    const slotList = rowType === 'product'   ? this.productSlotObjects
                    : rowType === 'resources' ? this.resSlotObjects
                    : this.slotObjects;
     const slot     = slotList[slotIndex];
 
     // ── Role enforcement for C-Suite cards ──────────────────
     if (card.role) {
-      const rowKeys = ['cashRow', 'ipRow', 'resourcesRow'];
+      const rowKeys = ['cashRow', 'productRow', 'resourcesRow'];
       let existingRowKey = null, existingSlotIdx = null;
       for (const key of rowKeys) {
         const idx = state[key].findIndex(id => {
@@ -712,11 +739,11 @@ class GameScene extends Phaser.Scene {
       }
 
       if (existingRowKey) {
-        const existingRowType = existingRowKey === 'cashRow' ? 'cash'
-                              : existingRowKey === 'ipRow'   ? 'ip' : 'resources';
+        const existingRowType = existingRowKey === 'cashRow'    ? 'cash'
+                              : existingRowKey === 'productRow' ? 'product' : 'resources';
         if (existingRowType !== rowType || existingSlotIdx !== slotIndex) {
-          const existingSlotList = existingRowKey === 'cashRow'   ? this.slotObjects
-                                 : existingRowKey === 'ipRow'     ? this.ipSlotObjects
+          const existingSlotList = existingRowKey === 'cashRow'      ? this.slotObjects
+                                 : existingRowKey === 'productRow'  ? this.productSlotObjects
                                  : this.resSlotObjects;
           const existingSlotObj = existingSlotList[existingSlotIdx];
           this.showFloat(existingSlotObj.x, existingSlotObj.y - 90, `REPLACE ${card.role}`, '#ff6b6b');
@@ -747,7 +774,7 @@ class GameScene extends Phaser.Scene {
     state.hand = state.hand.filter(id => id !== cardId);
     this.handOffset = Math.min(this.handOffset, Math.max(0, state.hand.length - CAROUSEL_VISIBLE));
 
-    if (rowType === 'ip')             this.renderIPSlotCard(slotIndex, card);
+    if (rowType === 'product')        this.renderProductSlotCard(slotIndex, card);
     else if (rowType === 'resources') this.renderResSlotCard(slotIndex, card);
     else                              this.renderSlotCard(slotIndex, card);
 
@@ -825,13 +852,13 @@ class GameScene extends Phaser.Scene {
     slot.cardId = card.id;
   }
 
-  renderIPSlotCard(slotIndex, card) {
-    const slot      = this.ipSlotObjects[slotIndex];
+  renderProductSlotCard(slotIndex, card) {
+    const slot      = this.productSlotObjects[slotIndex];
     const typeColor = COLORS.typeColors[card.type] || 0x888888;
 
     slot.slotLabel.setVisible(false);
-    slot.slotBg.setFillStyle(COLORS.ipCardPlaced)
-      .setStrokeStyle(1, COLORS.ipAccent);
+    slot.slotBg.setFillStyle(COLORS.productCardPlaced)
+      .setStrokeStyle(1, COLORS.productAccent);
 
     slot.add(this.add.rectangle(0, -SLOT_H / 2 + 6, SLOT_W, 12, typeColor).setOrigin(0.5, 0.5));
     slot.add(this.add.text(0, -SLOT_H / 2 + 6, card.type.toUpperCase(), {
@@ -929,10 +956,10 @@ class GameScene extends Phaser.Scene {
   // cards and updates the operation text on each slot. Gold color = boosted.
   refreshBoardOpLabels() {
     const cashIds = this.state.cashRow.filter(Boolean);
-    const ipIds   = this.state.ipRow.filter(Boolean);
-    const resIds  = this.state.resourcesRow.filter(Boolean);
-    const cashOps = this.getModifiedOps(cashIds);
-    const ipOps   = this.getModifiedOps(ipIds);
+    const productIds = this.state.productRow.filter(Boolean);
+    const resIds     = this.state.resourcesRow.filter(Boolean);
+    const cashOps    = this.getModifiedOps(cashIds);
+    const ipOps      = this.getModifiedOps(productIds);
     const resOps  = this.getModifiedOps(resIds);
 
     this.slotObjects.forEach((slot, i) => {
@@ -945,8 +972,8 @@ class GameScene extends Phaser.Scene {
       slot.opText.setColor(boosted ? '#ffd32a' : '#80ffaa');
     });
 
-    this.ipSlotObjects.forEach((slot, i) => {
-      const id = this.state.ipRow[i];
+    this.productSlotObjects.forEach((slot, i) => {
+      const id = this.state.productRow[i];
       if (!id || !slot.opText) return;
       const card = this.cardsData.find(c => c.id === id);
       const eff  = ipOps[id];
@@ -966,95 +993,6 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  // ── IP Multiplier ─────────────────────────────────────────
-  computeIPMultiplier() {
-    const ids = this.state.ipRow.filter(Boolean);
-    const ops = this.getModifiedOps(ids);
-    let m = 1;
-    for (let i = 0; i < 5; i++) {
-      const id = this.state.ipRow[i];
-      if (!id) continue;
-      const op = ops[id];
-      if (op.type === 'add')      m += op.value;
-      else if (op.type === 'multiply') m *= op.value;
-    }
-    return Math.round(m * 100) / 100;
-  }
-
-  buildIPChainSteps() {
-    const ids = this.state.ipRow.filter(Boolean);
-    const ops = this.getModifiedOps(ids);
-    const steps = ['1'];
-    let m = 1;
-    for (let i = 0; i < 5; i++) {
-      const id = this.state.ipRow[i];
-      if (!id) continue;
-      const op = ops[id];
-      if (op.type === 'add') {
-        m += op.value;
-        steps.push(`+${op.value}`);
-      } else if (op.type === 'multiply') {
-        m *= op.value;
-        steps.push(`×${op.value}`);
-      }
-    }
-    return steps;
-  }
-
-  animateIPChain() {
-    let m = 1;
-    const effectiveOps = this.getModifiedOps(this.state.ipRow.filter(Boolean));
-
-    this.showFloat(740, ROW_IP_Y, 'IP CHAIN ×1', '#cd84ff', 1000);
-
-    const STEP_DELAY = 700;
-
-    const processCard = (index) => {
-      if (index >= 5) {
-        this.finalizeIPChain(m);
-        return;
-      }
-
-      const cardId = this.state.ipRow[index];
-      if (cardId === null) { processCard(index + 1); return; }
-
-      const slot = this.ipSlotObjects[index];
-      this.tweens.add({
-        targets: slot.slotBg, alpha: 0.3, yoyo: true, duration: 220,
-        onComplete: () => slot.slotBg.setAlpha(1)
-      });
-
-      const op = effectiveOps[cardId];
-      if (op.type === 'add')      m = Math.round((m + op.value) * 100) / 100;
-      else if (op.type === 'multiply') m = Math.round(m * op.value * 100) / 100;
-
-      const label = op.type === 'multiply'
-        ? `×${op.value}  →  ×${m}`
-        : `+${op.value}  →  ×${m}`;
-      this.showFloat(slot.x, slot.y - 90, label, '#cd84ff', 900);
-
-      this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
-    };
-
-    this.time.delayedCall(600, () => processCard(0));
-  }
-
-  finalizeIPChain(multiplier) {
-    const flash = this.add.text(740, ROW_IP_Y, `×${multiplier}`, {
-      fontSize: '52px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
-    }).setOrigin(0.5, 0.5).setAlpha(0);
-
-    this.tweens.add({
-      targets: flash, alpha: 1, scaleX: 1.15, scaleY: 1.15, duration: 280, ease: 'Back.Out',
-      onComplete: () => {
-        this.tweens.add({
-          targets: flash, alpha: 0, y: flash.y - 50, duration: 700, delay: 500,
-          onComplete: () => { flash.destroy(); this.triggerValuation(); }
-        });
-      }
-    });
-  }
-
   // ── Turn Management ───────────────────────────────────────
   advanceTurn() {
     this.state.turn++;
@@ -1062,7 +1000,7 @@ class GameScene extends Phaser.Scene {
 
     if (this.state.turn > this.state.maxTurns) {
       this.state.phase = 'valuation';
-      this.time.delayedCall(500, () => this.animateIPChain());
+      this.time.delayedCall(500, () => this.triggerValuation());
     }
   }
 
@@ -1074,7 +1012,7 @@ class GameScene extends Phaser.Scene {
   }
 
   runActivationSequence() {
-    const BASE = 100;
+    const BASE = BASE_CASH_PER_ROUND[this.state.round - 1] ?? 100;
     let payout = BASE;
 
     const effectiveOps = this._computeActivationOps(this.state.cashRow.filter(Boolean));
@@ -1102,7 +1040,7 @@ class GameScene extends Phaser.Scene {
       const op     = effectiveOps[cardId];
       const before = payout;
 
-      if (op.type === 'add')      payout += op.value * 100;
+      if (op.type === 'add')      payout += op.value * BASE;
       else if (op.type === 'multiply') payout = Math.round(payout * op.value);
 
       const diff  = payout - before;
@@ -1137,7 +1075,7 @@ class GameScene extends Phaser.Scene {
   }
 
   _countBoardCardsOfType(targetType) {
-    return [...this.state.cashRow, ...this.state.ipRow, ...this.state.resourcesRow]
+    return [...this.state.cashRow, ...this.state.productRow, ...this.state.resourcesRow]
       .filter(id => {
         if (!id) return false;
         const c = this.cardsData.find(x => x.id === id);
@@ -1146,7 +1084,7 @@ class GameScene extends Phaser.Scene {
   }
 
   _applyPermanentOpBoost(matchFn, value) {
-    [...this.state.cashRow, ...this.state.ipRow, ...this.state.resourcesRow]
+    [...this.state.cashRow, ...this.state.productRow, ...this.state.resourcesRow]
       .filter(Boolean)
       .forEach(id => {
         const c = this.cardsData.find(x => x.id === id);
@@ -1157,7 +1095,7 @@ class GameScene extends Phaser.Scene {
   }
 
   _applyBoostValue(matchFn, value) {
-    [...this.state.cashRow, ...this.state.ipRow, ...this.state.resourcesRow]
+    [...this.state.cashRow, ...this.state.productRow, ...this.state.resourcesRow]
       .filter(Boolean)
       .forEach(id => {
         const c = this.cardsData.find(x => x.id === id);
@@ -1172,7 +1110,7 @@ class GameScene extends Phaser.Scene {
   getModifiedOps(targetIds) {
     const allBoardIds = [
       ...this.state.cashRow.filter(Boolean),
-      ...this.state.ipRow.filter(Boolean),
+      ...this.state.productRow.filter(Boolean),
       ...this.state.resourcesRow.filter(Boolean),
     ];
 
@@ -1273,6 +1211,98 @@ class GameScene extends Phaser.Scene {
       this.state.phase = 'drawing';
       this.showDrawModal(draws);
       // closeDrawModal() calls advanceTurn()
+    } else {
+      this.state.phase = 'playing';
+      this.advanceTurn();
+    }
+  }
+
+  // ── Product Row (Ship) ───────────────────────────────────
+  onActivateProductClicked() {
+    if (this.state.phase !== 'playing') return;
+    this.state.phase = 'activating';
+    this.runProductActivationSequence();
+  }
+
+  runProductActivationSequence() {
+    const BASE = 1;
+    let score = BASE;
+
+    const effectiveOps = this._computeActivationOps(this.state.productRow.filter(Boolean));
+
+    this.productActivateTile.tileBg.setFillStyle(0x5c2080);
+    this.showFloat(this.productActivateTile.x, this.productActivateTile.y - 90, 'BASE ×1', '#cd84ff', 900);
+
+    const STEP_DELAY = 700;
+
+    const processCard = (index) => {
+      if (index >= 5) {
+        this.finalizeProductActivation(score);
+        return;
+      }
+
+      const cardId = this.state.productRow[index];
+      if (cardId === null) { processCard(index + 1); return; }
+
+      const slot = this.productSlotObjects[index];
+      this.tweens.add({
+        targets: slot.slotBg, alpha: 0.3, yoyo: true, duration: 220,
+        onComplete: () => slot.slotBg.setAlpha(1)
+      });
+
+      const op = effectiveOps[cardId];
+
+      if (op.type === 'add')           score = Math.round((score + op.value) * 100) / 100;
+      else if (op.type === 'multiply') score = Math.round(score * op.value * 100) / 100;
+
+      const label = op.type === 'multiply'
+        ? `×${op.value}  →  ×${score}`
+        : `+${op.value}  →  ×${score}`;
+
+      this.showFloat(slot.x, slot.y - 90, label, '#cd84ff', 900);
+
+      const card = this.cardsData.find(c => c.id === cardId);
+      if (card.triggerEffect) {
+        // Pass cash (not score) so cash-earning triggers update the bank, not the ship score
+        this.showTriggerModal(card, this.state.cash, (updatedCash, pendingDraws) => {
+          this.state.cash = updatedCash;
+          if (pendingDraws) this.pendingDrawCount += pendingDraws;
+          this.updateHUD();
+          this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
+        });
+      } else {
+        this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
+      }
+    };
+
+    this.time.delayedCall(600, () => processCard(0));
+  }
+
+  finalizeProductActivation(score) {
+    this.state.productMultiplier = Math.round((this.state.productMultiplier + score) * 100) / 100;
+    this.productActivateTile.tileBg.setFillStyle(COLORS.productSlotEmpty);
+
+    const flash = this.add.text(740, ROW_PROD_Y, `SHIP +${score}×`, {
+      fontSize: '52px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5, 0.5).setAlpha(0);
+
+    this.tweens.add({
+      targets: flash, alpha: 1, scaleX: 1.15, scaleY: 1.15, duration: 280, ease: 'Back.Out',
+      onComplete: () => {
+        this.tweens.add({
+          targets: flash, alpha: 0, y: flash.y - 50, duration: 700, delay: 500,
+          onComplete: () => flash.destroy()
+        });
+      }
+    });
+
+    this.updateHUD();
+
+    if (this.pendingDrawCount > 0) {
+      const draws = this.pendingDrawCount;
+      this.pendingDrawCount = 0;
+      this.state.phase = 'drawing';
+      this.showDrawModal(draws);
     } else {
       this.state.phase = 'playing';
       this.advanceTurn();
@@ -1635,7 +1665,7 @@ class GameScene extends Phaser.Scene {
       { text: 'Place cards into the three rows to build your startup.', color: '#aaaacc' },
       { text: 'Some cards affect others, and some have trigger effects that\nfire when activated.', color: '#aaaacc' },
       { text: '', color: '#aaaacc' },
-      { text: '⬡  IP ROW  — passive. Cards here scale your valuation\n    multiplier. They can affect the board but never trigger.', color: '#cd84ff' },
+      { text: '⬡  PRODUCT ROW  — activate to ship your product. Each ship\n    adds to your cumulative valuation multiplier.', color: '#cd84ff' },
       { text: '⬡  CASH ROW  — activate to generate money to place cards.', color: '#80ffaa' },
       { text: '⬡  RESOURCES ROW  — activate to draw cards from the deck.', color: '#ffaa44' },
       { text: '', color: '#aaaacc' },
@@ -1845,7 +1875,7 @@ class GameScene extends Phaser.Scene {
   _renderSwapCsuiteModal(modal, cx, cy, PH, payout, _fx, resumeCallback) {
     // Scan all rows for C-Suite cards
     const csuiteCards = [];
-    const rowKeys = ['cashRow', 'ipRow', 'resourcesRow'];
+    const rowKeys = ['cashRow', 'productRow', 'resourcesRow'];
     rowKeys.forEach(rowKey => {
       this.state[rowKey].forEach((id, i) => {
         if (!id) return;
@@ -1879,7 +1909,7 @@ class GameScene extends Phaser.Scene {
     modal.add(instrText);
     modal.instrText = instrText;
 
-    const rowLabel = { cashRow: 'CASH', ipRow: 'IP', resourcesRow: 'RES' };
+    const rowLabel = { cashRow: 'CASH', productRow: 'PRODUCT', resourcesRow: 'RES' };
     const listStartY = cy - 55;
     const btnH = 26;
 
@@ -1973,7 +2003,7 @@ class GameScene extends Phaser.Scene {
           this.state.cardOpBoosts[card.id] = (this.state.cardOpBoosts[card.id] || 0) + fx.value;
         } else {
           const matchFn = tc => this._typeMatches(tc, fx.target) || tc.role === fx.target;
-          [...this.state.cashRow, ...this.state.ipRow, ...this.state.resourcesRow]
+          [...this.state.cashRow, ...this.state.productRow, ...this.state.resourcesRow]
             .filter(Boolean)
             .forEach(id => {
               const tc = this.cardsData.find(c => c.id === id);
@@ -1999,93 +2029,144 @@ class GameScene extends Phaser.Scene {
     const hand = this.state.hand;
     if (hand.length === 0) { return resumeCallback(payout, 0); }
 
-    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
-    const box = this.add.rectangle(740, 450, 700, 380, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
-    const title = this.add.text(740, 310, `Trade a card from hand → draw ${fx.draws}`, {
+    const PER_PAGE = 5;
+    let pageOffset = 0;
+
+    const overlay   = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
+    const box       = this.add.rectangle(740, 450, 700, 380, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
+    const title     = this.add.text(740, 310, `Trade a card from hand → draw ${fx.draws}`, {
       fontSize: '20px', fontFamily: 'monospace', color: '#ffffff', align: 'center'
     }).setOrigin(0.5).setDepth(32);
-    const sub = this.add.text(740, 345, 'Select a card to discard:', {
+    const sub       = this.add.text(740, 345, 'Select a card to discard:', {
       fontSize: '14px', fontFamily: 'monospace', color: '#aaaaaa'
     }).setOrigin(0.5).setDepth(32);
-
-    const objs = [];
-    const cleanup = () => { overlay.destroy(); box.destroy(); title.destroy(); sub.destroy(); objs.forEach(o => o.destroy()); skipBtn.destroy(); };
-
-    const startX = 740 - ((Math.min(hand.length, 5) - 1) * 110) / 2;
-    hand.slice(0, 5).forEach((cid, i) => {
-      const hc = this.cardsData.find(c => c.id === cid);
-      const cx = startX + i * 110;
-      const cy = 430;
-      const bg = this.add.rectangle(cx, cy, 100, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
-      const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 90 } }).setOrigin(0.5).setDepth(33);
-      const tp = this.add.text(cx, cy + 40, hc.type, { fontSize: '9px', fontFamily: 'monospace', color: '#aaaaaa', align: 'center' }).setOrigin(0.5).setDepth(33);
-      objs.push(bg, nm, tp);
-      bg.on('pointerdown', () => {
-        // Remove from hand
-        const idx = this.state.hand.indexOf(cid);
-        if (idx !== -1) this.state.hand.splice(idx, 1);
-        this.renderHand();
-        cleanup();
-        resumeCallback(payout, fx.draws);
-      });
-      bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
-      bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
-    });
-
-    const skipBtn = this.add.text(740, 540, 'SKIP', {
+    const pageLabel = this.add.text(740, 496, '', {
+      fontSize: '11px', fontFamily: 'monospace', color: '#556677'
+    }).setOrigin(0.5).setDepth(32);
+    const leftArrow  = this.add.text(415, 430, '◀', {
+      fontSize: '22px', fontFamily: 'monospace', color: '#aaaacc'
+    }).setOrigin(0.5).setDepth(33).setInteractive({ useHandCursor: true });
+    const rightArrow = this.add.text(1065, 430, '▶', {
+      fontSize: '22px', fontFamily: 'monospace', color: '#aaaacc'
+    }).setOrigin(0.5).setDepth(33).setInteractive({ useHandCursor: true });
+    const skipBtn   = this.add.text(740, 540, 'SKIP', {
       fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
       backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
     }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+
+    let cardObjs = [];
+    const cleanup = () => {
+      [overlay, box, title, sub, pageLabel, leftArrow, rightArrow, skipBtn].forEach(o => o.destroy());
+      cardObjs.forEach(o => o.destroy());
+    };
+
+    const renderPage = () => {
+      cardObjs.forEach(o => o.destroy());
+      cardObjs = [];
+      const page = hand.slice(pageOffset, pageOffset + PER_PAGE);
+      const startX = 740 - ((page.length - 1) * 110) / 2;
+      page.forEach((cid, i) => {
+        const hc = this.cardsData.find(c => c.id === cid);
+        const cx = startX + i * 110;
+        const cy = 430;
+        const bg = this.add.rectangle(cx, cy, 100, 130, 0x2a2a3e).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
+        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 90 } }).setOrigin(0.5).setDepth(33);
+        const tp = this.add.text(cx, cy + 40, hc.type, { fontSize: '9px', fontFamily: 'monospace', color: '#aaaaaa', align: 'center' }).setOrigin(0.5).setDepth(33);
+        cardObjs.push(bg, nm, tp);
+        bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
+        bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+        bg.on('pointerdown', () => {
+          const idx = this.state.hand.indexOf(cid);
+          if (idx !== -1) this.state.hand.splice(idx, 1);
+          this.renderHand();
+          cleanup();
+          resumeCallback(payout, fx.draws);
+        });
+      });
+      const hasMore = hand.length > PER_PAGE;
+      pageLabel.setText(hasMore ? `${pageOffset + 1}–${Math.min(pageOffset + PER_PAGE, hand.length)} of ${hand.length}` : '');
+      leftArrow.setAlpha(pageOffset > 0 ? 1 : 0.2);
+      rightArrow.setAlpha(pageOffset + PER_PAGE < hand.length ? 1 : 0.2);
+    };
+
+    leftArrow.on('pointerdown',  () => { if (pageOffset > 0) { pageOffset -= PER_PAGE; renderPage(); } });
+    rightArrow.on('pointerdown', () => { if (pageOffset + PER_PAGE < hand.length) { pageOffset += PER_PAGE; renderPage(); } });
     skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
-    objs.push(skipBtn);
+
+    renderPage();
   }
 
   _renderGainCashPerDiscardModal(card, payout, fx, resumeCallback) {
     const hand = this.state.hand;
     if (hand.length === 0) { return resumeCallback(payout, 0); }
 
-    let selected = new Set();
-    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
-    const box = this.add.rectangle(740, 450, 760, 400, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
-    const title = this.add.text(740, 300, `Discard cards → earn $${fx.amount}k each`, {
+    const PER_PAGE = 5;
+    let pageOffset = 0;
+    const selected = new Set();
+
+    const overlay    = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
+    const box        = this.add.rectangle(740, 450, 760, 400, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
+    const title      = this.add.text(740, 300, `Discard cards → earn $${fx.amount}k each`, {
       fontSize: '20px', fontFamily: 'monospace', color: '#ffffff', align: 'center'
     }).setOrigin(0.5).setDepth(32);
-
-    const totalLabel = this.add.text(740, 335, `Earn: $0k`, {
+    const totalLabel = this.add.text(740, 335, 'Earn: $0k', {
       fontSize: '16px', fontFamily: 'monospace', color: '#80ffaa'
     }).setOrigin(0.5).setDepth(32);
-
-    const objs = [overlay, box, title, totalLabel];
-    const cardObjs = [];
-
-    const cleanup = () => { objs.forEach(o => o.destroy()); cardObjs.forEach(({ bg }) => bg.destroy()); acceptBtn.destroy(); skipBtn.destroy(); };
-
-    const updateTotal = () => {
-      totalLabel.setText(`Earn: $${selected.size * fx.amount}k`);
-      cardObjs.forEach(({ id, bg }) => {
-        bg.setStrokeStyle(selected.has(id) ? 3 : 1, selected.has(id) ? 0x80ffaa : 0x666666);
-      });
-    };
-
-    const startX = 740 - ((Math.min(hand.length, 5) - 1) * 120) / 2;
-    hand.slice(0, 5).forEach((cid, i) => {
-      const hc = this.cardsData.find(c => c.id === cid);
-      const cx = startX + i * 120;
-      const cy = 430;
-      const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
-      const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
-      cardObjs.push({ id: cid, bg, nm });
-      objs.push(nm);
-      bg.on('pointerdown', () => {
-        if (selected.has(cid)) selected.delete(cid); else selected.add(cid);
-        updateTotal();
-      });
-    });
-
-    const acceptBtn = this.add.text(680, 545, 'ACCEPT', {
+    const pageLabel  = this.add.text(740, 496, '', {
+      fontSize: '11px', fontFamily: 'monospace', color: '#556677'
+    }).setOrigin(0.5).setDepth(32);
+    const leftArrow  = this.add.text(380, 430, '◀', {
+      fontSize: '22px', fontFamily: 'monospace', color: '#aaaacc'
+    }).setOrigin(0.5).setDepth(33).setInteractive({ useHandCursor: true });
+    const rightArrow = this.add.text(1100, 430, '▶', {
+      fontSize: '22px', fontFamily: 'monospace', color: '#aaaacc'
+    }).setOrigin(0.5).setDepth(33).setInteractive({ useHandCursor: true });
+    const acceptBtn  = this.add.text(680, 545, 'ACCEPT', {
       fontSize: '18px', fontFamily: 'monospace', color: '#80ffaa',
       backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
     }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipBtn    = this.add.text(800, 545, 'SKIP', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
+      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+
+    let cardObjs = [];
+    const cleanup = () => {
+      [overlay, box, title, totalLabel, pageLabel, leftArrow, rightArrow, acceptBtn, skipBtn].forEach(o => o.destroy());
+      cardObjs.forEach(o => o.destroy());
+    };
+
+    const updateTotal = () => {
+      totalLabel.setText(`Earn: $${selected.size * fx.amount}k`);
+    };
+
+    const renderPage = () => {
+      cardObjs.forEach(o => o.destroy());
+      cardObjs = [];
+      const page = hand.slice(pageOffset, pageOffset + PER_PAGE);
+      const startX = 740 - ((page.length - 1) * 120) / 2;
+      page.forEach((cid, i) => {
+        const hc = this.cardsData.find(c => c.id === cid);
+        const cx = startX + i * 120;
+        const cy = 430;
+        const isSelected = selected.has(cid);
+        const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e).setStrokeStyle(isSelected ? 3 : 1, isSelected ? 0x80ffaa : 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
+        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+        cardObjs.push(bg, nm);
+        bg.on('pointerdown', () => {
+          if (selected.has(cid)) selected.delete(cid); else selected.add(cid);
+          bg.setStrokeStyle(selected.has(cid) ? 3 : 1, selected.has(cid) ? 0x80ffaa : 0x666666);
+          updateTotal();
+        });
+      });
+      const hasMore = hand.length > PER_PAGE;
+      pageLabel.setText(hasMore ? `${pageOffset + 1}–${Math.min(pageOffset + PER_PAGE, hand.length)} of ${hand.length}` : '');
+      leftArrow.setAlpha(pageOffset > 0 ? 1 : 0.2);
+      rightArrow.setAlpha(pageOffset + PER_PAGE < hand.length ? 1 : 0.2);
+    };
+
+    leftArrow.on('pointerdown',  () => { if (pageOffset > 0) { pageOffset -= PER_PAGE; renderPage(); } });
+    rightArrow.on('pointerdown', () => { if (pageOffset + PER_PAGE < hand.length) { pageOffset += PER_PAGE; renderPage(); } });
     acceptBtn.on('pointerdown', () => {
       const earned = selected.size * fx.amount;
       selected.forEach(cid => {
@@ -2096,12 +2177,9 @@ class GameScene extends Phaser.Scene {
       cleanup();
       resumeCallback(payout + earned, 0);
     });
-
-    const skipBtn = this.add.text(800, 545, 'SKIP', {
-      fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
-      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
     skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
+
+    renderPage();
   }
 
   _renderSwapCardModal(card, payout, fx, resumeCallback) {
@@ -2109,7 +2187,7 @@ class GameScene extends Phaser.Scene {
     // Phase 2: select hand card of handType to place in that slot
     const allRows = [
       { row: this.state.cashRow, rowName: 'cash' },
-      { row: this.state.ipRow, rowName: 'ip' },
+      { row: this.state.productRow, rowName: 'product' },
       { row: this.state.resourcesRow, rowName: 'resources' }
     ];
 
@@ -2156,7 +2234,7 @@ class GameScene extends Phaser.Scene {
         bg.on('pointerdown', () => {
           // Remove from board
           const targetRow = boardSlot.rowName === 'cash' ? this.state.cashRow
-                          : boardSlot.rowName === 'ip'   ? this.state.ipRow
+                          : boardSlot.rowName === 'product'   ? this.state.productRow
                           : this.state.resourcesRow;
           targetRow[boardSlot.slotIdx] = cid;
           // Remove from hand
@@ -2220,7 +2298,7 @@ class GameScene extends Phaser.Scene {
 
     const allRows = [
       { row: this.state.cashRow, rowName: 'cash' },
-      { row: this.state.ipRow, rowName: 'ip' },
+      { row: this.state.productRow, rowName: 'product' },
       { row: this.state.resourcesRow, rowName: 'resources' }
     ];
     const boardCandidates = [];
@@ -2263,7 +2341,7 @@ class GameScene extends Phaser.Scene {
           this.updateHUD();
           // Place hand card in board slot
           const targetRow = boardSlot.rowName === 'cash' ? this.state.cashRow
-                          : boardSlot.rowName === 'ip'   ? this.state.ipRow
+                          : boardSlot.rowName === 'product'   ? this.state.productRow
                           : this.state.resourcesRow;
           targetRow[boardSlot.slotIdx] = cid;
           const handIdx = this.state.hand.indexOf(cid);
@@ -2356,7 +2434,7 @@ class GameScene extends Phaser.Scene {
     // C-Suite is discarded (removed from all state — already overwritten above)
 
     const rowType = csuiteEntry.rowKey === 'cashRow'      ? 'cash'
-                  : csuiteEntry.rowKey === 'ipRow'        ? 'ip'
+                  : csuiteEntry.rowKey === 'productRow'   ? 'product'
                   : 'resources';
     this._reRenderSlot(rowType, csuiteEntry.slotIndex);
     this.refreshBoardOpLabels();
@@ -2369,28 +2447,28 @@ class GameScene extends Phaser.Scene {
   }
 
   _reRenderAllSlots() {
-    ['cash', 'ip', 'resources'].forEach(rowType => {
+    ['cash', 'product', 'resources'].forEach(rowType => {
       for (let i = 0; i < 5; i++) this._reRenderSlot(rowType, i);
     });
     this.refreshBoardOpLabels();
   }
 
   _reRenderSlot(rowType, slotIndex) {
-    const slotList   = rowType === 'ip'        ? this.ipSlotObjects
+    const slotList   = rowType === 'product'   ? this.productSlotObjects
                      : rowType === 'resources' ? this.resSlotObjects
                      : this.slotObjects;
-    const renderFn   = rowType === 'ip'        ? (i, c) => this.renderIPSlotCard(i, c)
+    const renderFn   = rowType === 'product'   ? (i, c) => this.renderProductSlotCard(i, c)
                      : rowType === 'resources' ? (i, c) => this.renderResSlotCard(i, c)
                      : (i, c) => this.renderSlotCard(i, c);
-    const rowArray   = rowType === 'ip'        ? this.state.ipRow
+    const rowArray   = rowType === 'product'   ? this.state.productRow
                      : rowType === 'resources' ? this.state.resourcesRow
                      : this.state.cashRow;
 
     const slot = slotList[slotIndex];
-    const COLORS_slotEmpty  = rowType === 'ip'        ? COLORS.ipSlotEmpty
+    const COLORS_slotEmpty  = rowType === 'product'   ? COLORS.productSlotEmpty
                             : rowType === 'resources' ? COLORS.resSlotEmpty
                             : COLORS.slotEmpty;
-    const COLORS_slotBorder = rowType === 'ip'        ? COLORS.ipSlotBorder
+    const COLORS_slotBorder = rowType === 'product'   ? COLORS.productSlotBorder
                             : rowType === 'resources' ? COLORS.resSlotBorder
                             : COLORS.slotBorder;
 
@@ -2413,10 +2491,10 @@ class GameScene extends Phaser.Scene {
 
   // ── Valuation ─────────────────────────────────────────────
   triggerValuation() {
-    const cashIds = this.state.cashRow.filter(Boolean);
-    const ipIds   = this.state.ipRow.filter(Boolean);
-    const resIds  = this.state.resourcesRow.filter(Boolean);
-    const allIds  = [...cashIds, ...ipIds, ...resIds];
+    const cashIds    = this.state.cashRow.filter(Boolean);
+    const productIds = this.state.productRow.filter(Boolean);
+    const resIds     = this.state.resourcesRow.filter(Boolean);
+    const allIds     = [...cashIds, ...productIds, ...resIds];
 
     // Apply valueMultiplier from specialEffects on board (e.g., Agentic Overlord)
     allIds.forEach(sid => {
@@ -2454,36 +2532,35 @@ class GameScene extends Phaser.Scene {
     const breakdown = allIds.map(id => {
       const card  = this.cardsData.find(c => c.id === id);
       const bonus = valueBonuses[id] || 0;
-      const row   = cashIds.includes(id) ? 'cash' : ipIds.includes(id) ? 'ip' : 'resources';
+      const row   = cashIds.includes(id) ? 'cash' : productIds.includes(id) ? 'product' : 'resources';
       return { name: card.name, base: card.baseValue, bonus, total: card.baseValue + bonus, row };
     });
 
-    const baseTotal    = breakdown.reduce((s, c) => s + c.total, 0);
-    const ipMultiplier = this.computeIPMultiplier();
-    const finalTotal   = Math.round(baseTotal * ipMultiplier);
-    const ipChainSteps = this.buildIPChainSteps();
-    const isEndGame    = this.state.round === 3;
+    const baseTotal       = breakdown.reduce((s, c) => s + c.total, 0);
+    const productMultiplier = this.state.productMultiplier;
+    const finalTotal      = Math.round(baseTotal * productMultiplier);
+    const isEndGame       = this.state.round === 3;
 
     this.scene.start('ValuationScene', {
       breakdown,
       baseTotal,
-      ipMultiplier,
+      productMultiplier,
       finalTotal,
-      ipChainSteps,
       finalCash: this.state.cash,
       round:     this.state.round,
       isEndGame,
       carryOver: isEndGame ? null : {
-        round:        this.state.round,
-        cash:         this.state.cash,
-        hand:         [...this.state.hand],
-        cashRow:      [...this.state.cashRow],
-        ipRow:        [...this.state.ipRow],
-        resourcesRow: [...this.state.resourcesRow],
-        drawPile:     [...this.state.drawPile],
-        revealedCards:[...this.state.revealedCards],
-        cardOpBoosts: { ...this.state.cardOpBoosts },
-        valueBonuses: { ...this.state.valueBonuses },
+        round:          this.state.round,
+        cash:           this.state.cash,
+        hand:           [...this.state.hand],
+        cashRow:        [...this.state.cashRow],
+        productRow:     [...this.state.productRow],
+        resourcesRow:   [...this.state.resourcesRow],
+        drawPile:       [...this.state.drawPile],
+        revealedCards:  [...this.state.revealedCards],
+        cardOpBoosts:   { ...this.state.cardOpBoosts },
+        valueBonuses:   { ...this.state.valueBonuses },
+        productMultiplier: this.state.productMultiplier,
       },
     });
   }
@@ -2507,9 +2584,9 @@ class GameScene extends Phaser.Scene {
       }
     });
     this.hudCash.setText(fmtVal(state.cash));
+    if (this.cashSubtitle) this.cashSubtitle.setText(`Base: $${BASE_CASH_PER_ROUND[state.round - 1]}k`);
 
-    const mult = this.computeIPMultiplier();
-    this.hudIPMultiplier.setText(`${mult}×`);
+    this.hudProductMultiplier.setText(`${state.productMultiplier}×`);
 
     if (this.hudDrawPile) this.hudDrawPile.setText(`${state.drawPile.length} cards`);
   }
@@ -2547,7 +2624,7 @@ class ValuationScene extends Phaser.Scene {
   init(data) { this.payload = data; }
 
   create() {
-    const { breakdown, baseTotal, ipMultiplier, finalTotal, ipChainSteps,
+    const { breakdown, baseTotal, productMultiplier, finalTotal,
             finalCash, round, isEndGame, carryOver } = this.payload;
     const cx = GAME_W / 2;
 
@@ -2577,8 +2654,8 @@ class ValuationScene extends Phaser.Scene {
       y += 26;
     } else {
       breakdown.forEach(entry => {
-        const rowTag   = entry.row === 'ip' ? '[IP]  ' : entry.row === 'resources' ? '[RES] ' : '[CASH]';
-        const tagColor = entry.row === 'ip' ? '#9966cc' : entry.row === 'resources' ? '#aa7722' : '#446688';
+        const rowTag   = entry.row === 'product' ? '[PROD] ' : entry.row === 'resources' ? '[RES]  ' : '[CASH] ';
+        const tagColor = entry.row === 'product' ? '#9966cc' : entry.row === 'resources' ? '#aa7722' : '#446688';
         this.add.text(cx - 230, y, rowTag, {
           fontSize: '10px', fontFamily: 'monospace', color: tagColor
         }).setOrigin(0, 0.5);
@@ -2613,16 +2690,14 @@ class ValuationScene extends Phaser.Scene {
     }).setOrigin(1, 0.5);
     y += 30;
 
-    // ── IP Chain ─────────────────────────────────────────────
-    this.add.text(cx, y, 'IP MULTIPLIER CHAIN', {
+    // ── Product Multiplier ────────────────────────────────────
+    this.add.text(cx, y, 'PRODUCT MULTIPLIER', {
       fontSize: '11px', fontFamily: 'monospace', color: '#555577', align: 'center'
     }).setOrigin(0.5, 0.5);
     y += 24;
 
-    const chainStr = ipChainSteps.join('  →  ');
-    this.add.text(cx, y, chainStr + '  =  ' + ipMultiplier + '×', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#cd84ff', align: 'center',
-      wordWrap: { width: 600 }
+    this.add.text(cx, y, `${productMultiplier}×`, {
+      fontSize: '20px', fontFamily: 'monospace', color: '#cd84ff', align: 'center', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5);
     y += 36;
 
@@ -2630,7 +2705,7 @@ class ValuationScene extends Phaser.Scene {
     this.add.rectangle(cx, y, 560, 2, 0x555577).setOrigin(0.5, 0.5);
     y += 24;
 
-    const calcStr = `${fmtVal(baseTotal)}  ×  ${ipMultiplier}×  =`;
+    const calcStr = `${fmtVal(baseTotal)}  ×  ${productMultiplier}×  =`;
     this.add.text(cx, y, calcStr, {
       fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
