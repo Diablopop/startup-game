@@ -19,8 +19,8 @@ const ROW_RES_Y       = 440;
 const ROW_SLOT_X      = 400;   // x of first slot center
 const ACTIVATE_TILE_X = 284;   // x of activate tile / row label block
 
-const TURNS_PER_ROUND     = [7, 6, 5];
-const BASE_CASH_PER_ROUND = [25, 50, 75, 100, 100];
+const TURNS_PER_ROUND     = [7, 7, 6, 5];
+const BASE_CASH_PER_ROUND = [25, 50, 75, 100];
 
 const COLORS = {
   bg:             0x1a1a2e,
@@ -163,7 +163,7 @@ class GameScene extends Phaser.Scene {
       fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    this.add.text(110, 68, 'TURNS', {
+    this.hudTurnsLabel = this.add.text(110, 68, 'TURNS', {
       fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
     this.buildTurnBoxes(86);
@@ -2539,7 +2539,7 @@ class GameScene extends Phaser.Scene {
     const baseTotal       = breakdown.reduce((s, c) => s + c.total, 0);
     const productMultiplier = this.state.productMultiplier;
     const finalTotal      = Math.round(baseTotal * productMultiplier);
-    const isEndGame       = this.state.round === 3;
+    const isEndGame       = this.state.round === TURNS_PER_ROUND.length;
 
     this.scene.start('ValuationScene', {
       breakdown,
@@ -2568,7 +2568,8 @@ class GameScene extends Phaser.Scene {
   // ── HUD ───────────────────────────────────────────────────
   updateHUD() {
     const { state } = this;
-    this.hudRound.setText(`ROUND ${state.round} / 3`);
+    this.hudRound.setText(`ROUND ${state.round} / ${TURNS_PER_ROUND.length}`);
+    this.hudTurnsLabel.setText(`${state.maxTurns} TURNS`);
 
     const completed = Math.min(state.turn - 1, state.maxTurns);
     this.turnBoxes.forEach(({ box, check }, i) => {
@@ -2731,8 +2732,7 @@ class ValuationScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5);
     const btnW   = isEndGame ? 200 : 280;
     const btnLbl = isEndGame ? 'PLAY AGAIN'
-                 : round === 1 ? 'CONTINUE TO ROUND 2'
-                 : 'CONTINUE TO ROUND 3';
+                 : `CONTINUE TO ROUND ${round + 1}`;
 
     const btn = this.add.rectangle(cx, btnY, btnW, 48, 0x1a472a)
       .setStrokeStyle(2, 0x40916c).setInteractive();
