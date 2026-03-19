@@ -98,6 +98,8 @@ class GameScene extends Phaser.Scene {
         drawPile:     [...carryOver.drawPile],
         revealedCards:[...carryOver.revealedCards],
         phase:        'playing',
+        cardOpBoosts: { ...(carryOver.cardOpBoosts || {}) },
+        valueBonuses: { ...(carryOver.valueBonuses || {}) },
       };
     } else {
       // Fresh game — shuffle deck, deal 4 to hand, 2 face-up, rest to draw pile
@@ -115,6 +117,8 @@ class GameScene extends Phaser.Scene {
         drawPile:     shuffled.slice(6),
         revealedCards:shuffled.slice(4, 6),
         phase:        'playing',
+        cardOpBoosts: {},
+        valueBonuses: {},
       };
     }
 
@@ -592,28 +596,48 @@ class GameScene extends Phaser.Scene {
   }
 
   operationLabel(op) {
-    if (op.type === 'add')      return `+${op.value}`;
+    if (op.type === 'add')      return op.value < 0 ? `${op.value}` : `+${op.value}`;
     if (op.type === 'multiply') return `×${op.value}`;
     return '?';
   }
 
   specialEffectLabel(fx) {
     const labelOne = (f) => {
+      if (f.type === 'immediate_play') return 'Play another card now';
       if (f.type !== 'modify_type') return '';
-      const b      = f.operationBonus;
       const target = f.targetRole || f.targetType || '?';
-      const opStr  = b.type === 'multiply' ? `×${b.value} ${target} ops` : `${b.value >= 0 ? '+' : ''}${b.value} to ${target} ops`;
-      const valStr = f.valueBonus > 0 ? `\n+$${f.valueBonus}k val` : '';
-      return opStr + valStr;
+      const parts = [];
+      if (f.operationBonus) {
+        const b = f.operationBonus;
+        parts.push(b.type === 'multiply'
+          ? `×${b.value} ${target} ops`
+          : `${b.value >= 0 ? '+' : ''}${b.value} to ${target} ops`);
+      }
+      if (f.valueBonus)      parts.push(`${f.valueBonus >= 0 ? '+' : ''}$${Math.abs(f.valueBonus)}k ${target} val`);
+      if (f.valueMultiplier) parts.push(`×${f.valueMultiplier} ${target} val`);
+      if (f.costDiscount)    parts.push(`-$${f.costDiscount}k ${target} cost`);
+      return parts.join(' ') || '';
     };
-    if (Array.isArray(fx)) return fx.map(labelOne).join('\n');
+    if (Array.isArray(fx)) return fx.map(labelOne).filter(Boolean).join('\n');
     return labelOne(fx);
   }
 
   triggerEffectLabel(fx) {
-    if (fx.type === 'gain_cash')                return `+$${fx.amount}k on trigger`;
-    if (fx.type === 'spend_cash_draw_resource') return `Pay $${fx.cost}k → draw ${fx.draws}`;
-    if (fx.type === 'swap_csuite')              return `Swap a C-Suite card`;
+    if (!fx) return '';
+    if (fx.type === 'gain_cash')               return `+$${fx.amount}k on trigger`;
+    if (fx.type === 'gain_cash_per_type')      return `+$${fx.amount}k per ${fx.targetType}`;
+    if (fx.type === 'gain_cash_per_discard')   return `+$${fx.amount}k per discard`;
+    if (fx.type === 'draw')                    return `Draw ${fx.count} card${fx.count !== 1 ? 's' : ''}`;
+    if (fx.type === 'spend_cash_draw_resource')return `Pay $${fx.cost}k → draw ${fx.draws}`;
+    if (fx.type === 'spend_cash_draw')         return `Pay $${fx.cost}k → draw ${fx.draws}`;
+    if (fx.type === 'spend_cash_boost_op')     return `Pay $${fx.cost}k → ${fx.target} +${fx.value} op`;
+    if (fx.type === 'spend_cash_swap')         return `Pay $${fx.cost}k → swap for ${fx.handType}`;
+    if (fx.type === 'boost_op')                return `${fx.target}: +${fx.value} op`;
+    if (fx.type === 'boost_value')             return `${fx.target}: +$${fx.value}k val`;
+    if (fx.type === 'trade_draw')              return `Trade 1 card → draw ${fx.draws}`;
+    if (fx.type === 'swap_csuite')             return `Swap a C-Suite card`;
+    if (fx.type === 'swap_card')               return `Swap ${fx.boardType} → ${fx.handType}`;
+    if (fx.type === 'self_boost_per_type')     return `+${fx.value} op per ${fx.targetType}`;
     return 'trigger effect';
   }
 
@@ -653,7 +677,18 @@ class GameScene extends Phaser.Scene {
     if (state.phase !== 'playing') return;
 
     const card = this.cardsData.find(c => c.id === cardId);
-    const cost = card.cost * 100;
+    let effectiveCost = card.cost * 100;
+    // Apply costDiscount from board specialEffects
+    [...state.cashRow, ...state.ipRow, ...state.resourcesRow].filter(Boolean).forEach(bid => {
+      const bc = this.cardsData.find(c => c.id === bid);
+      if (!bc || !bc.specialEffect) return;
+      const effects = Array.isArray(bc.specialEffect) ? bc.specialEffect : [bc.specialEffect];
+      effects.forEach(fx => {
+        if (fx.type === 'modify_type' && fx.costDiscount && this._typeMatches(card, fx.targetType)) {
+          effectiveCost = Math.max(0, effectiveCost - fx.costDiscount * 100);
+        }
+      });
+    });
 
     const rowArray = rowType === 'ip'        ? state.ipRow
                    : rowType === 'resources' ? state.resourcesRow
@@ -700,14 +735,14 @@ class GameScene extends Phaser.Scene {
       return;
     }
 
-    if (state.cash < cost) {
-      this.showFloat(slot.x, slot.y - 90, `NEED $${cost}k`, '#ff6b6b');
+    if (state.cash < effectiveCost) {
+      this.showFloat(slot.x, slot.y - 90, `NEED $${effectiveCost}k`, '#ff6b6b');
       this.snapBack(cardId);
       return;
     }
 
     // Commit
-    state.cash -= cost;
+    state.cash -= effectiveCost;
     rowArray[slotIndex] = cardId;
     state.hand = state.hand.filter(id => id !== cardId);
     this.handOffset = Math.min(this.handOffset, Math.max(0, state.hand.length - CAROUSEL_VISIBLE));
@@ -719,6 +754,15 @@ class GameScene extends Phaser.Scene {
     this.refreshBoardOpLabels();
     this.renderHand();
     this.updateHUD();
+
+    // immediate_play special effect
+    if (card.specialEffect && !Array.isArray(card.specialEffect) && card.specialEffect.type === 'immediate_play') {
+      // Offer to place another card — just re-enable placement UI
+      // For now: show a float label indicating the effect fired
+      this.showFloat(740, 400, 'Play another card!', '#80ffaa', 1500);
+      // The player can simply take another placement action normally
+    }
+
     this.advanceTurn();
   }
 
@@ -757,8 +801,9 @@ class GameScene extends Phaser.Scene {
     slot.opText = cashOpText;
 
     let yBot = SLOT_H / 2 - 14;
-    if (card.baseValue > 0) {
-      slot.add(this.add.text(0, yBot, `$${card.baseValue}k`, {
+    const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
+    if (dispVal > 0) {
+      slot.add(this.add.text(0, yBot, `$${dispVal}k`, {
         fontSize: '9px', fontFamily: 'monospace', color: '#80ffaa', align: 'center'
       }).setOrigin(0.5, 0.5));
       yBot -= 14;
@@ -806,8 +851,9 @@ class GameScene extends Phaser.Scene {
     slot.opText = ipOpText;
 
     let yBot = SLOT_H / 2 - 14;
-    if (card.baseValue > 0) {
-      slot.add(this.add.text(0, yBot, `$${card.baseValue}k`, {
+    const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
+    if (dispVal > 0) {
+      slot.add(this.add.text(0, yBot, `$${dispVal}k`, {
         fontSize: '9px', fontFamily: 'monospace', color: '#cd84ff', align: 'center'
       }).setOrigin(0.5, 0.5));
       yBot -= 14;
@@ -854,8 +900,9 @@ class GameScene extends Phaser.Scene {
     slot.opText = resOpText;
 
     let yBot = SLOT_H / 2 - 14;
-    if (card.baseValue > 0) {
-      slot.add(this.add.text(0, yBot, `$${card.baseValue}k`, {
+    const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
+    if (dispVal > 0) {
+      slot.add(this.add.text(0, yBot, `$${dispVal}k`, {
         fontSize: '9px', fontFamily: 'monospace', color: '#ffaa44', align: 'center'
       }).setOrigin(0.5, 0.5));
       yBot -= 14;
@@ -1030,7 +1077,7 @@ class GameScene extends Phaser.Scene {
     const BASE = 100;
     let payout = BASE;
 
-    const effectiveOps = this.computeEffectiveOperations();
+    const effectiveOps = this._computeActivationOps(this.state.cashRow.filter(Boolean));
 
     this.activateTile.tileBg.setFillStyle(COLORS.activateActive);
     this.showFloat(this.activateTile.x, this.activateTile.y - 90, `BASE +$${BASE}k`, '#80ffaa', 900);
@@ -1078,6 +1125,48 @@ class GameScene extends Phaser.Scene {
     this.time.delayedCall(600, () => processCard(0));
   }
 
+  // ─── Type-matching helper ────────────────────────────────────────────────────
+  _typeMatches(card, targetType, sourceCardId = null) {
+    if (!targetType) return false;
+    if (targetType === 'All cards') return true;
+    if (targetType === 'All other cards') return sourceCardId ? card.id !== sourceCardId : true;
+    const norm = t => t === 'Prod/Design' ? 'Product/Design'
+                     : t === 'Board'      ? 'Boardmember'
+                     : t;
+    return norm(card.type) === norm(targetType) || card.role === targetType;
+  }
+
+  _countBoardCardsOfType(targetType) {
+    return [...this.state.cashRow, ...this.state.ipRow, ...this.state.resourcesRow]
+      .filter(id => {
+        if (!id) return false;
+        const c = this.cardsData.find(x => x.id === id);
+        return c && this._typeMatches(c, targetType);
+      }).length;
+  }
+
+  _applyPermanentOpBoost(matchFn, value) {
+    [...this.state.cashRow, ...this.state.ipRow, ...this.state.resourcesRow]
+      .filter(Boolean)
+      .forEach(id => {
+        const c = this.cardsData.find(x => x.id === id);
+        if (c && matchFn(c)) {
+          this.state.cardOpBoosts[id] = (this.state.cardOpBoosts[id] || 0) + value;
+        }
+      });
+  }
+
+  _applyBoostValue(matchFn, value) {
+    [...this.state.cashRow, ...this.state.ipRow, ...this.state.resourcesRow]
+      .filter(Boolean)
+      .forEach(id => {
+        const c = this.cardsData.find(x => x.id === id);
+        if (c && matchFn(c)) {
+          this.state.valueBonuses[id] = (this.state.valueBonuses[id] || 0) + value;
+        }
+      });
+  }
+
   // Returns modified operations for targetIds, applying modify_type bonuses from
   // ALL cards on the board (all rows), per GDD §4.1 cross-row scope.
   getModifiedOps(targetIds) {
@@ -1088,22 +1177,23 @@ class GameScene extends Phaser.Scene {
     ];
 
     const ops = {};
+
+    // Re-initialize cleanly
     targetIds.forEach(id => {
       const card = this.cardsData.find(c => c.id === id);
       ops[id] = { type: card.operation.type, value: card.operation.value };
     });
 
+    // Apply passive specialEffect modify_type bonuses from all board cards
     allBoardIds.forEach(id => {
       const card = this.cardsData.find(c => c.id === id);
       if (!card.specialEffect) return;
       const effects = Array.isArray(card.specialEffect) ? card.specialEffect : [card.specialEffect];
       effects.forEach(fx => {
-        if (fx.type !== 'modify_type') return;
+        if (fx.type !== 'modify_type' || !fx.operationBonus) return;
         targetIds.forEach(tid => {
           const tc = this.cardsData.find(c => c.id === tid);
-          const matchesType = fx.targetType && tc.type === fx.targetType;
-          const matchesRole = fx.targetRole && tc.role === fx.targetRole;
-          if (!matchesType && !matchesRole) return;
+          if (!this._typeMatches(tc, fx.targetType, id)) return;
           const b = fx.operationBonus;
           if (b.type === 'multiply') ops[tid].value *= b.value;
           else if (b.type === 'add')  ops[tid].value += b.value;
@@ -1111,11 +1201,50 @@ class GameScene extends Phaser.Scene {
       });
     });
 
+    // Apply permanent op boosts from spend_cash_boost_op (additive on top of base op)
+    targetIds.forEach(id => {
+      if (this.state.cardOpBoosts[id]) {
+        ops[id].value += this.state.cardOpBoosts[id];
+      }
+    });
+
+    return ops;
+  }
+
+  // Extends getModifiedOps with trigger boost_op / self_boost_per_type pre-pass
+  // for cards in the row being activated this turn.
+  _computeActivationOps(rowCardIds) {
+    const ops = this.getModifiedOps(rowCardIds);
+
+    // Scan trigger effects in the activating row for boost_op / self_boost_per_type
+    rowCardIds.forEach(sourceId => {
+      const src = this.cardsData.find(c => c.id === sourceId);
+      if (!src || !src.triggerEffect) return;
+      const fx = src.triggerEffect;
+
+      if (fx.type === 'boost_op') {
+        // Apply to matching cards in the row
+        rowCardIds.forEach(tid => {
+          const tc = this.cardsData.find(c => c.id === tid);
+          if (fx.target === 'Self') {
+            if (tid === sourceId) ops[tid].value += fx.value;
+          } else if (this._typeMatches(tc, fx.target)) {
+            ops[tid].value += fx.value;
+          }
+        });
+      }
+
+      if (fx.type === 'self_boost_per_type') {
+        const count = this._countBoardCardsOfType(fx.targetType);
+        ops[sourceId].value += fx.value * count;
+      }
+    });
+
     return ops;
   }
 
   computeEffectiveOperations() {
-    return this.getModifiedOps(this.state.cashRow.filter(Boolean));
+    return this._computeActivationOps(this.state.cashRow.filter(Boolean));
   }
 
   finalizePayout(payout) {
@@ -1161,7 +1290,7 @@ class GameScene extends Phaser.Scene {
     const BASE = 1;
     let drawCount = BASE;
 
-    const effectiveOps = this.getModifiedOps(this.state.resourcesRow.filter(Boolean));
+    const effectiveOps = this._computeActivationOps(this.state.resourcesRow.filter(Boolean));
 
     this.hireTile.tileBg.setFillStyle(COLORS.resTileActive);
     this.showFloat(this.hireTile.x, this.hireTile.y - 90, 'BASE +1 draw', '#ffaa44', 900);
@@ -1186,8 +1315,8 @@ class GameScene extends Phaser.Scene {
       const op     = effectiveOps[cardId];
       const before = drawCount;
 
-      if (op.type === 'add')      drawCount = Math.round(drawCount + op.value);
-      else if (op.type === 'multiply') drawCount = Math.round(drawCount * op.value);
+      if (op.type === 'add')      drawCount = drawCount + op.value;
+      else if (op.type === 'multiply') drawCount = drawCount * op.value;
 
       const diff  = drawCount - before;
       const label = op.type === 'multiply'
@@ -1222,7 +1351,7 @@ class GameScene extends Phaser.Scene {
   }
 
   finalizeDrawCount(drawCount) {
-    const count = Math.max(1, drawCount);
+    const count = Math.max(1, Math.round(drawCount));
     this.hireTile.tileBg.setFillStyle(COLORS.resTile);
 
     const flash = this.add.text(740, ROW_RES_Y, `DRAW ${count}`, {
@@ -1560,6 +1689,64 @@ class GameScene extends Phaser.Scene {
     const PW = 480;
     const PH = 220;
 
+    // Auto effects — no modal needed
+    if (fx.type === 'gain_cash_per_type') {
+      const count = this._countBoardCardsOfType(fx.targetType);
+      const earned = fx.amount * count;
+      if (earned > 0) {
+        this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${earned}k (${count}×${fx.targetType})`, '#e9c46a', 1200);
+      }
+      return resumeCallback(payout + earned, 0);
+    }
+
+    if (fx.type === 'draw') {
+      return resumeCallback(payout, fx.count);
+    }
+
+    if (fx.type === 'boost_value') {
+      const matchFn = tc => fx.target === 'Self' ? tc.id === card.id : this._typeMatches(tc, fx.target);
+      this._applyBoostValue(matchFn, fx.value);
+      this._reRenderAllSlots();
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.value}k val`, '#a8dadc', 1000);
+      return resumeCallback(payout, 0);
+    }
+
+    if (fx.type === 'boost_op') {
+      const matchFn = tc => fx.target === 'Self' ? tc.id === card.id : this._typeMatches(tc, fx.target);
+      this._applyPermanentOpBoost(matchFn, fx.value);
+      this._reRenderAllSlots();
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `${fx.target}: +${fx.value} op`, '#a8dadc', 1000);
+      return resumeCallback(payout, 0);
+    }
+
+    if (fx.type === 'self_boost_per_type') {
+      const count = this._countBoardCardsOfType(fx.targetType);
+      this.state.cardOpBoosts[card.id] = (this.state.cardOpBoosts[card.id] || 0) + fx.value * count;
+      this._reRenderAllSlots();
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+${fx.value * count} op (${count}×${fx.targetType})`, '#a8dadc', 1000);
+      return resumeCallback(payout, 0);
+    }
+
+    // Modal-based effects
+    if (fx.type === 'spend_cash_draw') {
+      return this._renderSpendCashDrawModal(card, payout, fx, resumeCallback);
+    }
+    if (fx.type === 'spend_cash_boost_op') {
+      return this._renderSpendCashBoostOpModal(card, payout, fx, resumeCallback);
+    }
+    if (fx.type === 'spend_cash_swap') {
+      return this._renderSpendCashSwapModal(card, payout, fx, resumeCallback);
+    }
+    if (fx.type === 'trade_draw') {
+      return this._renderTradeDrawModal(card, payout, fx, resumeCallback);
+    }
+    if (fx.type === 'gain_cash_per_discard') {
+      return this._renderGainCashPerDiscardModal(card, payout, fx, resumeCallback);
+    }
+    if (fx.type === 'swap_card') {
+      return this._renderSwapCardModal(card, payout, fx, resumeCallback);
+    }
+
     const modal = this.add.container(0, 0);
     this.triggerModal = modal;
 
@@ -1726,6 +1913,406 @@ class GameScene extends Phaser.Scene {
     skipBg.on('pointerdown', () => { modal.destroy(); resumeCallback(payout, 0); });
   }
 
+  _renderSpendCashDrawModal(card, payout, fx, resumeCallback) {
+    const canAfford = this.state.cash >= fx.cost;
+    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.55).setDepth(30);
+    const box = this.add.rectangle(740, 450, 460, 220, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
+    const title = this.add.text(740, 370, `Pay $${fx.cost}k → Draw ${fx.draws} card${fx.draws !== 1 ? 's' : ''}?`, {
+      fontSize: '20px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 400 }
+    }).setOrigin(0.5).setDepth(32);
+    const cashLabel = this.add.text(740, 410, `Cash: $${this.state.cash}k`, {
+      fontSize: '16px', fontFamily: 'monospace', color: canAfford ? '#80ffaa' : '#ff6b6b'
+    }).setOrigin(0.5).setDepth(32);
+
+    const cleanup = () => { overlay.destroy(); box.destroy(); title.destroy(); cashLabel.destroy(); acceptBtn.destroy(); skipBtn.destroy(); };
+
+    const acceptBtn = this.add.text(680, 490, 'ACCEPT', {
+      fontSize: '18px', fontFamily: 'monospace', color: canAfford ? '#80ffaa' : '#888888',
+      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: canAfford });
+    if (canAfford) {
+      acceptBtn.on('pointerdown', () => {
+        this.state.cash -= fx.cost;
+        this.updateHUD();
+        cleanup();
+        resumeCallback(payout, fx.draws);
+      });
+    }
+
+    const skipBtn = this.add.text(800, 490, 'SKIP', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
+      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
+  }
+
+  _renderSpendCashBoostOpModal(card, payout, fx, resumeCallback) {
+    const canAfford = this.state.cash >= fx.cost;
+    const targetLabel = fx.target === 'Self' ? card.name : (fx.scope === 'all' ? `all ${fx.target}` : fx.target);
+    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.55).setDepth(30);
+    const box = this.add.rectangle(740, 450, 500, 240, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
+    const title = this.add.text(740, 370, `Pay $${fx.cost}k → ${targetLabel}: +${fx.value} op?`, {
+      fontSize: '20px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 460 }
+    }).setOrigin(0.5).setDepth(32);
+    const cashLabel = this.add.text(740, 415, `Cash: $${this.state.cash}k`, {
+      fontSize: '16px', fontFamily: 'monospace', color: canAfford ? '#80ffaa' : '#ff6b6b'
+    }).setOrigin(0.5).setDepth(32);
+
+    const cleanup = () => { overlay.destroy(); box.destroy(); title.destroy(); cashLabel.destroy(); acceptBtn.destroy(); skipBtn.destroy(); };
+
+    const acceptBtn = this.add.text(680, 495, 'ACCEPT', {
+      fontSize: '18px', fontFamily: 'monospace', color: canAfford ? '#80ffaa' : '#888888',
+      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: canAfford });
+    if (canAfford) {
+      acceptBtn.on('pointerdown', () => {
+        this.state.cash -= fx.cost;
+        this.updateHUD();
+        // Apply permanent op boost
+        if (fx.target === 'Self') {
+          this.state.cardOpBoosts[card.id] = (this.state.cardOpBoosts[card.id] || 0) + fx.value;
+        } else {
+          const matchFn = tc => this._typeMatches(tc, fx.target) || tc.role === fx.target;
+          [...this.state.cashRow, ...this.state.ipRow, ...this.state.resourcesRow]
+            .filter(Boolean)
+            .forEach(id => {
+              const tc = this.cardsData.find(c => c.id === id);
+              if (tc && matchFn(tc)) {
+                this.state.cardOpBoosts[id] = (this.state.cardOpBoosts[id] || 0) + fx.value;
+              }
+            });
+        }
+        this._reRenderAllSlots();
+        cleanup();
+        resumeCallback(payout, 0);
+      });
+    }
+
+    const skipBtn = this.add.text(800, 495, 'SKIP', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
+      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
+  }
+
+  _renderTradeDrawModal(card, payout, fx, resumeCallback) {
+    const hand = this.state.hand;
+    if (hand.length === 0) { return resumeCallback(payout, 0); }
+
+    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
+    const box = this.add.rectangle(740, 450, 700, 380, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
+    const title = this.add.text(740, 310, `Trade a card from hand → draw ${fx.draws}`, {
+      fontSize: '20px', fontFamily: 'monospace', color: '#ffffff', align: 'center'
+    }).setOrigin(0.5).setDepth(32);
+    const sub = this.add.text(740, 345, 'Select a card to discard:', {
+      fontSize: '14px', fontFamily: 'monospace', color: '#aaaaaa'
+    }).setOrigin(0.5).setDepth(32);
+
+    const objs = [];
+    const cleanup = () => { overlay.destroy(); box.destroy(); title.destroy(); sub.destroy(); objs.forEach(o => o.destroy()); skipBtn.destroy(); };
+
+    const startX = 740 - ((Math.min(hand.length, 5) - 1) * 110) / 2;
+    hand.slice(0, 5).forEach((cid, i) => {
+      const hc = this.cardsData.find(c => c.id === cid);
+      const cx = startX + i * 110;
+      const cy = 430;
+      const bg = this.add.rectangle(cx, cy, 100, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
+      const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 90 } }).setOrigin(0.5).setDepth(33);
+      const tp = this.add.text(cx, cy + 40, hc.type, { fontSize: '9px', fontFamily: 'monospace', color: '#aaaaaa', align: 'center' }).setOrigin(0.5).setDepth(33);
+      objs.push(bg, nm, tp);
+      bg.on('pointerdown', () => {
+        // Remove from hand
+        const idx = this.state.hand.indexOf(cid);
+        if (idx !== -1) this.state.hand.splice(idx, 1);
+        this.renderHand();
+        cleanup();
+        resumeCallback(payout, fx.draws);
+      });
+      bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
+      bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+    });
+
+    const skipBtn = this.add.text(740, 540, 'SKIP', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
+      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
+    objs.push(skipBtn);
+  }
+
+  _renderGainCashPerDiscardModal(card, payout, fx, resumeCallback) {
+    const hand = this.state.hand;
+    if (hand.length === 0) { return resumeCallback(payout, 0); }
+
+    let selected = new Set();
+    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
+    const box = this.add.rectangle(740, 450, 760, 400, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
+    const title = this.add.text(740, 300, `Discard cards → earn $${fx.amount}k each`, {
+      fontSize: '20px', fontFamily: 'monospace', color: '#ffffff', align: 'center'
+    }).setOrigin(0.5).setDepth(32);
+
+    const totalLabel = this.add.text(740, 335, `Earn: $0k`, {
+      fontSize: '16px', fontFamily: 'monospace', color: '#80ffaa'
+    }).setOrigin(0.5).setDepth(32);
+
+    const objs = [overlay, box, title, totalLabel];
+    const cardObjs = [];
+
+    const cleanup = () => { objs.forEach(o => o.destroy()); cardObjs.forEach(({ bg }) => bg.destroy()); acceptBtn.destroy(); skipBtn.destroy(); };
+
+    const updateTotal = () => {
+      totalLabel.setText(`Earn: $${selected.size * fx.amount}k`);
+      cardObjs.forEach(({ id, bg }) => {
+        bg.setStrokeStyle(selected.has(id) ? 3 : 1, selected.has(id) ? 0x80ffaa : 0x666666);
+      });
+    };
+
+    const startX = 740 - ((Math.min(hand.length, 5) - 1) * 120) / 2;
+    hand.slice(0, 5).forEach((cid, i) => {
+      const hc = this.cardsData.find(c => c.id === cid);
+      const cx = startX + i * 120;
+      const cy = 430;
+      const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
+      const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+      cardObjs.push({ id: cid, bg, nm });
+      objs.push(nm);
+      bg.on('pointerdown', () => {
+        if (selected.has(cid)) selected.delete(cid); else selected.add(cid);
+        updateTotal();
+      });
+    });
+
+    const acceptBtn = this.add.text(680, 545, 'ACCEPT', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#80ffaa',
+      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    acceptBtn.on('pointerdown', () => {
+      const earned = selected.size * fx.amount;
+      selected.forEach(cid => {
+        const idx = this.state.hand.indexOf(cid);
+        if (idx !== -1) this.state.hand.splice(idx, 1);
+      });
+      this.renderHand();
+      cleanup();
+      resumeCallback(payout + earned, 0);
+    });
+
+    const skipBtn = this.add.text(800, 545, 'SKIP', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
+      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
+  }
+
+  _renderSwapCardModal(card, payout, fx, resumeCallback) {
+    // Phase 1: select board card of boardType to remove
+    // Phase 2: select hand card of handType to place in that slot
+    const allRows = [
+      { row: this.state.cashRow, rowName: 'cash' },
+      { row: this.state.ipRow, rowName: 'ip' },
+      { row: this.state.resourcesRow, rowName: 'resources' }
+    ];
+
+    const boardCandidates = [];
+    allRows.forEach(({ row, rowName }) => {
+      row.forEach((cid, slotIdx) => {
+        if (!cid) return;
+        const bc = this.cardsData.find(c => c.id === cid);
+        if (bc && this._typeMatches(bc, fx.boardType)) {
+          boardCandidates.push({ cid, rowName, slotIdx });
+        }
+      });
+    });
+
+    const handCandidates = this.state.hand.filter(cid => {
+      const hc = this.cardsData.find(c => c.id === cid);
+      return hc && this._typeMatches(hc, fx.handType);
+    });
+
+    if (boardCandidates.length === 0 || handCandidates.length === 0) {
+      return resumeCallback(payout, 0);
+    }
+
+    const objs = [];
+    const cleanup = () => objs.forEach(o => o.destroy());
+
+    const showPhase2 = (boardSlot) => {
+      cleanup();
+      const overlay2 = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
+      const box2 = this.add.rectangle(740, 450, 660, 340, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
+      const t2 = this.add.text(740, 330, `Choose ${fx.handType} from hand to place:`, {
+        fontSize: '18px', fontFamily: 'monospace', color: '#ffffff', align: 'center'
+      }).setOrigin(0.5).setDepth(32);
+      const p2objs = [overlay2, box2, t2];
+
+      const startX2 = 740 - ((Math.min(handCandidates.length, 5) - 1) * 120) / 2;
+      handCandidates.slice(0, 5).forEach((cid, i) => {
+        const hc = this.cardsData.find(c => c.id === cid);
+        const cx = startX2 + i * 120;
+        const cy = 440;
+        const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
+        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+        p2objs.push(bg, nm);
+        bg.on('pointerdown', () => {
+          // Remove from board
+          const targetRow = boardSlot.rowName === 'cash' ? this.state.cashRow
+                          : boardSlot.rowName === 'ip'   ? this.state.ipRow
+                          : this.state.resourcesRow;
+          targetRow[boardSlot.slotIdx] = cid;
+          // Remove from hand
+          const handIdx = this.state.hand.indexOf(cid);
+          if (handIdx !== -1) this.state.hand.splice(handIdx, 1);
+          this.renderHand();
+          this._reRenderSlot(boardSlot.rowName, boardSlot.slotIdx);
+          p2objs.forEach(o => o.destroy());
+          resumeCallback(payout, 0);
+        });
+        bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
+        bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+      });
+
+      const skipBtn2 = this.add.text(740, 540, 'SKIP', {
+        fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
+        backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+      }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+      skipBtn2.on('pointerdown', () => { p2objs.forEach(o => o.destroy()); skipBtn2.destroy(); resumeCallback(payout, 0); });
+      p2objs.push(skipBtn2);
+    };
+
+    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
+    const box = this.add.rectangle(740, 450, 660, 340, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
+    const t1 = this.add.text(740, 330, `Choose ${fx.boardType} card on board to swap:`, {
+      fontSize: '18px', fontFamily: 'monospace', color: '#ffffff', align: 'center'
+    }).setOrigin(0.5).setDepth(32);
+    objs.push(overlay, box, t1);
+
+    const startX = 740 - ((Math.min(boardCandidates.length, 5) - 1) * 120) / 2;
+    boardCandidates.slice(0, 5).forEach((slot, i) => {
+      const bc = this.cardsData.find(c => c.id === slot.cid);
+      const cx = startX + i * 120;
+      const cy = 440;
+      const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
+      const nm = this.add.text(cx, cy - 30, bc.name, { fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+      objs.push(bg, nm);
+      bg.on('pointerdown', () => showPhase2(slot));
+      bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
+      bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+    });
+
+    const skipBtn = this.add.text(740, 540, 'SKIP', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
+      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    skipBtn.on('pointerdown', () => { cleanup(); skipBtn.destroy(); resumeCallback(payout, 0); });
+    objs.push(skipBtn);
+  }
+
+  _renderSpendCashSwapModal(card, payout, fx, resumeCallback) {
+    const canAfford = this.state.cash >= fx.cost;
+    const handCandidates = this.state.hand.filter(cid => {
+      const hc = this.cardsData.find(c => c.id === cid);
+      return hc && (fx.handType === 'any' || this._typeMatches(hc, fx.handType));
+    });
+
+    if (!canAfford || handCandidates.length === 0) {
+      return resumeCallback(payout, 0);
+    }
+
+    const allRows = [
+      { row: this.state.cashRow, rowName: 'cash' },
+      { row: this.state.ipRow, rowName: 'ip' },
+      { row: this.state.resourcesRow, rowName: 'resources' }
+    ];
+    const boardCandidates = [];
+    allRows.forEach(({ row, rowName }) => {
+      row.forEach((cid, slotIdx) => {
+        if (!cid) return;
+        const bc = this.cardsData.find(c => c.id === cid);
+        if (bc && (fx.boardType === 'any' || this._typeMatches(bc, fx.boardType))) {
+          boardCandidates.push({ cid, rowName, slotIdx });
+        }
+      });
+    });
+
+    if (boardCandidates.length === 0) {
+      return resumeCallback(payout, 0);
+    }
+
+    const objs = [];
+    const cleanup = () => objs.forEach(o => o.destroy());
+
+    const showPhase2 = (boardSlot) => {
+      cleanup();
+      const overlay2 = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
+      const box2 = this.add.rectangle(740, 450, 660, 340, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
+      const t2 = this.add.text(740, 330, `Choose ${fx.handType} from hand to place:`, {
+        fontSize: '18px', fontFamily: 'monospace', color: '#ffffff', align: 'center'
+      }).setOrigin(0.5).setDepth(32);
+      const p2objs = [overlay2, box2, t2];
+
+      const startX2 = 740 - ((Math.min(handCandidates.length, 5) - 1) * 120) / 2;
+      handCandidates.slice(0, 5).forEach((cid, i) => {
+        const hc = this.cardsData.find(c => c.id === cid);
+        const cx = startX2 + i * 120;
+        const cy = 440;
+        const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
+        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+        p2objs.push(bg, nm);
+        bg.on('pointerdown', () => {
+          this.state.cash -= fx.cost;
+          this.updateHUD();
+          // Place hand card in board slot
+          const targetRow = boardSlot.rowName === 'cash' ? this.state.cashRow
+                          : boardSlot.rowName === 'ip'   ? this.state.ipRow
+                          : this.state.resourcesRow;
+          targetRow[boardSlot.slotIdx] = cid;
+          const handIdx = this.state.hand.indexOf(cid);
+          if (handIdx !== -1) this.state.hand.splice(handIdx, 1);
+          this.renderHand();
+          this._reRenderSlot(boardSlot.rowName, boardSlot.slotIdx);
+          p2objs.forEach(o => o.destroy());
+          resumeCallback(payout, 0);
+        });
+        bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
+        bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+      });
+
+      const skipBtn2 = this.add.text(740, 540, 'SKIP', {
+        fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
+        backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+      }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+      skipBtn2.on('pointerdown', () => { p2objs.forEach(o => o.destroy()); skipBtn2.destroy(); resumeCallback(payout, 0); });
+      p2objs.push(skipBtn2);
+    };
+
+    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
+    const box = this.add.rectangle(740, 450, 660, 340, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
+    const t1 = this.add.text(740, 310, `Pay $${fx.cost}k → choose any board card to swap:`, {
+      fontSize: '18px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 600 }
+    }).setOrigin(0.5).setDepth(32);
+    objs.push(overlay, box, t1);
+
+    const startX = 740 - ((Math.min(boardCandidates.length, 5) - 1) * 120) / 2;
+    boardCandidates.slice(0, 5).forEach((slot, i) => {
+      const bc = this.cardsData.find(c => c.id === slot.cid);
+      const cx = startX + i * 120;
+      const cy = 440;
+      const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
+      const nm = this.add.text(cx, cy - 30, bc.name, { fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+      objs.push(bg, nm);
+      bg.on('pointerdown', () => showPhase2(slot));
+      bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
+      bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+    });
+
+    const skipBtn = this.add.text(740, 540, 'SKIP', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#ff6b6b',
+      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    skipBtn.on('pointerdown', () => { cleanup(); skipBtn.destroy(); resumeCallback(payout, 0); });
+    objs.push(skipBtn);
+  }
+
   _handleSwapPhase1(modal, csuiteEntry, allCsuite, cx, cy, _PH, payout, resumeCallback) {
     if (modal.swapState.phase !== 1) return;
     modal.swapState.phase = 2;
@@ -1781,6 +2368,13 @@ class GameScene extends Phaser.Scene {
     resumeCallback(payout, 0);
   }
 
+  _reRenderAllSlots() {
+    ['cash', 'ip', 'resources'].forEach(rowType => {
+      for (let i = 0; i < 5; i++) this._reRenderSlot(rowType, i);
+    });
+    this.refreshBoardOpLabels();
+  }
+
   _reRenderSlot(rowType, slotIndex) {
     const slotList   = rowType === 'ip'        ? this.ipSlotObjects
                      : rowType === 'resources' ? this.resSlotObjects
@@ -1824,8 +2418,25 @@ class GameScene extends Phaser.Scene {
     const resIds  = this.state.resourcesRow.filter(Boolean);
     const allIds  = [...cashIds, ...ipIds, ...resIds];
 
-    // Tier 2 value bonuses (cross-row)
-    const valueBonuses = {};
+    // Apply valueMultiplier from specialEffects on board (e.g., Agentic Overlord)
+    allIds.forEach(sid => {
+      const sc = this.cardsData.find(c => c.id === sid);
+      if (!sc || !sc.specialEffect) return;
+      const effs = Array.isArray(sc.specialEffect) ? sc.specialEffect : [sc.specialEffect];
+      effs.forEach(fx => {
+        if (fx.type === 'modify_type' && fx.valueMultiplier) {
+          allIds.forEach(tid => {
+            const tc = this.cardsData.find(c => c.id === tid);
+            if (tc && this._typeMatches(tc, fx.targetType, sid)) {
+              this.state.valueBonuses[tid] = (this.state.valueBonuses[tid] || 0) + tc.baseValue * (fx.valueMultiplier - 1);
+            }
+          });
+        }
+      });
+    });
+
+    // Tier 2 value bonuses (cross-row) — from specialEffect valueBonus and accumulated state.valueBonuses
+    const valueBonuses = { ...this.state.valueBonuses };
     allIds.forEach(id => {
       const card = this.cardsData.find(c => c.id === id);
       if (!card.specialEffect) return;
@@ -1834,9 +2445,7 @@ class GameScene extends Phaser.Scene {
         if (fx.type !== 'modify_type') return;
         allIds.forEach(tid => {
           const tc = this.cardsData.find(c => c.id === tid);
-          const matchesType = fx.targetType && tc.type === fx.targetType;
-          const matchesRole = fx.targetRole && tc.role === fx.targetRole;
-          if ((matchesType || matchesRole) && fx.valueBonus > 0)
+          if (this._typeMatches(tc, fx.targetType, id) && fx.valueBonus > 0)
             valueBonuses[tid] = (valueBonuses[tid] || 0) + fx.valueBonus;
         });
       });
@@ -1873,6 +2482,8 @@ class GameScene extends Phaser.Scene {
         resourcesRow: [...this.state.resourcesRow],
         drawPile:     [...this.state.drawPile],
         revealedCards:[...this.state.revealedCards],
+        cardOpBoosts: { ...this.state.cardOpBoosts },
+        valueBonuses: { ...this.state.valueBonuses },
       },
     });
   }
@@ -1895,7 +2506,7 @@ class GameScene extends Phaser.Scene {
         check.setVisible(false);
       }
     });
-    this.hudCash.setText(`$${state.cash.toLocaleString()}k`);
+    this.hudCash.setText(fmtVal(state.cash));
 
     const mult = this.computeIPMultiplier();
     this.hudIPMultiplier.setText(`${mult}×`);
@@ -1919,8 +2530,12 @@ class GameScene extends Phaser.Scene {
 // VALUATION SCENE
 // ============================================================
 function fmtVal(kVal) {
+  if (kVal >= 1000000) {
+    const b = Math.round(kVal / 100000) / 10;
+    return `$${b}b`;
+  }
   if (kVal >= 1000) {
-    const m = Math.round(kVal / 100) / 10; // round to 1 decimal place
+    const m = Math.round(kVal / 100) / 10;
     return `$${m}m`;
   }
   return `$${kVal.toLocaleString()}k`;
