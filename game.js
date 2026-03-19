@@ -1669,7 +1669,7 @@ class GameScene extends Phaser.Scene {
       { text: '⬡  CASH ROW  — activate to generate money to place cards.', color: '#80ffaa' },
       { text: '⬡  RESOURCES ROW  — activate to draw cards from the deck.', color: '#ffaa44' },
       { text: '', color: '#aaaacc' },
-      { text: 'You have three rounds of valuations to scale to $1 billion.', color: '#aaaacc' },
+      { text: 'You have four rounds of valuations to scale to $1 billion.', color: '#aaaacc' },
     ];
 
     let textY = cy - PH / 2 + 80;
