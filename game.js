@@ -189,23 +189,23 @@ class TutorialScene extends Phaser.Scene {
 
     // YOUR GOAL
     this.pageObjects.push(
-      this.add.text(cx - 480, y, 'YOUR GOAL', {
+      this.add.text(cx - 380, y, 'YOUR GOAL', {
         fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
       }).setOrigin(0, 0)
     );
     y += 20;
     this.pageObjects.push(
-      this.add.text(cx - 480, y,
-        'Build the most valuable startup in 4 rounds. Each round gives you a set number of\nturns to grow your company.', {
-          fontSize: '12px', fontFamily: 'monospace', color: '#ccccdd',
-          wordWrap: { width: 960 }
+      this.add.text(cx - 380, y,
+        'Build the most valuable startup in 4 rounds. Each round gives you a set number of turns to grow your company.', {
+          fontSize: '14px', fontFamily: 'monospace', color: '#ccccdd',
+          wordWrap: { width: 760 }
         }).setOrigin(0, 0)
     );
     y += 46;
 
     // ACTIONS
     this.pageObjects.push(
-      this.add.text(cx - 480, y, 'EACH TURN, PICK ONE ACTION:', {
+      this.add.text(cx - 380, y, 'EACH TURN, PICK ONE ACTION:', {
         fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
       }).setOrigin(0, 0)
     );
@@ -220,14 +220,14 @@ class TutorialScene extends Phaser.Scene {
 
     actions.forEach(a => {
       this.pageObjects.push(
-        this.add.text(cx - 480, y, a.label, {
+        this.add.text(cx - 356, y, a.label, {
           fontSize: '12px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold'
         }).setOrigin(0, 0)
       );
       this.pageObjects.push(
-        this.add.text(cx - 480 + 20, y + 18, a.desc, {
-          fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc',
-          wordWrap: { width: 940 }
+        this.add.text(cx - 356, y + 18, a.desc, {
+          fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc',
+          wordWrap: { width: 736 }
         }).setOrigin(0, 0)
       );
       y += 52;
@@ -235,32 +235,32 @@ class TutorialScene extends Phaser.Scene {
 
     // ROWS
     this.pageObjects.push(
-      this.add.text(cx - 480, y, 'ROWS', {
+      this.add.text(cx - 380, y, 'ROWS', {
         fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
       }).setOrigin(0, 0)
     );
     y += 20;
     this.pageObjects.push(
-      this.add.text(cx - 480, y,
+      this.add.text(cx - 380, y,
         'Placed cards trigger left to right when you activate that row. Each card\'s operation modifies the row\'s running score.', {
-          fontSize: '12px', fontFamily: 'monospace', color: '#ccccdd',
-          wordWrap: { width: 960 }
+          fontSize: '14px', fontFamily: 'monospace', color: '#ccccdd',
+          wordWrap: { width: 760 }
         }).setOrigin(0, 0)
     );
-    y += 36;
+    y += 56;
 
     // VALUATION
     this.pageObjects.push(
-      this.add.text(cx - 480, y, 'VALUATION', {
+      this.add.text(cx - 380, y, 'VALUATION', {
         fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
       }).setOrigin(0, 0)
     );
     y += 20;
     this.pageObjects.push(
-      this.add.text(cx - 480, y,
+      this.add.text(cx - 380, y,
         'At the end of each round, your startup is valued: the value of all placed cards × your product multiplier.\nIf you never ship, your valuation is $0.', {
-          fontSize: '12px', fontFamily: 'monospace', color: '#ccccdd',
-          wordWrap: { width: 960 }
+          fontSize: '14px', fontFamily: 'monospace', color: '#ccccdd',
+          wordWrap: { width: 760 }
         }).setOrigin(0, 0)
     );
   }
@@ -271,13 +271,13 @@ class TutorialScene extends Phaser.Scene {
 
     // Title
     this.pageObjects.push(
-      this.add.text(cx, 30, 'UNDERSTANDING CARDS', {
+      this.add.text(cx, 40, 'UNDERSTANDING CARDS', {
         fontSize: '28px', fontFamily: 'monospace', color: '#00ffff', fontStyle: 'bold', align: 'center'
       }).setOrigin(0.5, 0)
     );
 
     // ── Card display — pixel-identical to buildCardVisual, rendered at 2× scale ──
-    const cardX = cx - 220;
+    const cardX = cx - 270;
     const cardY = GAME_H / 2;
 
     const typeColor = COLORS.typeColors[exCard.type] || 0x888888;
@@ -350,8 +350,8 @@ class TutorialScene extends Phaser.Scene {
     this.pageObjects.push(container);
 
     // ── Labels panel (right side) ─────────────────────────────
-    const labelX = cx + 60;
-    let labelY = 205;
+    const labelX = cx - 120;
+    let labelY = 160;
 
     const labelDefs = [
       { label: 'TYPE',            color: '#ffffff',
@@ -374,9 +374,9 @@ class TutorialScene extends Phaser.Scene {
       const lbl = this.add.text(labelX, labelY, def.label, {
         fontSize: '13px', fontFamily: 'monospace', color: def.color, fontStyle: 'bold'
       }).setOrigin(0, 0);
-      const desc = this.add.text(labelX + 4, labelY + 18, def.desc, {
-        fontSize: '10px', fontFamily: 'monospace', color: '#778899',
-        wordWrap: { width: 460 }
+      const desc = this.add.text(labelX, labelY + 18, def.desc, {
+        fontSize: '13px', fontFamily: 'monospace', color: '#778899',
+        wordWrap: { width: 500 }
       }).setOrigin(0, 0);
 
       this.pageObjects.push(lbl, desc);
@@ -407,7 +407,7 @@ class TutorialScene extends Phaser.Scene {
     this.pageObjects.push(
       this.add.text(cx, y,
         "This prototype is actively in development. Here's what's coming:", {
-          fontSize: '13px', fontFamily: 'monospace', color: '#ccccdd',
+          fontSize: '14px', fontFamily: 'monospace', color: '#ccccdd',
           align: 'center', wordWrap: { width: 800 }
         }).setOrigin(0.5, 0)
     );
@@ -436,8 +436,8 @@ class TutorialScene extends Phaser.Scene {
       );
       y += 22;
       this.pageObjects.push(
-        this.add.text(cx - 380 + 16, y, f.desc, {
-          fontSize: '12px', fontFamily: 'monospace', color: '#aaaacc',
+        this.add.text(cx - 380, y, f.desc, {
+          fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc',
           wordWrap: { width: 760 }
         }).setOrigin(0, 0)
       );
