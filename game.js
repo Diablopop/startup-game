@@ -608,57 +608,60 @@ class GameScene extends Phaser.Scene {
 
     const typeColor = COLORS.typeColors[card.type] || 0x888888;
 
-    const bg = this.add.rectangle(0, 0, CARD_W, CARD_H, COLORS.cardBg)
-      .setStrokeStyle(1, typeColor);
+    const bg = this.add.graphics();
+    const drawBg = (strokeW, strokeC) => {
+      bg.clear();
+      bg.fillStyle(COLORS.cardBg);
+      bg.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+      bg.lineStyle(strokeW, strokeC);
+      bg.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+    };
+    drawBg(1, typeColor);
+    bg.setStrokeStyle = (w, c) => drawBg(w, c);
     container.cardBg = bg;
 
-    const bar = this.add.rectangle(0, -CARD_H / 2 + 6, CARD_W, 12, typeColor).setOrigin(0.5, 0.5);
+    const bar = this.add.graphics();
+    bar.fillStyle(typeColor);
+    bar.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 12, { tl: 5, tr: 5, bl: 0, br: 0 });
     const typeLabel = this.add.text(0, -CARD_H / 2 + 6, card.type.toUpperCase(), {
       fontSize: '7px', fontFamily: 'monospace', color: '#000000', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    const nameText = this.add.text(0, -CARD_H / 2 + 22, card.name, {
-      fontSize: '9px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
+    const nameText = this.add.text(0, -CARD_H / 2 + 42, card.name, {
+      fontSize: '11px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
       align: 'center', wordWrap: { width: CARD_W - 10 }
-    }).setOrigin(0.5, 0);
+    }).setOrigin(0.5, 0.5);
 
-    const divider = this.add.rectangle(0, -CARD_H / 2 + 48, CARD_W - 16, 1, 0x33334a).setOrigin(0.5, 0.5);
+    const divider = this.add.rectangle(0, -CARD_H / 2 + 72, CARD_W - 16, 1, 0x33334a).setOrigin(0.5, 0.5);
 
-    const opText = this.add.text(0, -CARD_H / 2 + 58, this.operationLabel(card.operation), {
+    const opText = this.add.text(0, -CARD_H / 2 + 82, this.operationLabel(card.operation), {
       fontSize: '20px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0);
 
     container.add([bg, bar, typeLabel, nameText, divider, opText]);
 
-    if (card.specialEffect) {
-      container.add(this.add.text(0, -CARD_H / 2 + 84, this.specialEffectLabel(card.specialEffect), {
-        fontSize: '7px', fontFamily: 'monospace', color: '#e9c46a', align: 'center',
-        wordWrap: { width: CARD_W - 12 }
-      }).setOrigin(0.5, 0));
+    // Effect icons — ★ for special/bonus-turn effects, ⚡ for trigger effects
+    const icons = [];
+    if (card.specialEffect || card.bonusTurn) icons.push({ symbol: '★', color: '#e9c46a' });
+    if (card.triggerEffect)                   icons.push({ symbol: '⚡', color: '#00ffff' });
+    if (icons.length > 0) {
+      const iconY   = -CARD_H / 2 + 118;
+      const spacing = 20;
+      const startX  = -((icons.length - 1) * spacing) / 2;
+      icons.forEach((icon, i) => {
+        container.add(this.add.text(startX + i * spacing, iconY, icon.symbol, {
+          fontSize: '18px', fontFamily: 'monospace', color: icon.color, align: 'center'
+        }).setOrigin(0.5, 0.5));
+      });
     }
-
-    if (card.bonusTurn) {
-      container.add(this.add.text(0, -CARD_H / 2 + 84, '★ +1 Bonus Turn', {
-        fontSize: '7px', fontFamily: 'monospace', color: '#e9c46a', align: 'center',
-        wordWrap: { width: CARD_W - 12 }
-      }).setOrigin(0.5, 0));
-    }
-
-    const bottomText  = card.triggerEffect ? `⚡ ${this.triggerEffectLabel(card.triggerEffect)}` : `"${card.description}"`;
-    const bottomColor = card.triggerEffect ? '#00ffff' : '#888899';
-    container.add(this.add.text(0, CARD_H / 2 - 44, bottomText, {
-      fontSize: '7px', fontFamily: 'monospace', color: bottomColor,
-      fontStyle: card.triggerEffect ? 'bold' : 'italic',
-      align: 'center', wordWrap: { width: CARD_W - 12 }
-    }).setOrigin(0.5, 0));
 
     container.add(this.add.text(-CARD_W / 2 + 6, CARD_H / 2 - 16, `$${card.cost * 100}k`, {
-      fontSize: '8px', fontFamily: 'monospace', color: '#ff8888'
+      fontSize: '11px', fontFamily: 'monospace', color: '#ff8888'
     }).setOrigin(0, 0.5));
 
     const valStr = card.baseValue > 0 ? `$${card.baseValue}k` : '—';
     container.add(this.add.text(CARD_W / 2 - 6, CARD_H / 2 - 16, valStr, {
-      fontSize: '8px', fontFamily: 'monospace', color: '#80ffaa'
+      fontSize: '11px', fontFamily: 'monospace', color: '#80ffaa'
     }).setOrigin(1, 0.5));
 
     if (draggable) {
@@ -735,16 +738,58 @@ class GameScene extends Phaser.Scene {
   showCardInfoPopup(card, worldX, worldY, cardH = CARD_H) {
     this.hideCardInfoPopup();
 
-    const PW  = 165;
-    const PAD = 10;
+    const PW  = 240;
+    const PAD = 14;
     const typeColor    = COLORS.typeColors[card.type] || 0x888888;
     const typeColorHex = '#' + typeColor.toString(16).padStart(6, '0');
 
-    // Dynamic height based on which sections are present
-    let PH = 108; // base: type + name + divider + description + padding
-    if (card.specialEffect) PH += 32;
-    if (card.bonusTurn)     PH += 24;
-    if (card.triggerEffect) PH += 26;
+    // Build all text objects first so we can measure their actual heights
+    const typeText = this.add.text(0, 0, card.type.toUpperCase(), {
+      fontSize: '10px', fontFamily: 'monospace', color: typeColorHex, align: 'center'
+    }).setOrigin(0.5, 0);
+
+    const nameText = this.add.text(0, 0, card.name, {
+      fontSize: '17px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
+      align: 'center', wordWrap: { width: PW - PAD * 2 }
+    }).setOrigin(0.5, 0);
+
+    const descText = this.add.text(0, 0, `"${card.description}"`, {
+      fontSize: '12px', fontFamily: 'monospace', color: '#888899', fontStyle: 'italic',
+      align: 'center', wordWrap: { width: PW - PAD * 2 }
+    }).setOrigin(0.5, 0);
+
+    let specialText = null, bonusText = null, triggerText = null;
+    if (card.specialEffect) {
+      specialText = this.add.text(0, 0, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
+        fontSize: '12px', fontFamily: 'monospace', color: '#e9c46a',
+        align: 'center', wordWrap: { width: PW - PAD * 2 }
+      }).setOrigin(0.5, 0);
+    }
+    if (card.bonusTurn) {
+      bonusText = this.add.text(0, 0, '★ +1 Bonus Turn on placement', {
+        fontSize: '12px', fontFamily: 'monospace', color: '#e9c46a', align: 'center'
+      }).setOrigin(0.5, 0);
+    }
+    if (card.triggerEffect) {
+      triggerText = this.add.text(0, 0, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
+        fontSize: '12px', fontFamily: 'monospace', color: '#00ffff',
+        align: 'center', wordWrap: { width: PW - PAD * 2 }
+      }).setOrigin(0.5, 0);
+    }
+
+    // Measure total content height
+    const TOP_PAD = 14, BOTTOM_PAD = 14, DIV_H = 1;
+    const GAP_AFTER_TYPE = 6, GAP_AFTER_NAME = 10, GAP_AFTER_DIV = 8, GAP_AFTER_SECTION = 8;
+
+    let contentH = typeText.height + GAP_AFTER_TYPE
+                 + nameText.height + GAP_AFTER_NAME
+                 + DIV_H + GAP_AFTER_DIV
+                 + descText.height;
+    if (specialText)  contentH += GAP_AFTER_SECTION + DIV_H + GAP_AFTER_DIV + specialText.height;
+    if (bonusText)    contentH += GAP_AFTER_SECTION + DIV_H + GAP_AFTER_DIV + bonusText.height;
+    if (triggerText)  contentH += GAP_AFTER_SECTION + DIV_H + GAP_AFTER_DIV + triggerText.height;
+
+    const PH = TOP_PAD + contentH + BOTTOM_PAD;
 
     // Position: above card by default, flip below if too close to top edge
     const gap        = 8;
@@ -753,70 +798,47 @@ class GameScene extends Phaser.Scene {
     if (popupCenterY - PH / 2 < 4) {
       popupCenterY = worldY + cardH / 2 + gap + PH / 2;
     }
-    // Clamp X so popup never clips off the left or right edge
     const popupCenterX = Math.max(PW / 2 + 5, Math.min(GAME_W - PW / 2 - 5, worldX));
 
     const popup = this.add.container(popupCenterX, popupCenterY).setDepth(200);
-
-    // Background panel
     popup.add(this.add.rectangle(0, 0, PW, PH, 0x0d1b2a).setStrokeStyle(2, typeColor));
 
-    // Layout items from top; y is distance from popup center (0,0)
-    let y = -PH / 2 + 12;
+    // Layout: place items top-to-bottom starting from -PH/2 + TOP_PAD
+    let y = -PH / 2 + TOP_PAD;
 
-    // Card type
-    popup.add(this.add.text(0, y, card.type.toUpperCase(), {
-      fontSize: '8px', fontFamily: 'monospace', color: typeColorHex, align: 'center'
-    }).setOrigin(0.5, 0));
-    y += 14;
+    typeText.setPosition(0, y); popup.add(typeText);
+    y += typeText.height + GAP_AFTER_TYPE;
 
-    // Card name
-    popup.add(this.add.text(0, y, card.name, {
-      fontSize: '13px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
-      align: 'center', wordWrap: { width: PW - PAD * 2 }
-    }).setOrigin(0.5, 0));
-    y += 20;
+    nameText.setPosition(0, y); popup.add(nameText);
+    y += nameText.height + GAP_AFTER_NAME;
 
-    // Divider
-    popup.add(this.add.rectangle(0, y, PW - 20, 1, 0x444466).setOrigin(0.5, 0));
-    y += 10;
+    popup.add(this.add.rectangle(0, y, PW - 20, DIV_H, 0x444466).setOrigin(0.5, 0));
+    y += DIV_H + GAP_AFTER_DIV;
 
-    // Description / quote (always shown)
-    popup.add(this.add.text(0, y, `"${card.description}"`, {
-      fontSize: '9px', fontFamily: 'monospace', color: '#888899', fontStyle: 'italic',
-      align: 'center', wordWrap: { width: PW - PAD * 2 }
-    }).setOrigin(0.5, 0));
-    y += 32;
+    descText.setPosition(0, y); popup.add(descText);
+    y += descText.height;
 
-    // Special effect (★)
-    if (card.specialEffect) {
-      popup.add(this.add.rectangle(0, y, PW - 20, 1, 0x444466).setOrigin(0.5, 0));
-      y += 10;
-      popup.add(this.add.text(0, y, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
-        fontSize: '9px', fontFamily: 'monospace', color: '#e9c46a',
-        align: 'center', wordWrap: { width: PW - PAD * 2 }
-      }).setOrigin(0.5, 0));
-      y += 22;
+    if (specialText) {
+      y += GAP_AFTER_SECTION;
+      popup.add(this.add.rectangle(0, y, PW - 20, DIV_H, 0x444466).setOrigin(0.5, 0));
+      y += DIV_H + GAP_AFTER_DIV;
+      specialText.setPosition(0, y); popup.add(specialText);
+      y += specialText.height;
     }
 
-    // Bonus turn (★)
-    if (card.bonusTurn) {
-      popup.add(this.add.rectangle(0, y, PW - 20, 1, 0x444466).setOrigin(0.5, 0));
-      y += 10;
-      popup.add(this.add.text(0, y, '★ +1 Bonus Turn on placement', {
-        fontSize: '9px', fontFamily: 'monospace', color: '#e9c46a', align: 'center'
-      }).setOrigin(0.5, 0));
-      y += 14;
+    if (bonusText) {
+      y += GAP_AFTER_SECTION;
+      popup.add(this.add.rectangle(0, y, PW - 20, DIV_H, 0x444466).setOrigin(0.5, 0));
+      y += DIV_H + GAP_AFTER_DIV;
+      bonusText.setPosition(0, y); popup.add(bonusText);
+      y += bonusText.height;
     }
 
-    // Trigger effect (⚡)
-    if (card.triggerEffect) {
-      popup.add(this.add.rectangle(0, y, PW - 20, 1, 0x444466).setOrigin(0.5, 0));
-      y += 10;
-      popup.add(this.add.text(0, y, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
-        fontSize: '9px', fontFamily: 'monospace', color: '#00ffff',
-        align: 'center', wordWrap: { width: PW - PAD * 2 }
-      }).setOrigin(0.5, 0));
+    if (triggerText) {
+      y += GAP_AFTER_SECTION;
+      popup.add(this.add.rectangle(0, y, PW - 20, DIV_H, 0x444466).setOrigin(0.5, 0));
+      y += DIV_H + GAP_AFTER_DIV;
+      triggerText.setPosition(0, y); popup.add(triggerText);
     }
 
     this.cardInfoPopup = popup;
@@ -966,9 +988,7 @@ class GameScene extends Phaser.Scene {
     state.hand = state.hand.filter(id => id !== cardId);
     this.handOffset = Math.min(this.handOffset, Math.max(0, state.hand.length - CAROUSEL_VISIBLE));
 
-    if (rowType === 'product')        this.renderProductSlotCard(targetSlotIndex, card);
-    else if (rowType === 'resources') this.renderResSlotCard(targetSlotIndex, card);
-    else                              this.renderSlotCard(targetSlotIndex, card);
+    this._reRenderSlot(rowType, targetSlotIndex);
 
     this.refreshBoardOpLabels();
     this.renderHand();
@@ -1043,33 +1063,22 @@ class GameScene extends Phaser.Scene {
     slot.add(cashOpText);
     slot.opText = cashOpText;
 
-    let yBot = SLOT_H / 2 - 14;
     const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
     if (dispVal > 0) {
-      slot.add(this.add.text(0, yBot, `$${dispVal}k`, {
+      slot.add(this.add.text(0, SLOT_H / 2 - 14, `$${dispVal}k`, {
         fontSize: '9px', fontFamily: 'monospace', color: '#80ffaa', align: 'center'
       }).setOrigin(0.5, 0.5));
-      yBot -= 14;
     }
-    if (card.triggerEffect) {
-      slot.add(this.add.text(0, yBot, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
-        fontSize: '6px', fontFamily: 'monospace', color: '#00ffff',
-        align: 'center', wordWrap: { width: SLOT_W - 12 }
-      }).setOrigin(0.5, 0.5));
-      yBot -= 14;
-    }
-    if (card.specialEffect) {
-      slot.add(this.add.text(0, yBot, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
-        fontSize: '6px', fontFamily: 'monospace', color: '#e9c46a',
-        align: 'center', wordWrap: { width: SLOT_W - 12 }
-      }).setOrigin(0.5, 0.5));
-      yBot -= 14;
-    }
-    if (card.bonusTurn) {
-      slot.add(this.add.text(0, yBot, '★ +1 Bonus Turn', {
-        fontSize: '6px', fontFamily: 'monospace', color: '#e9c46a',
-        align: 'center', wordWrap: { width: SLOT_W - 12 }
-      }).setOrigin(0.5, 0.5));
+    const slotIcons = [];
+    if (card.specialEffect || card.bonusTurn) slotIcons.push({ symbol: '★', color: '#e9c46a' });
+    if (card.triggerEffect)                   slotIcons.push({ symbol: '⚡', color: '#00ffff' });
+    if (slotIcons.length > 0) {
+      const startX = -((slotIcons.length - 1) * 22) / 2;
+      slotIcons.forEach((icon, i) => {
+        slot.add(this.add.text(startX + i * 22, 32, icon.symbol, {
+          fontSize: '18px', fontFamily: 'monospace', color: icon.color, align: 'center'
+        }).setOrigin(0.5, 0.5));
+      });
     }
 
     slot.cardId = card.id;
@@ -1100,33 +1109,22 @@ class GameScene extends Phaser.Scene {
     slot.add(ipOpText);
     slot.opText = ipOpText;
 
-    let yBot = SLOT_H / 2 - 14;
     const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
     if (dispVal > 0) {
-      slot.add(this.add.text(0, yBot, `$${dispVal}k`, {
+      slot.add(this.add.text(0, SLOT_H / 2 - 14, `$${dispVal}k`, {
         fontSize: '9px', fontFamily: 'monospace', color: '#cd84ff', align: 'center'
       }).setOrigin(0.5, 0.5));
-      yBot -= 14;
     }
-    if (card.triggerEffect) {
-      slot.add(this.add.text(0, yBot, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
-        fontSize: '6px', fontFamily: 'monospace', color: '#00ffff',
-        align: 'center', wordWrap: { width: SLOT_W - 12 }
-      }).setOrigin(0.5, 0.5));
-      yBot -= 14;
-    }
-    if (card.specialEffect) {
-      slot.add(this.add.text(0, yBot, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
-        fontSize: '6px', fontFamily: 'monospace', color: '#e9c46a',
-        align: 'center', wordWrap: { width: SLOT_W - 12 }
-      }).setOrigin(0.5, 0.5));
-      yBot -= 14;
-    }
-    if (card.bonusTurn) {
-      slot.add(this.add.text(0, yBot, '★ +1 Bonus Turn', {
-        fontSize: '6px', fontFamily: 'monospace', color: '#e9c46a',
-        align: 'center', wordWrap: { width: SLOT_W - 12 }
-      }).setOrigin(0.5, 0.5));
+    const slotIcons = [];
+    if (card.specialEffect || card.bonusTurn) slotIcons.push({ symbol: '★', color: '#e9c46a' });
+    if (card.triggerEffect)                   slotIcons.push({ symbol: '⚡', color: '#00ffff' });
+    if (slotIcons.length > 0) {
+      const startX = -((slotIcons.length - 1) * 22) / 2;
+      slotIcons.forEach((icon, i) => {
+        slot.add(this.add.text(startX + i * 22, 32, icon.symbol, {
+          fontSize: '18px', fontFamily: 'monospace', color: icon.color, align: 'center'
+        }).setOrigin(0.5, 0.5));
+      });
     }
 
     slot.cardId = card.id;
@@ -1156,33 +1154,22 @@ class GameScene extends Phaser.Scene {
     slot.add(resOpText);
     slot.opText = resOpText;
 
-    let yBot = SLOT_H / 2 - 14;
     const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
     if (dispVal > 0) {
-      slot.add(this.add.text(0, yBot, `$${dispVal}k`, {
+      slot.add(this.add.text(0, SLOT_H / 2 - 14, `$${dispVal}k`, {
         fontSize: '9px', fontFamily: 'monospace', color: '#ffaa44', align: 'center'
       }).setOrigin(0.5, 0.5));
-      yBot -= 14;
     }
-    if (card.triggerEffect) {
-      slot.add(this.add.text(0, yBot, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
-        fontSize: '6px', fontFamily: 'monospace', color: '#00ffff',
-        align: 'center', wordWrap: { width: SLOT_W - 12 }
-      }).setOrigin(0.5, 0.5));
-      yBot -= 14;
-    }
-    if (card.specialEffect) {
-      slot.add(this.add.text(0, yBot, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
-        fontSize: '6px', fontFamily: 'monospace', color: '#e9c46a',
-        align: 'center', wordWrap: { width: SLOT_W - 12 }
-      }).setOrigin(0.5, 0.5));
-      yBot -= 14;
-    }
-    if (card.bonusTurn) {
-      slot.add(this.add.text(0, yBot, '★ +1 Bonus Turn', {
-        fontSize: '6px', fontFamily: 'monospace', color: '#e9c46a',
-        align: 'center', wordWrap: { width: SLOT_W - 12 }
-      }).setOrigin(0.5, 0.5));
+    const slotIcons = [];
+    if (card.specialEffect || card.bonusTurn) slotIcons.push({ symbol: '★', color: '#e9c46a' });
+    if (card.triggerEffect)                   slotIcons.push({ symbol: '⚡', color: '#00ffff' });
+    if (slotIcons.length > 0) {
+      const startX = -((slotIcons.length - 1) * 22) / 2;
+      slotIcons.forEach((icon, i) => {
+        slot.add(this.add.text(startX + i * 22, 32, icon.symbol, {
+          fontSize: '18px', fontFamily: 'monospace', color: icon.color, align: 'center'
+        }).setOrigin(0.5, 0.5));
+      });
     }
 
     slot.cardId = card.id;
@@ -1647,7 +1634,7 @@ class GameScene extends Phaser.Scene {
     const PW = 780;
     const PH = 380;
 
-    const modal = this.add.container(0, 0);
+    const modal = this.add.container(0, 0).setDepth(50);
     this.drawModal = modal;
 
     // Overlay
@@ -1670,7 +1657,7 @@ class GameScene extends Phaser.Scene {
     modal.drawsRemaining = drawsRemaining;
 
     // Three columns: face-up card 1, face-up card 2, draw pile
-    const cardSlotY = cy + 10;
+    const cardSlotY = cy - 20;
     const card1X    = cx - 230;
     const card2X    = cx;
     const pileX     = cx + 230;
@@ -1697,18 +1684,32 @@ class GameScene extends Phaser.Scene {
 
     // Stack depth — back cards offset down-right
     for (let i = 3; i >= 1; i--) {
-      modal.add(this.add.rectangle(x + i * 4, y + i * 4, CARD_W, CARD_H, 0x0a1520)
-        .setStrokeStyle(1, 0x223344));
+      const g = this.add.graphics({ x: x + i * 4, y: y + i * 4 });
+      g.fillStyle(0x0a1520);
+      g.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+      g.lineStyle(1, 0x223344);
+      g.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+      modal.add(g);
     }
 
     // Top card face-down
-    const topCard = this.add.rectangle(x, y, CARD_W, CARD_H, 0x0d1b2a)
-      .setStrokeStyle(2, pileEnabled ? 0x5566bb : 0x333355);
+    const topCard = this.add.graphics({ x, y });
+    const drawTop = (strokeW, strokeC) => {
+      topCard.clear();
+      topCard.fillStyle(0x0d1b2a);
+      topCard.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+      topCard.lineStyle(strokeW, strokeC);
+      topCard.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+    };
+    drawTop(2, pileEnabled ? 0x5566bb : 0x333355);
+    topCard.setStrokeStyle = (w, c) => drawTop(w, c);
     modal.add(topCard);
 
     // Inner border for card-back texture
-    modal.add(this.add.rectangle(x, y, CARD_W - 14, CARD_H - 14, 0x0d1b2a)
-      .setStrokeStyle(1, pileEnabled ? 0x334477 : 0x222233));
+    const innerG = this.add.graphics({ x, y });
+    innerG.lineStyle(1, pileEnabled ? 0x334477 : 0x222233);
+    innerG.strokeRoundedRect(-(CARD_W - 14) / 2, -(CARD_H - 14) / 2, CARD_W - 14, CARD_H - 14, 3);
+    modal.add(innerG);
 
     // Question mark
     modal.add(this.add.text(x, y - 14, '?', {
@@ -1723,7 +1724,10 @@ class GameScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5));
 
     if (pileEnabled) {
-      topCard.setInteractive({ useHandCursor: true });
+      topCard.setInteractive(
+        new Phaser.Geom.Rectangle(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H),
+        Phaser.Geom.Rectangle.Contains
+      );
       topCard.on('pointerover', () => topCard.setStrokeStyle(2, 0x99aaee));
       topCard.on('pointerout',  () => topCard.setStrokeStyle(2, 0x5566bb));
       topCard.on('pointerdown', () => this.takeBlindCard(modal));
@@ -1748,6 +1752,9 @@ class GameScene extends Phaser.Scene {
     const cardContainer = this.buildCardVisual(card, x, y, false);
     modal.add(cardContainer);
 
+    // Effect text below card
+    this.addModalCardEffectText(modal, card, x, y);
+
     // Make interactive with hover highlight + click to take
     cardContainer.setSize(CARD_W, CARD_H).setInteractive({ useHandCursor: true });
     cardContainer.on('pointerover', () => cardContainer.cardBg.setStrokeStyle(2, 0xffffff));
@@ -1755,6 +1762,32 @@ class GameScene extends Phaser.Scene {
       cardContainer.cardBg.setStrokeStyle(1, typeColor);
     });
     cardContainer.on('pointerdown', () => this.takeFaceUpCard(id, revealedIndex, modal));
+  }
+
+  addModalCardEffectText(modal, card, x, cardCenterY) {
+    let lineY = cardCenterY + CARD_H / 2 + 10;
+    const addLine = (textObj) => {
+      textObj.setPosition(x, lineY).setOrigin(0.5, 0);
+      modal.add(textObj);
+      lineY += textObj.height + 4;
+    };
+    if (card.specialEffect) {
+      addLine(this.add.text(0, 0, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
+        fontSize: '10px', fontFamily: 'monospace', color: '#e9c46a',
+        align: 'center', wordWrap: { width: 180 }
+      }));
+    }
+    if (card.bonusTurn) {
+      addLine(this.add.text(0, 0, '★ +1 Bonus Turn', {
+        fontSize: '10px', fontFamily: 'monospace', color: '#e9c46a', align: 'center'
+      }));
+    }
+    if (card.triggerEffect) {
+      addLine(this.add.text(0, 0, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
+        fontSize: '10px', fontFamily: 'monospace', color: '#00ffff',
+        align: 'center', wordWrap: { width: 180 }
+      }));
+    }
   }
 
   showDrawPileViewer() {
@@ -1777,7 +1810,7 @@ class GameScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5));
 
     // Same three-column layout as CHOOSE A CARD, but non-interactive
-    const cardSlotY = cy + 10;
+    const cardSlotY = cy - 20;
     const card1X    = cx - 230;
     const card2X    = cx;
     const pileX     = cx + 230;
@@ -1785,7 +1818,9 @@ class GameScene extends Phaser.Scene {
     // Face-up card 1
     const id0 = this.state.revealedCards[0];
     if (id0) {
-      modal.add(this.buildCardVisual(this.cardsData.find(c => c.id === id0), card1X, cardSlotY, false));
+      const card0 = this.cardsData.find(c => c.id === id0);
+      modal.add(this.buildCardVisual(card0, card1X, cardSlotY, false));
+      this.addModalCardEffectText(modal, card0, card1X, cardSlotY);
     } else {
       modal.add(this.add.rectangle(card1X, cardSlotY, CARD_W, CARD_H, 0x111122).setStrokeStyle(1, 0x333344));
       modal.add(this.add.text(card1X, cardSlotY, 'EMPTY', { fontSize: '9px', fontFamily: 'monospace', color: '#333344' }).setOrigin(0.5, 0.5));
@@ -1794,7 +1829,9 @@ class GameScene extends Phaser.Scene {
     // Face-up card 2
     const id1 = this.state.revealedCards[1];
     if (id1) {
-      modal.add(this.buildCardVisual(this.cardsData.find(c => c.id === id1), card2X, cardSlotY, false));
+      const card1 = this.cardsData.find(c => c.id === id1);
+      modal.add(this.buildCardVisual(card1, card2X, cardSlotY, false));
+      this.addModalCardEffectText(modal, card1, card2X, cardSlotY);
     } else {
       modal.add(this.add.rectangle(card2X, cardSlotY, CARD_W, CARD_H, 0x111122).setStrokeStyle(1, 0x333344));
       modal.add(this.add.text(card2X, cardSlotY, 'EMPTY', { fontSize: '9px', fontFamily: 'monospace', color: '#333344' }).setOrigin(0.5, 0.5));

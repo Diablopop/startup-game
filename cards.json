@@ -1,2726 +1,2759 @@
 {
-  "cards": [
-    {
-      "id": 1,
-      "name": "Perk Hunter",
-      "type": "Boardmember",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "Worth a billion and still in it for the catering.",
-      "bonusTurn": true
-    },
-    {
-      "id": 2,
-      "name": "Icky Touch",
-      "type": "Boardmember",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "Why women don't want to be in the boardroom.",
-      "triggerEffect": {
-        "type": "spend_cash_boost_op",
-        "cost": 100,
-        "target": "Boardmember",
-        "value": 1,
-        "scope": "all"
-      }
-    },
-    {
-      "id": 3,
-      "name": "Uncle Pete",
-      "type": "Boardmember",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "Who needs expertise when you have a private jet?",
-      "triggerEffect": {
-        "type": "gain_cash_per_type",
-        "amount": 50,
-        "targetType": "C-Suite"
-      }
-    },
-    {
-      "id": 4,
-      "name": "Rubber Stamper",
-      "type": "Boardmember",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Approves everything. Questions nothing. Perfect attendance.",
-      "bonusTurn": true
-    },
-    {
-      "id": 5,
-      "name": "CEO's Pet",
-      "type": "Boardmember",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "What conflict of interest?",
-      "triggerEffect": {
-        "type": "boost_op",
-        "target": "CEO",
-        "value": 2
-      }
-    },
-    {
-      "id": 6,
-      "name": "Board Observer",
-      "type": "Boardmember",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Nevermind me—I just want to get the know the business.",
-      "triggerEffect": {
-        "type": "swap_csuite"
-      }
-    },
-    {
-      "id": 7,
-      "name": "Ancient Emeritus",
-      "type": "Boardmember",
-      "cost": 3,
-      "operation": {
-        "type": "add",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Email will change everything.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Boardmember",
-        "operationBonus": {
-          "type": "add",
-          "value": 1
-        },
-        "valueBonus": 50
-      }
-    },
-    {
-      "id": 8,
-      "name": "Equity Hostage",
-      "type": "Boardmember",
-      "cost": 3,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Can't contribute. Can attend meetings though.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "C-Suite",
-        "operationBonus": {
-          "type": "add",
-          "value": 1
-        }
-      }
-    },
-    {
-      "id": 9,
-      "name": "Serial Entrepreneur",
-      "type": "Boardmember",
-      "cost": 3,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Has an exit, a podcast, and an opinion on everything.",
-      "triggerEffect": {
-        "type": "spend_cash_boost_op",
-        "cost": 50,
-        "target": "Self",
-        "value": 2
-      }
-    },
-    {
-      "id": 10,
-      "name": "Captain Hat Guy",
-      "type": "Boardmember",
-      "cost": 3,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Does owning a bunch of yachts make you a Captain?",
-      "triggerEffect": {
-        "type": "spend_cash_boost_op",
-        "cost": 50,
-        "target": "CTO",
-        "value": 2
-      }
-    },
-    {
-      "id": 11,
-      "name": "In Absentia",
-      "type": "Boardmember",
-      "cost": 3,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Sends regrets and a strongly worded email after every decision.",
-      "triggerEffect": {
-        "type": "boost_op",
-        "target": "C-Suite",
-        "value": 2,
-        "scope": "one"
-      }
-    },
-    {
-      "id": 12,
-      "name": "The General, Ret.",
-      "type": "Boardmember",
-      "cost": 4,
-      "operation": {
-        "type": "multiply",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Business is like a battlefield... I mean an army... or a tank?",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "C-Suite",
-        "operationBonus": {
-          "type": "multiply",
-          "value": 2
-        },
-        "valueBonus": 50
-      }
-    },
-    {
-      "id": 13,
-      "name": "Former Secretary of Something",
-      "type": "Boardmember",
-      "cost": 5,
-      "operation": {
-        "type": "multiply",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Even their bathroom has mahogany walls.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "C-Suite",
-        "operationBonus": {
-          "type": "multiply",
-          "value": 2
-        },
-        "valueBonus": 100
-      },
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 100
-      }
-    },
-    {
-      "id": 14,
-      "name": "Cult Cultivator CEO",
-      "type": "C-Suite",
-      "cost": 5,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "Mandatory meditation at 6am. Voluntary employment.",
-      "role": "CEO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "C-Suite",
-        "operationBonus": {
-          "type": "multiply",
-          "value": 2
-        }
-      },
-      "triggerEffect": {
-        "type": "draw",
-        "count": 2
-      }
-    },
-    {
-      "id": 15,
-      "name": "Acqui-holic CEO",
-      "type": "C-Suite",
-      "cost": 5,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "Integration is someone else's problem.",
-      "role": "CEO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Boardmember",
-        "operationBonus": {
-          "type": "multiply",
-          "value": 2
-        }
-      },
-      "triggerEffect": {
-        "type": "spend_cash_swap",
-        "cost": 100,
-        "boardType": "any",
-        "handType": "C-Suite"
-      }
-    },
-    {
-      "id": 16,
-      "name": "Move Fast, Break People CEO",
-      "type": "C-Suite",
-      "cost": 5,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "The bodies are metaphorical. The lawsuits are not.",
-      "role": "CEO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Investor",
-        "operationBonus": {
-          "type": "multiply",
-          "value": 2
-        }
-      },
-      "triggerEffect": {
-        "type": "gain_cash_per_discard",
-        "amount": 100
-      }
-    },
-    {
-      "id": 17,
-      "name": "The Outsourcer CMO",
-      "type": "C-Suite",
-      "cost": 4,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "Let's use India for that.",
-      "role": "CMO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Boardmember",
-        "operationBonus": {
-          "type": "add",
-          "value": 1
-        }
-      },
-      "triggerEffect": {
-        "type": "draw",
-        "count": 2
-      }
-    },
-    {
-      "id": 18,
-      "name": "Attribution Thief CMO",
-      "type": "C-Suite",
-      "cost": 4,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "\"Marketing optimizations\" trump product innovations every time.",
-      "role": "CMO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Prod/Design",
-        "operationBonus": {
-          "type": "add",
-          "value": -0.5
-        }
-      },
-      "triggerEffect": {
-        "type": "self_boost_per_type",
-        "value": 1,
-        "targetType": "Sales"
-      }
-    },
-    {
-      "id": 19,
-      "name": "Backlog Bomber CPO",
-      "type": "C-Suite",
-      "cost": 4,
-      "operation": {
-        "type": "add",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "I added a few tickets—should only take a few sprints.",
-      "role": "CPO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Prod/Design",
-        "operationBonus": {
-          "type": "add",
-          "value": 1
-        }
-      },
-      "triggerEffect": {
-        "type": "boost_value",
-        "target": "Prod/Design",
-        "value": 25
-      }
-    },
-    {
-      "id": 20,
-      "name": "Funnel Fetishist CPO",
-      "type": "C-Suite",
-      "cost": 4,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Every human interaction is a conversion opportunity.",
-      "role": "CPO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Prod/Design",
-        "operationBonus": {
-          "type": "multiply",
-          "value": 2
-        }
-      }
-    },
-    {
-      "id": 21,
-      "name": "Tech Debt Theologian CTO",
-      "type": "C-Suite",
-      "cost": 4,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "Can explain exactly why everything is broken. Has no plan to fix it.",
-      "role": "CTO",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Engineering",
-          "operationBonus": {
-            "type": "multiply",
-            "value": 2
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Prod/Design",
-          "operationBonus": {
-            "type": "add",
-            "value": -0.5
-          }
-        }
-      ],
-      "triggerEffect": {
-        "type": "draw",
-        "count": 1
-      }
-    },
-    {
-      "id": 22,
-      "name": "CTO, IC",
-      "type": "C-Suite",
-      "cost": 4,
-      "operation": {
-        "type": "add",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "Doesn't trust software they didn't write themselves.",
-      "role": "CTO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Engineering",
-        "operationBonus": {
-          "type": "multiply",
-          "value": 2
-        }
-      },
-      "triggerEffect": {
-        "type": "boost_value",
-        "target": "Engineering",
-        "value": 25
-      }
-    },
-    {
-      "id": 23,
-      "name": "Process Preacher COO",
-      "type": "C-Suite",
-      "cost": 4,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "If it isn't in Confluence, it didn't happen.",
-      "role": "COO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Services & Technology",
-        "operationBonus": {
-          "type": "add",
-          "value": 2
-        }
-      },
-      "triggerEffect": {
-        "type": "boost_op",
-        "target": "Services & Technology",
-        "value": 0.5
-      }
-    },
-    {
-      "id": 24,
-      "name": "Vanishing Act COO",
-      "type": "C-Suite",
-      "cost": 4,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "Killer onboarding energy. Completely checked out by month four.",
-      "role": "COO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "C-Suite",
-        "operationBonus": {
-          "type": "add",
-          "value": 2
-        }
-      },
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 25,
-      "name": "Burn Warden CFO",
-      "type": "C-Suite",
-      "cost": 4,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "Sends daily emails about \"discipline\" while expensing $400 meals.",
-      "role": "CFO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "C-Suite",
-        "operationBonus": {
-          "type": "add",
-          "value": 2
-        }
-      },
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 26,
-      "name": "Token Adult CFO",
-      "type": "C-Suite",
-      "cost": 4,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "No idea what the product is, but the investors feel better.",
-      "role": "CFO",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Boardmember",
-        "operationBonus": {
-          "type": "multiply",
-          "value": 2
-        }
-      }
-    },
-    {
-      "id": 27,
-      "name": "STEM Program Intern",
-      "type": "Engineering",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Built their first app at 14. Still can't work the coffee machine.",
-      "specialEffect": {
-        "type": "immediate_play"
-      }
-    },
-    {
-      "id": 28,
-      "name": "Investor's Kid",
-      "type": "Engineering",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Someone needs to prompt Claude Code."
-    },
-    {
-      "id": 29,
-      "name": "Friday Night Shipper",
-      "type": "Engineering",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "What could go wrong?"
-    },
-    {
-      "id": 30,
-      "name": "Junior Engineer",
-      "type": "Engineering",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Will mass-refactor your codebase on day one."
-    },
-    {
-      "id": 31,
-      "name": "Over-Architect",
-      "type": "Engineering",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Writes enterprise-grade infrastructure for a product with 12 users.",
-      "triggerEffect": {
-        "type": "spend_cash_draw",
-        "cost": 25,
-        "draws": 1
-      }
-    },
-    {
-      "id": 32,
-      "name": "The Sandbagger",
-      "type": "Engineering",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "13 points (two days).",
-      "triggerEffect": {
-        "type": "boost_value",
-        "target": "Self",
-        "value": 25
-      }
-    },
-    {
-      "id": 33,
-      "name": "Rabbit Hole Delver",
-      "type": "Engineering",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Doesn't everyone take three days for a 1-point ticket?"
-    },
-    {
-      "id": 34,
-      "name": "Whiz Kid",
-      "type": "Engineering",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "If they're so smart, why are they here?"
-    },
-    {
-      "id": 35,
-      "name": "The Quiet Contrarian",
-      "type": "Engineering",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Says nothing in meetings, then builds something completely different.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Engineering",
-        "operationBonus": {
-          "type": "add",
-          "value": 0.5
-        }
-      }
-    },
-    {
-      "id": 36,
-      "name": "Hindsight Expert",
-      "type": "Engineering",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "I knew this would happen.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Engineering",
-        "valueBonus": 25
-      }
-    },
-    {
-      "id": 37,
-      "name": "Scrum Watchdog",
-      "type": "Engineering",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "How do we know if people are standing when their cameras are off?",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Engineering",
-        "valueBonus": 50
-      },
-      "triggerEffect": {
-        "type": "swap_card",
-        "boardType": "Prod/Design",
-        "handType": "Engineering"
-      }
-    },
-    {
-      "id": 38,
-      "name": "Preservationist",
-      "type": "Engineering",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "We can't change that—nobody knows how it works.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Engineering",
-        "valueBonus": 50
-      },
-      "triggerEffect": {
-        "type": "boost_op",
-        "target": "Engineering",
-        "value": 0.5
-      }
-    },
-    {
-      "id": 39,
-      "name": "Platform Gatekeeper",
-      "type": "Engineering",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Owns the deploy pipeline. Answers Slack on their own schedule.",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Engineering",
-          "valueBonus": 50
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Sales",
-          "valueBonus": -25
-        }
-      ],
-      "triggerEffect": {
-        "type": "gain_cash_per_type",
-        "amount": 25,
-        "targetType": "Engineering"
-      }
-    },
-    {
-      "id": 40,
-      "name": "The Scope Slayer",
-      "type": "Engineering",
-      "cost": 2,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "What if we just... didn't build that?",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Engineering",
-          "operationBonus": {
-            "type": "add",
-            "value": 1
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Prod/Design",
-          "operationBonus": {
-            "type": "add",
-            "value": -0.5
-          }
-        }
+      "cards": [
+            {
+                  "id": 1,
+                  "name": "Perk Hunter",
+                  "type": "Boardmember",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Worth a billion and still in it for the catering.",
+                  "bonusTurn": true
+            },
+            {
+                  "id": 2,
+                  "name": "Icky Touch",
+                  "type": "Boardmember",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Why women don't want to be in the boardroom.",
+                  "triggerEffect": {
+                        "type": "spend_cash_boost_op",
+                        "cost": 100,
+                        "target": "Boardmember",
+                        "value": 1,
+                        "scope": "all"
+                  }
+            },
+            {
+                  "id": 3,
+                  "name": "Uncle Pete",
+                  "type": "Boardmember",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Who needs expertise when you have a private jet?",
+                  "triggerEffect": {
+                        "type": "gain_cash_per_type",
+                        "amount": 50,
+                        "targetType": "C-Suite"
+                  }
+            },
+            {
+                  "id": 4,
+                  "name": "Rubber Stamper",
+                  "type": "Boardmember",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Approves everything. Questions nothing. Perfect attendance.",
+                  "bonusTurn": true
+            },
+            {
+                  "id": 5,
+                  "name": "CEO's Pet",
+                  "type": "Boardmember",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "What conflict of interest?",
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "CEO",
+                        "value": 2
+                  }
+            },
+            {
+                  "id": 6,
+                  "name": "Board Observer",
+                  "type": "Boardmember",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Nevermind me—I just want to get the know the business.",
+                  "triggerEffect": {
+                        "type": "swap_csuite"
+                  }
+            },
+            {
+                  "id": 7,
+                  "name": "Ancient Emeritus",
+                  "type": "Boardmember",
+                  "cost": 3,
+                  "operation": {
+                        "type": "add",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Email will change everything.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Boardmember",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 1
+                        },
+                        "valueBonus": 50
+                  }
+            },
+            {
+                  "id": 8,
+                  "name": "Equity Hostage",
+                  "type": "Boardmember",
+                  "cost": 3,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Can't contribute. Can attend meetings though.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "C-Suite",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 1
+                        }
+                  }
+            },
+            {
+                  "id": 9,
+                  "name": "Serial Entrepreneur",
+                  "type": "Boardmember",
+                  "cost": 3,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Has an exit, a podcast, and an opinion on everything.",
+                  "triggerEffect": {
+                        "type": "spend_cash_boost_op",
+                        "cost": 50,
+                        "target": "Self",
+                        "value": 2
+                  }
+            },
+            {
+                  "id": 10,
+                  "name": "Captain Hat Guy",
+                  "type": "Boardmember",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Does owning a bunch of yachts make you a Captain?",
+                  "triggerEffect": {
+                        "type": "spend_cash_boost_op",
+                        "cost": 50,
+                        "target": "CTO",
+                        "value": 2
+                  }
+            },
+            {
+                  "id": 11,
+                  "name": "In Absentia",
+                  "type": "Boardmember",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Sends regrets and a strongly worded email after every decision.",
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "C-Suite",
+                        "value": 2,
+                        "scope": "one"
+                  }
+            },
+            {
+                  "id": 12,
+                  "name": "The General, Ret.",
+                  "type": "Boardmember",
+                  "cost": 4,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Business is like a battlefield... I mean an army... or a tank?",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "C-Suite",
+                        "operationBonus": {
+                              "type": "multiply",
+                              "value": 2
+                        },
+                        "valueBonus": 50
+                  }
+            },
+            {
+                  "id": 13,
+                  "name": "Former Secretary of Something",
+                  "type": "Boardmember",
+                  "cost": 5,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Even their bathroom has mahogany walls.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "C-Suite",
+                        "operationBonus": {
+                              "type": "multiply",
+                              "value": 2
+                        },
+                        "valueBonus": 100
+                  },
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 100
+                  }
+            },
+            {
+                  "id": 14,
+                  "name": "Cult Cultivator CEO",
+                  "type": "C-Suite",
+                  "cost": 5,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "Mandatory meditation at 6am. Voluntary employment.",
+                  "role": "CEO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "C-Suite",
+                        "operationBonus": {
+                              "type": "multiply",
+                              "value": 2
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "draw",
+                        "count": 2
+                  }
+            },
+            {
+                  "id": 15,
+                  "name": "Acqui-holic CEO",
+                  "type": "C-Suite",
+                  "cost": 5,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "Integration is someone else's problem.",
+                  "role": "CEO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Boardmember",
+                        "operationBonus": {
+                              "type": "multiply",
+                              "value": 2
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "spend_cash_swap",
+                        "cost": 100,
+                        "boardType": "any",
+                        "handType": "C-Suite"
+                  }
+            },
+            {
+                  "id": 16,
+                  "name": "Move Fast, Break People CEO",
+                  "type": "C-Suite",
+                  "cost": 5,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "The bodies are metaphorical. The lawsuits are not.",
+                  "role": "CEO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Investor",
+                        "operationBonus": {
+                              "type": "multiply",
+                              "value": 2
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "gain_cash_per_discard",
+                        "amount": 100
+                  }
+            },
+            {
+                  "id": 17,
+                  "name": "The Outsourcer CMO",
+                  "type": "C-Suite",
+                  "cost": 4,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "Let's use India for that.",
+                  "role": "CMO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Boardmember",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 1
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "draw",
+                        "count": 2
+                  }
+            },
+            {
+                  "id": 18,
+                  "name": "Attribution Thief CMO",
+                  "type": "C-Suite",
+                  "cost": 4,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "\"Marketing optimizations\" trump product innovations every time.",
+                  "role": "CMO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Prod/Design",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": -0.5
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "self_boost_per_type",
+                        "value": 1,
+                        "targetType": "Sales"
+                  }
+            },
+            {
+                  "id": 19,
+                  "name": "Backlog Bomber CPO",
+                  "type": "C-Suite",
+                  "cost": 4,
+                  "operation": {
+                        "type": "add",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "I added a few tickets—should only take a few sprints.",
+                  "role": "CPO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Prod/Design",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 1
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "boost_value",
+                        "target": "Prod/Design",
+                        "value": 25
+                  }
+            },
+            {
+                  "id": 20,
+                  "name": "Funnel Fetishist CPO",
+                  "type": "C-Suite",
+                  "cost": 4,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Every human interaction is a conversion opportunity.",
+                  "role": "CPO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Prod/Design",
+                        "operationBonus": {
+                              "type": "multiply",
+                              "value": 2
+                        }
+                  }
+            },
+            {
+                  "id": 21,
+                  "name": "Tech Debt Theologian CTO",
+                  "type": "C-Suite",
+                  "cost": 4,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "Can explain exactly why everything is broken. Has no plan to fix it.",
+                  "role": "CTO",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Engineering",
+                              "operationBonus": {
+                                    "type": "multiply",
+                                    "value": 2
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Prod/Design",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ],
+                  "triggerEffect": {
+                        "type": "draw",
+                        "count": 1
+                  }
+            },
+            {
+                  "id": 22,
+                  "name": "CTO, IC",
+                  "type": "C-Suite",
+                  "cost": 4,
+                  "operation": {
+                        "type": "add",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "Doesn't trust software they didn't write themselves.",
+                  "role": "CTO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Engineering",
+                        "operationBonus": {
+                              "type": "multiply",
+                              "value": 2
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "boost_value",
+                        "target": "Engineering",
+                        "value": 25
+                  }
+            },
+            {
+                  "id": 23,
+                  "name": "Process Preacher COO",
+                  "type": "C-Suite",
+                  "cost": 4,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "If it isn't in Confluence, it didn't happen.",
+                  "role": "COO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Services & Technology",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 2
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "Services & Technology",
+                        "value": 0.5
+                  }
+            },
+            {
+                  "id": 24,
+                  "name": "Vanishing Act COO",
+                  "type": "C-Suite",
+                  "cost": 4,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "Killer onboarding energy. Completely checked out by month four.",
+                  "role": "COO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "C-Suite",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 2
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 25,
+                  "name": "Burn Warden CFO",
+                  "type": "C-Suite",
+                  "cost": 4,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "Sends daily emails about \"discipline\" while expensing $400 meals.",
+                  "role": "CFO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "C-Suite",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 2
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 26,
+                  "name": "Token Adult CFO",
+                  "type": "C-Suite",
+                  "cost": 4,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "No idea what the product is, but the investors feel better.",
+                  "role": "CFO",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Boardmember",
+                        "operationBonus": {
+                              "type": "multiply",
+                              "value": 2
+                        }
+                  }
+            },
+            {
+                  "id": 27,
+                  "name": "STEM Program Intern",
+                  "type": "Engineering",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Built their first app at 14. Still can't work the coffee machine.",
+                  "specialEffect": {
+                        "type": "immediate_play"
+                  }
+            },
+            {
+                  "id": 28,
+                  "name": "Investor's Kid",
+                  "type": "Engineering",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Someone needs to prompt Claude Code."
+            },
+            {
+                  "id": 29,
+                  "name": "Friday Night Shipper",
+                  "type": "Engineering",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "What could go wrong?"
+            },
+            {
+                  "id": 30,
+                  "name": "Junior Engineer",
+                  "type": "Engineering",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Will mass-refactor your codebase on day one."
+            },
+            {
+                  "id": 31,
+                  "name": "Over-Architect",
+                  "type": "Engineering",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Writes enterprise-grade infrastructure for a product with 12 users.",
+                  "triggerEffect": {
+                        "type": "spend_cash_draw",
+                        "cost": 25,
+                        "draws": 1
+                  }
+            },
+            {
+                  "id": 32,
+                  "name": "The Sandbagger",
+                  "type": "Engineering",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "13 points (two days).",
+                  "triggerEffect": {
+                        "type": "boost_value",
+                        "target": "Self",
+                        "value": 25
+                  }
+            },
+            {
+                  "id": 33,
+                  "name": "Rabbit Hole Delver",
+                  "type": "Engineering",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Doesn't everyone take three days for a 1-point ticket?"
+            },
+            {
+                  "id": 34,
+                  "name": "Whiz Kid",
+                  "type": "Engineering",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "If they're so smart, why are they here?"
+            },
+            {
+                  "id": 35,
+                  "name": "The Quiet Contrarian",
+                  "type": "Engineering",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Says nothing in meetings, then builds something completely different.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Engineering",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 0.5
+                        }
+                  }
+            },
+            {
+                  "id": 36,
+                  "name": "Hindsight Expert",
+                  "type": "Engineering",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "I knew this would happen.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Engineering",
+                        "valueBonus": 25
+                  }
+            },
+            {
+                  "id": 37,
+                  "name": "Scrum Watchdog",
+                  "type": "Engineering",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "How do we know if people are standing when their cameras are off?",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Engineering",
+                        "valueBonus": 50
+                  },
+                  "triggerEffect": {
+                        "type": "swap_card",
+                        "boardType": "Prod/Design",
+                        "handType": "Engineering"
+                  }
+            },
+            {
+                  "id": 38,
+                  "name": "Preservationist",
+                  "type": "Engineering",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "We can't change that—nobody knows how it works.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Engineering",
+                        "valueBonus": 50
+                  },
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "Engineering",
+                        "value": 0.5
+                  }
+            },
+            {
+                  "id": 39,
+                  "name": "Platform Gatekeeper",
+                  "type": "Engineering",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Owns the deploy pipeline. Answers Slack on their own schedule.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Engineering",
+                              "valueBonus": 50
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Sales",
+                              "valueBonus": -25
+                        }
+                  ],
+                  "triggerEffect": {
+                        "type": "gain_cash_per_type",
+                        "amount": 25,
+                        "targetType": "Engineering"
+                  }
+            },
+            {
+                  "id": 40,
+                  "name": "The Scope Slayer",
+                  "type": "Engineering",
+                  "cost": 2,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "What if we just... didn't build that?",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Engineering",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 1
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Prod/Design",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ]
+            },
+            {
+                  "id": 41,
+                  "name": "CTO's Pet",
+                  "type": "Engineering",
+                  "cost": 2,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Too busy to work with the team.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Prod/Design",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": -0.5
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "CTO",
+                        "value": 2
+                  }
+            },
+            {
+                  "id": 42,
+                  "name": "Energy Drink Addict",
+                  "type": "Engineering",
+                  "cost": 2,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Commits code at 3am. Reverts it at 9am.",
+                  "bonusTurn": true
+            },
+            {
+                  "id": 43,
+                  "name": "QA Tyrant",
+                  "type": "Engineering",
+                  "cost": 2,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Filed 200 bugs. Twelve of them matter.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Engineering",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 1
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Sales",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ],
+                  "triggerEffect": {
+                        "type": "spend_cash_boost_op",
+                        "cost": 50,
+                        "target": "Engineering",
+                        "value": 1,
+                        "scope": "all"
+                  }
+            },
+            {
+                  "id": 44,
+                  "name": "Grizzled Vet",
+                  "type": "Engineering",
+                  "cost": 3,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Has survived four reorgs and two pivots.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Engineering",
+                        "operationBonus": {
+                              "type": "multiply",
+                              "value": 2
+                        }
+                  }
+            },
+            {
+                  "id": 45,
+                  "name": "10x Engineer",
+                  "type": "Engineering",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Produces ten times the code and ten times the opinions.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Engineering",
+                        "valueBonus": 25
+                  },
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "Self",
+                        "value": 1
+                  }
+            },
+            {
+                  "id": 46,
+                  "name": "Agentic Overlord",
+                  "type": "Engineering",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Replaced half the team with a YAML file.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Engineering",
+                        "valueMultiplier": 2
+                  },
+                  "triggerEffect": {
+                        "type": "boost_value",
+                        "target": "Engineering",
+                        "value": 25
+                  }
+            },
+            {
+                  "id": 47,
+                  "name": "Mom & Dad",
+                  "type": "Investor",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "They believe in you. They don't understand what you do."
+            },
+            {
+                  "id": 48,
+                  "name": "Golf Buddy",
+                  "type": "Investor",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Met the founder at a charity scramble. Wrote a check on the ninth hole.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 25
+                  }
+            },
+            {
+                  "id": 49,
+                  "name": "Former Child Actor",
+                  "type": "Investor",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Looking for a second act that doesn't involve a stage.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 25
+                  }
+            },
+            {
+                  "id": 50,
+                  "name": "Trust Fund Kid",
+                  "type": "Investor",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "The Patagonia vest makes him an authority.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 51,
+                  "name": "Spray and Prayer",
+                  "type": "Investor",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Portfolio of 47 startups. Can name five of them.",
+                  "triggerEffect": {
+                        "type": "gain_cash_per_type",
+                        "amount": 50,
+                        "targetType": "C-Suite"
+                  }
+            },
+            {
+                  "id": 52,
+                  "name": "Pivot Pusher",
+                  "type": "Investor",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 150,
+                  "description": "Funded your idea, now has a better one for you.",
+                  "triggerEffect": {
+                        "type": "gain_cash_per_type",
+                        "amount": 25,
+                        "targetType": "Prod/Design"
+                  }
+            },
+            {
+                  "id": 53,
+                  "name": "Trend Chaser",
+                  "type": "Investor",
+                  "cost": 2,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Only invests in whatever category was on the cover of TechCrunch last month.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 25
+                  }
+            },
+            {
+                  "id": 54,
+                  "name": "Car Dealership King",
+                  "type": "Investor",
+                  "cost": 3,
+                  "operation": {
+                        "type": "add",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Cash rich, tech illiterate, very confident.",
+                  "bonusTurn": true,
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 25
+                  }
+            },
+            {
+                  "id": 55,
+                  "name": "FOMO Financier",
+                  "type": "Investor",
+                  "cost": 3,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 150,
+                  "description": "Only invested because another firm showed interest.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 56,
+                  "name": "Gas Station Tycoon",
+                  "type": "Investor",
+                  "cost": 3,
+                  "operation": {
+                        "type": "add",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 150,
+                  "description": "Thinks SaaS is a type of fuel additive.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 57,
+                  "name": "Offshore Opportunist",
+                  "type": "Investor",
+                  "cost": 3,
+                  "operation": {
+                        "type": "add",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 150,
+                  "description": "Checks come from countries we've never heard of.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 58,
+                  "name": "Real Estate Mogul",
+                  "type": "Investor",
+                  "cost": 3,
+                  "operation": {
+                        "type": "add",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Wants to know when the company will buy its own building.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 59,
+                  "name": "Retired Quarterback",
+                  "type": "Investor",
+                  "cost": 4,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "Great arm. Questionable understanding of unit economics.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Boardmember",
+                        "costDiscount": 100
+                  }
+            },
+            {
+                  "id": 60,
+                  "name": "Ketamine Cowboy",
+                  "type": "Investor",
+                  "cost": 4,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "Microdoses on board call days.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Engineering",
+                        "costDiscount": 25
+                  },
+                  "triggerEffect": {
+                        "type": "draw",
+                        "count": 1
+                  }
+            },
+            {
+                  "id": 61,
+                  "name": "Secret Saudi",
+                  "type": "Investor",
+                  "cost": 4,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 300,
+                  "description": "The wire transfer came from a holding company in the Caymans.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Investor",
+                        "operationBonus": {
+                              "type": "multiply",
+                              "value": 2
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 100
+                  }
+            },
+            {
+                  "id": 62,
+                  "name": "CEO's Niece",
+                  "type": "Product/Design",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Her portfolio is a mood board."
+            },
+            {
+                  "id": 63,
+                  "name": "Building Maintenance Guy",
+                  "type": "Product/Design",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Got roped into fixing the website because he fixed the WiFi once."
+            },
+            {
+                  "id": 64,
+                  "name": "High School Mentee",
+                  "type": "Product/Design",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Here for community service hours. Accidentally useful."
+            },
+            {
+                  "id": 65,
+                  "name": "Design Camp Grad",
+                  "type": "Product/Design",
+                  "cost": 0.5,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "I know the Figma.",
+                  "specialEffect": {
+                        "type": "immediate_play"
+                  }
+            },
+            {
+                  "id": 66,
+                  "name": "Design Intern",
+                  "type": "Product/Design",
+                  "cost": 0.5,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Has heard of users."
+            },
+            {
+                  "id": 67,
+                  "name": "Scope Creeper",
+                  "type": "Product/Design",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Just one more thing before we ship.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Prod/Design",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 1
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Engineering",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -1
+                              }
+                        }
+                  ]
+            },
+            {
+                  "id": 68,
+                  "name": "D3",
+                  "type": "Product/Design",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "The double-dipping designer."
+            },
+            {
+                  "id": 69,
+                  "name": "Remote Ghost",
+                  "type": "Product/Design",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Sorry, just went for a walk."
+            },
+            {
+                  "id": 70,
+                  "name": "10x Meeting Time PM",
+                  "type": "Product/Design",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Blocks your calendar to talk about the next meeting.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Prod/Design",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 1
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Engineering",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ]
+            },
+            {
+                  "id": 71,
+                  "name": "Pixel Tweaker",
+                  "type": "Product/Design",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "That icon is a little off and everyone needs to know."
+            },
+            {
+                  "id": 72,
+                  "name": "Project Manager",
+                  "type": "Product/Design",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Don't we already have a PM?",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Prod/Design",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 1
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Engineering",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ],
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 25
+                  }
+            },
+            {
+                  "id": 73,
+                  "name": "Tech Hipster Designer",
+                  "type": "Product/Design",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Stood in line for the latest Apple Pencil.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Prod/Design",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 1
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "spend_cash_boost_op",
+                        "cost": 25,
+                        "target": "Prod/Design",
+                        "value": 1
+                  }
+            },
+            {
+                  "id": 74,
+                  "name": "Infinite Discovery",
+                  "type": "Product/Design",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "47 interviews and still not ready to share insights.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Prod/Design",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 1
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Sales",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ]
+            },
+            {
+                  "id": 75,
+                  "name": "Certified Product Owner",
+                  "type": "Product/Design",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "You know, Claude can write tickets too.",
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "Prod/Design",
+                        "value": 0.5
+                  }
+            },
+            {
+                  "id": 76,
+                  "name": "Scrumerfall PM",
+                  "type": "Product/Design",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Agile in the streets, waterfall in the sheets.",
+                  "triggerEffect": {
+                        "type": "gain_cash_per_type",
+                        "amount": 50,
+                        "targetType": "Engineering"
+                  }
+            },
+            {
+                  "id": 77,
+                  "name": "Vision Designer",
+                  "type": "Product/Design",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 150,
+                  "description": "Designs for the product three pivots from now.",
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "Prod/Design",
+                        "value": 0.5
+                  }
+            },
+            {
+                  "id": 78,
+                  "name": "Deck Artisan",
+                  "type": "Product/Design",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "The pitch deck has more polish than the product.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Prod/Design",
+                        "valueBonus": 50
+                  },
+                  "triggerEffect": {
+                        "type": "spend_cash_boost_op",
+                        "cost": 50,
+                        "target": "C-Suite",
+                        "value": 2
+                  }
+            },
+            {
+                  "id": 79,
+                  "name": "Product Mentor",
+                  "type": "Product/Design",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Hasn't shipped since 2011 but has very strong opinions.",
+                  "bonusTurn": true,
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "Prod/Design",
+                        "value": 0.5
+                  }
+            },
+            {
+                  "id": 80,
+                  "name": "Design Guru",
+                  "type": "Product/Design",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Their Dribbble has 40k followers. Their last shipped feature has 12 users.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Prod/Design",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 2
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "Prod/Design",
+                        "value": 1
+                  }
+            },
+            {
+                  "id": 81,
+                  "name": "Buzzword Dispenser",
+                  "type": "Product/Design",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 150,
+                  "description": "Let's leverage our synergies to ideate a north star metric.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 82,
+                  "name": "Empty Desk",
+                  "type": "Sales",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Nobody remembers hiring them. Nobody's asked them to leave.",
+                  "specialEffect": {
+                        "type": "immediate_play"
+                  }
+            },
+            {
+                  "id": 83,
+                  "name": "CMO's Nephew",
+                  "type": "Sales",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Crushing it on TikTok, apparently."
+            },
+            {
+                  "id": 84,
+                  "name": "Who is this kid?",
+                  "type": "Sales",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "He just came in and sat down."
+            },
+            {
+                  "id": 85,
+                  "name": "Cousin Drew",
+                  "type": "Sales",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Family discount. Family performance.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Sales",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 0.5
+                        }
+                  }
+            },
+            {
+                  "id": 86,
+                  "name": "BD Spammer",
+                  "type": "Sales",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "400 LinkedIn messages a day. Two replies."
+            },
+            {
+                  "id": 87,
+                  "name": "Crypto Bro",
+                  "type": "Sales",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Wants to put the customer database on the blockchain.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 25
+                  }
+            },
+            {
+                  "id": 88,
+                  "name": "Headhunter",
+                  "type": "Sales",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 150,
+                  "description": "Finds talent. Bills you for the search.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Sales",
+                        "costDiscount": 25
+                  },
+                  "triggerEffect": {
+                        "type": "spend_cash_draw",
+                        "cost": 25,
+                        "draws": 1
+                  }
+            },
+            {
+                  "id": 89,
+                  "name": "A.B.C.",
+                  "type": "Sales",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Always Be Calling product managers to demand new features.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Sales",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 1
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Prod/Design",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ]
+            },
+            {
+                  "id": 90,
+                  "name": "Hustler",
+                  "type": "Sales",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "The deal will close, but you don't want to know how.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 91,
+                  "name": "Self-Imagined Hotshot",
+                  "type": "Sales",
+                  "cost": 2,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "He's a legend... according to him.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 25
+                  }
+            },
+            {
+                  "id": 92,
+                  "name": "Suspiciously Energetic",
+                  "type": "Sales",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "Why does he keep going out to his car?",
+                  "bonusTurn": true
+            },
+            {
+                  "id": 93,
+                  "name": "Whale Whisperer",
+                  "type": "Sales",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 150,
+                  "description": "Knows three Fortune 500 CTOs by first name.",
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 94,
+                  "name": "High Roller",
+                  "type": "Sales",
+                  "cost": 4,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Only takes meetings at steakhouses.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Sales",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 1
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "spend_cash_boost_op",
+                        "cost": 50,
+                        "target": "Sales",
+                        "value": 2
+                  }
+            },
+            {
+                  "id": 95,
+                  "name": "Office Cleanse",
+                  "type": "Services & Technology",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Can burning sage prevent burning runway?",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "C-Suite",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 2
+                        }
+                  }
+            },
+            {
+                  "id": 96,
+                  "name": "Keg in the Kitchen",
+                  "type": "Services & Technology",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Of course you can drink it. But, you know, we'll know.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "C-Suite",
+                              "operationBonus": {
+                                    "type": "multiply",
+                                    "value": 2
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "All other cards",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ]
+            },
+            {
+                  "id": 97,
+                  "name": "Dusty Ping Pong Table",
+                  "type": "Services & Technology",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Last used at the holiday party before the pandemic.",
+                  "triggerEffect": {
+                        "type": "trade_draw",
+                        "discard": 1,
+                        "draws": 2
+                  }
+            },
+            {
+                  "id": 98,
+                  "name": "Networking event (all dudes)",
+                  "type": "Services & Technology",
+                  "cost": 0,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Great turnout. Zero diversity.",
+                  "triggerEffect": {
+                        "type": "trade_draw",
+                        "discard": 1,
+                        "draws": 2
+                  }
+            },
+            {
+                  "id": 99,
+                  "name": "Catered Lunch",
+                  "type": "Services & Technology",
+                  "cost": 0.5,
+                  "operation": {
+                        "type": "add",
+                        "value": 0
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Let's TACO 'bout it hahaha.",
+                  "triggerEffect": {
+                        "type": "spend_cash_boost_op",
+                        "cost": 25,
+                        "target": "Self",
+                        "value": 1
+                  }
+            },
+            {
+                  "id": 100,
+                  "name": "\"Unlimited\" PTO",
+                  "type": "Services & Technology",
+                  "cost": 0.5,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "You could take off next week, hypothetically.",
+                  "triggerEffect": {
+                        "type": "trade_draw",
+                        "discard": 1,
+                        "draws": 2
+                  }
+            },
+            {
+                  "id": 101,
+                  "name": "All Hands Meeting",
+                  "type": "Services & Technology",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Could have been an email. Wasn't.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "All cards",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 0.5
+                        }
+                  }
+            },
+            {
+                  "id": 102,
+                  "name": "Standing Desks",
+                  "type": "Services & Technology",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Most aren't even plugged in.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "All cards",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 0.5
+                        }
+                  }
+            },
+            {
+                  "id": 103,
+                  "name": "Slack Premium",
+                  "type": "Services & Technology",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Because you need all 3 years of arguments on record.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Boardmember",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "All other cards",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 0.5
+                              }
+                        }
+                  ]
+            },
+            {
+                  "id": 104,
+                  "name": "Swag Drop",
+                  "type": "Services & Technology",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Three hundred waterbottles that break if you stare too hard.",
+                  "triggerEffect": {
+                        "type": "trade_draw",
+                        "discard": 1,
+                        "draws": 2
+                  }
+            },
+            {
+                  "id": 105,
+                  "name": "Team Offsite",
+                  "type": "Services & Technology",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Two days of trust falls, rope climbs, and oblivious ableism.",
+                  "triggerEffect": {
+                        "type": "spend_cash_boost_op",
+                        "cost": 50,
+                        "target": "Self",
+                        "value": 2
+                  }
+            },
+            {
+                  "id": 106,
+                  "name": "Nap Pod",
+                  "type": "Services & Technology",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "HR says it's for wellness. Engineers say it's for deploys.",
+                  "bonusTurn": true
+            },
+            {
+                  "id": 107,
+                  "name": "Recruiting Firm",
+                  "type": "Services & Technology",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "25% of a year's salary to lightly filter resumes.",
+                  "triggerEffect": {
+                        "type": "spend_cash_draw",
+                        "cost": 25,
+                        "draws": 2
+                  }
+            },
+            {
+                  "id": 108,
+                  "name": "Podcast Sponsorship",
+                  "type": "Services & Technology",
+                  "cost": 2,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Now brought to you by a company you'll forget in ten seconds.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Prod/Design",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 1
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 50
+                  }
+            },
+            {
+                  "id": 109,
+                  "name": "AWS Contract",
+                  "type": "Services & Technology",
+                  "cost": 2,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Burns cash faster than your engineers.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Engineering",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 1
+                        }
+                  }
+            },
+            {
+                  "id": 110,
+                  "name": "Executive Coach",
+                  "type": "Services & Technology",
+                  "cost": 2,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 150,
+                  "description": "Charges $500/hr to tell the CEO what everyone else says for free.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "C-Suite",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 1
+                        }
+                  }
+            },
+            {
+                  "id": 111,
+                  "name": "Salesforce Integration",
+                  "type": "Services & Technology",
+                  "cost": 3,
+                  "operation": {
+                        "type": "add",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Two months to implement a dashboard nobody checks.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Sales",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 2
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Engineering",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ]
+            },
+            {
+                  "id": 112,
+                  "name": "Branding Agency",
+                  "type": "Services & Technology",
+                  "cost": 5,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 2
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 200,
+                  "description": "Spent $200k to change the blue.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "C-Suite",
+                              "operationBonus": {
+                                    "type": "multiply",
+                                    "value": 2
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Boardmember",
+                              "operationBonus": {
+                                    "type": "multiply",
+                                    "value": 2
+                              }
+                        }
+                  ]
+            }
       ]
-    },
-    {
-      "id": 41,
-      "name": "CTO's Pet",
-      "type": "Engineering",
-      "cost": 2,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "Too busy to work with the team.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Prod/Design",
-        "operationBonus": {
-          "type": "add",
-          "value": -0.5
-        }
-      },
-      "triggerEffect": {
-        "type": "boost_op",
-        "target": "CTO",
-        "value": 2
-      }
-    },
-    {
-      "id": 42,
-      "name": "Energy Drink Addict",
-      "type": "Engineering",
-      "cost": 2,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Commits code at 3am. Reverts it at 9am.",
-      "bonusTurn": true
-    },
-    {
-      "id": 43,
-      "name": "QA Tyrant",
-      "type": "Engineering",
-      "cost": 2,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Filed 200 bugs. Twelve of them matter.",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Engineering",
-          "operationBonus": {
-            "type": "add",
-            "value": 1
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Sales",
-          "operationBonus": {
-            "type": "add",
-            "value": -0.5
-          }
-        }
-      ],
-      "triggerEffect": {
-        "type": "spend_cash_boost_op",
-        "cost": 50,
-        "target": "Engineering",
-        "value": 1,
-        "scope": "all"
-      }
-    },
-    {
-      "id": 44,
-      "name": "Grizzled Vet",
-      "type": "Engineering",
-      "cost": 3,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Has survived four reorgs and two pivots.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Engineering",
-        "operationBonus": {
-          "type": "multiply",
-          "value": 2
-        }
-      }
-    },
-    {
-      "id": 45,
-      "name": "10x Engineer",
-      "type": "Engineering",
-      "cost": 3,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Produces ten times the code and ten times the opinions.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Engineering",
-        "valueBonus": 25
-      },
-      "triggerEffect": {
-        "type": "boost_op",
-        "target": "Self",
-        "value": 1
-      }
-    },
-    {
-      "id": 46,
-      "name": "Agentic Overlord",
-      "type": "Engineering",
-      "cost": 3,
-      "operation": {
-        "type": "multiply",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "product"
-      ],
-      "baseValue": 50,
-      "description": "Replaced half the team with a YAML file.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Engineering",
-        "valueMultiplier": 2
-      },
-      "triggerEffect": {
-        "type": "boost_value",
-        "target": "Engineering",
-        "value": 25
-      }
-    },
-    {
-      "id": 47,
-      "name": "Mom & Dad",
-      "type": "Investor",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "They believe in you. They don't understand what you do."
-    },
-    {
-      "id": 48,
-      "name": "Golf Buddy",
-      "type": "Investor",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "Met the founder at a charity scramble. Wrote a check on the ninth hole.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 25
-      }
-    },
-    {
-      "id": 49,
-      "name": "Former Child Actor",
-      "type": "Investor",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "Looking for a second act that doesn't involve a stage.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 25
-      }
-    },
-    {
-      "id": 50,
-      "name": "Trust Fund Kid",
-      "type": "Investor",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "The Patagonia vest makes him an authority.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 51,
-      "name": "Spray and Prayer",
-      "type": "Investor",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Portfolio of 47 startups. Can name five of them.",
-      "triggerEffect": {
-        "type": "gain_cash_per_type",
-        "amount": 50,
-        "targetType": "C-Suite"
-      }
-    },
-    {
-      "id": 52,
-      "name": "Pivot Pusher",
-      "type": "Investor",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 150,
-      "description": "Funded your idea, now has a better one for you.",
-      "triggerEffect": {
-        "type": "gain_cash_per_type",
-        "amount": 25,
-        "targetType": "Prod/Design"
-      }
-    },
-    {
-      "id": 53,
-      "name": "Trend Chaser",
-      "type": "Investor",
-      "cost": 2,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Only invests in whatever category was on the cover of TechCrunch last month.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 25
-      }
-    },
-    {
-      "id": 54,
-      "name": "Car Dealership King",
-      "type": "Investor",
-      "cost": 3,
-      "operation": {
-        "type": "add",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Cash rich, tech illiterate, very confident.",
-      "bonusTurn": true,
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 25
-      }
-    },
-    {
-      "id": 55,
-      "name": "FOMO Financier",
-      "type": "Investor",
-      "cost": 3,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 150,
-      "description": "Only invested because another firm showed interest.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 56,
-      "name": "Gas Station Tycoon",
-      "type": "Investor",
-      "cost": 3,
-      "operation": {
-        "type": "add",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 150,
-      "description": "Thinks SaaS is a type of fuel additive.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 57,
-      "name": "Offshore Opportunist",
-      "type": "Investor",
-      "cost": 3,
-      "operation": {
-        "type": "add",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 150,
-      "description": "Checks come from countries we've never heard of.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 58,
-      "name": "Real Estate Mogul",
-      "type": "Investor",
-      "cost": 3,
-      "operation": {
-        "type": "add",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Wants to know when the company will buy its own building.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 59,
-      "name": "Retired Quarterback",
-      "type": "Investor",
-      "cost": 4,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "Great arm. Questionable understanding of unit economics.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Boardmember",
-        "costDiscount": 100
-      }
-    },
-    {
-      "id": 60,
-      "name": "Ketamine Cowboy",
-      "type": "Investor",
-      "cost": 4,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "Microdoses on board call days.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Engineering",
-        "costDiscount": 25
-      },
-      "triggerEffect": {
-        "type": "draw",
-        "count": 1
-      }
-    },
-    {
-      "id": 61,
-      "name": "Secret Saudi",
-      "type": "Investor",
-      "cost": 4,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 300,
-      "description": "The wire transfer came from a holding company in the Caymans.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Investor",
-        "operationBonus": {
-          "type": "multiply",
-          "value": 2
-        }
-      },
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 100
-      }
-    },
-    {
-      "id": 62,
-      "name": "CEO's Niece",
-      "type": "Product/Design",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Her portfolio is a mood board."
-    },
-    {
-      "id": 63,
-      "name": "Building Maintenance Guy",
-      "type": "Product/Design",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Got roped into fixing the website because he fixed the WiFi once."
-    },
-    {
-      "id": 64,
-      "name": "High School Mentee",
-      "type": "Product/Design",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Here for community service hours. Accidentally useful."
-    },
-    {
-      "id": 65,
-      "name": "Design Camp Grad",
-      "type": "Product/Design",
-      "cost": 0.5,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "I know the Figma.",
-      "specialEffect": {
-        "type": "immediate_play"
-      }
-    },
-    {
-      "id": 66,
-      "name": "Design Intern",
-      "type": "Product/Design",
-      "cost": 0.5,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Has heard of users."
-    },
-    {
-      "id": 67,
-      "name": "Scope Creeper",
-      "type": "Product/Design",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "Just one more thing before we ship.",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Prod/Design",
-          "operationBonus": {
-            "type": "add",
-            "value": 1
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Engineering",
-          "operationBonus": {
-            "type": "add",
-            "value": -1
-          }
-        }
-      ]
-    },
-    {
-      "id": 68,
-      "name": "D3",
-      "type": "Product/Design",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "The double-dipping designer."
-    },
-    {
-      "id": 69,
-      "name": "Remote Ghost",
-      "type": "Product/Design",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "Sorry, just went for a walk."
-    },
-    {
-      "id": 70,
-      "name": "10x Meeting Time PM",
-      "type": "Product/Design",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Blocks your calendar to talk about the next meeting.",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Prod/Design",
-          "operationBonus": {
-            "type": "add",
-            "value": 1
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Engineering",
-          "operationBonus": {
-            "type": "add",
-            "value": -0.5
-          }
-        }
-      ]
-    },
-    {
-      "id": 71,
-      "name": "Pixel Tweaker",
-      "type": "Product/Design",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "That icon is a little off and everyone needs to know."
-    },
-    {
-      "id": 72,
-      "name": "Project Manager",
-      "type": "Product/Design",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Don't we already have a PM?",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Prod/Design",
-          "operationBonus": {
-            "type": "add",
-            "value": 1
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Engineering",
-          "operationBonus": {
-            "type": "add",
-            "value": -0.5
-          }
-        }
-      ],
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 25
-      }
-    },
-    {
-      "id": 73,
-      "name": "Tech Hipster Designer",
-      "type": "Product/Design",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Stood in line for the latest Apple Pencil.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Prod/Design",
-        "operationBonus": {
-          "type": "add",
-          "value": 1
-        }
-      },
-      "triggerEffect": {
-        "type": "spend_cash_boost_op",
-        "cost": 25,
-        "target": "Prod/Design",
-        "value": 1
-      }
-    },
-    {
-      "id": 74,
-      "name": "Infinite Discovery",
-      "type": "Product/Design",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "47 interviews and still not ready to share insights.",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Prod/Design",
-          "operationBonus": {
-            "type": "add",
-            "value": 1
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Sales",
-          "operationBonus": {
-            "type": "add",
-            "value": -0.5
-          }
-        }
-      ]
-    },
-    {
-      "id": 75,
-      "name": "Certified Product Owner",
-      "type": "Product/Design",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "You know, Claude can write tickets too.",
-      "triggerEffect": {
-        "type": "boost_op",
-        "target": "Prod/Design",
-        "value": 0.5
-      }
-    },
-    {
-      "id": 76,
-      "name": "Scrumerfall PM",
-      "type": "Product/Design",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Agile in the streets, waterfall in the sheets.",
-      "triggerEffect": {
-        "type": "gain_cash_per_type",
-        "amount": 50,
-        "targetType": "Engineering"
-      }
-    },
-    {
-      "id": 77,
-      "name": "Vision Designer",
-      "type": "Product/Design",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "product",
-        "resources"
-      ],
-      "baseValue": 150,
-      "description": "Designs for the product three pivots from now.",
-      "triggerEffect": {
-        "type": "boost_op",
-        "target": "Prod/Design",
-        "value": 0.5
-      }
-    },
-    {
-      "id": 78,
-      "name": "Deck Artisan",
-      "type": "Product/Design",
-      "cost": 3,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "The pitch deck has more polish than the product.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Prod/Design",
-        "valueBonus": 50
-      },
-      "triggerEffect": {
-        "type": "spend_cash_boost_op",
-        "cost": 50,
-        "target": "C-Suite",
-        "value": 2
-      }
-    },
-    {
-      "id": 79,
-      "name": "Product Mentor",
-      "type": "Product/Design",
-      "cost": 3,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Hasn't shipped since 2011 but has very strong opinions.",
-      "bonusTurn": true,
-      "triggerEffect": {
-        "type": "boost_op",
-        "target": "Prod/Design",
-        "value": 0.5
-      }
-    },
-    {
-      "id": 80,
-      "name": "Design Guru",
-      "type": "Product/Design",
-      "cost": 3,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Their Dribbble has 40k followers. Their last shipped feature has 12 users.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Prod/Design",
-        "operationBonus": {
-          "type": "add",
-          "value": 2
-        }
-      },
-      "triggerEffect": {
-        "type": "boost_op",
-        "target": "Prod/Design",
-        "value": 1
-      }
-    },
-    {
-      "id": 81,
-      "name": "Buzzword Dispenser",
-      "type": "Product/Design",
-      "cost": 3,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 150,
-      "description": "Let's leverage our synergies to ideate a north star metric.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 82,
-      "name": "Empty Desk",
-      "type": "Sales",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Nobody remembers hiring them. Nobody's asked them to leave.",
-      "specialEffect": {
-        "type": "immediate_play"
-      }
-    },
-    {
-      "id": 83,
-      "name": "CMO's Nephew",
-      "type": "Sales",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Crushing it on TikTok, apparently."
-    },
-    {
-      "id": 84,
-      "name": "Who is this kid?",
-      "type": "Sales",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "He just came in and sat down."
-    },
-    {
-      "id": 85,
-      "name": "Cousin Drew",
-      "type": "Sales",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Family discount. Family performance.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Sales",
-        "operationBonus": {
-          "type": "add",
-          "value": 0.5
-        }
-      }
-    },
-    {
-      "id": 86,
-      "name": "BD Spammer",
-      "type": "Sales",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "400 LinkedIn messages a day. Two replies."
-    },
-    {
-      "id": 87,
-      "name": "Crypto Bro",
-      "type": "Sales",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "Wants to put the customer database on the blockchain.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 25
-      }
-    },
-    {
-      "id": 88,
-      "name": "Headhunter",
-      "type": "Sales",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 150,
-      "description": "Finds talent. Bills you for the search.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Sales",
-        "costDiscount": 25
-      },
-      "triggerEffect": {
-        "type": "spend_cash_draw",
-        "cost": 25,
-        "draws": 1
-      }
-    },
-    {
-      "id": 89,
-      "name": "A.B.C.",
-      "type": "Sales",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Always Be Calling product managers to demand new features.",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Sales",
-          "operationBonus": {
-            "type": "add",
-            "value": 1
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Prod/Design",
-          "operationBonus": {
-            "type": "add",
-            "value": -0.5
-          }
-        }
-      ]
-    },
-    {
-      "id": 90,
-      "name": "Hustler",
-      "type": "Sales",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "The deal will close, but you don't want to know how.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 91,
-      "name": "Self-Imagined Hotshot",
-      "type": "Sales",
-      "cost": 2,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "He's a legend... according to him.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 25
-      }
-    },
-    {
-      "id": 92,
-      "name": "Suspiciously Energetic",
-      "type": "Sales",
-      "cost": 3,
-      "operation": {
-        "type": "multiply",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "Why does he keep going out to his car?",
-      "bonusTurn": true
-    },
-    {
-      "id": 93,
-      "name": "Whale Whisperer",
-      "type": "Sales",
-      "cost": 3,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 150,
-      "description": "Knows three Fortune 500 CTOs by first name.",
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 94,
-      "name": "High Roller",
-      "type": "Sales",
-      "cost": 4,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Only takes meetings at steakhouses.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Sales",
-        "operationBonus": {
-          "type": "add",
-          "value": 1
-        }
-      },
-      "triggerEffect": {
-        "type": "spend_cash_boost_op",
-        "cost": 50,
-        "target": "Sales",
-        "value": 2
-      }
-    },
-    {
-      "id": 95,
-      "name": "Office Cleanse",
-      "type": "Services & Technology",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Can burning sage prevent burning runway?",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "C-Suite",
-        "operationBonus": {
-          "type": "add",
-          "value": 2
-        }
-      }
-    },
-    {
-      "id": 96,
-      "name": "Keg in the Kitchen",
-      "type": "Services & Technology",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Of course you can drink it. But, you know, we'll know.",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "C-Suite",
-          "operationBonus": {
-            "type": "multiply",
-            "value": 2
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "All other cards",
-          "operationBonus": {
-            "type": "add",
-            "value": -0.5
-          }
-        }
-      ]
-    },
-    {
-      "id": 97,
-      "name": "Dusty Ping Pong Table",
-      "type": "Services & Technology",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Last used at the holiday party before the pandemic.",
-      "triggerEffect": {
-        "type": "trade_draw",
-        "discard": 1,
-        "draws": 2
-      }
-    },
-    {
-      "id": 98,
-      "name": "Networking event (all dudes)",
-      "type": "Services & Technology",
-      "cost": 0,
-      "operation": {
-        "type": "add",
-        "value": 0.5
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Great turnout. Zero diversity.",
-      "triggerEffect": {
-        "type": "trade_draw",
-        "discard": 1,
-        "draws": 2
-      }
-    },
-    {
-      "id": 99,
-      "name": "Catered Lunch",
-      "type": "Services & Technology",
-      "cost": 0.5,
-      "operation": {
-        "type": "add",
-        "value": 0
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Let's TACO 'bout it hahaha.",
-      "triggerEffect": {
-        "type": "spend_cash_boost_op",
-        "cost": 25,
-        "target": "Self",
-        "value": 1
-      }
-    },
-    {
-      "id": 100,
-      "name": "\"Unlimited\" PTO",
-      "type": "Services & Technology",
-      "cost": 0.5,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "You could take off next week, hypothetically.",
-      "triggerEffect": {
-        "type": "trade_draw",
-        "discard": 1,
-        "draws": 2
-      }
-    },
-    {
-      "id": 101,
-      "name": "All Hands Meeting",
-      "type": "Services & Technology",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Could have been an email. Wasn't.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "All cards",
-        "operationBonus": {
-          "type": "add",
-          "value": 0.5
-        }
-      }
-    },
-    {
-      "id": 102,
-      "name": "Standing Desks",
-      "type": "Services & Technology",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Most aren't even plugged in.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "All cards",
-        "operationBonus": {
-          "type": "add",
-          "value": 0.5
-        }
-      }
-    },
-    {
-      "id": 103,
-      "name": "Slack Premium",
-      "type": "Services & Technology",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Because you need all 3 years of arguments on record.",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Boardmember",
-          "operationBonus": {
-            "type": "add",
-            "value": -0.5
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "All other cards",
-          "operationBonus": {
-            "type": "add",
-            "value": 0.5
-          }
-        }
-      ]
-    },
-    {
-      "id": 104,
-      "name": "Swag Drop",
-      "type": "Services & Technology",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Three hundred waterbottles that break if you stare too hard.",
-      "triggerEffect": {
-        "type": "trade_draw",
-        "discard": 1,
-        "draws": 2
-      }
-    },
-    {
-      "id": 105,
-      "name": "Team Offsite",
-      "type": "Services & Technology",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Two days of trust falls, rope climbs, and oblivious ableism.",
-      "triggerEffect": {
-        "type": "spend_cash_boost_op",
-        "cost": 50,
-        "target": "Self",
-        "value": 2
-      }
-    },
-    {
-      "id": 106,
-      "name": "Nap Pod",
-      "type": "Services & Technology",
-      "cost": 1,
-      "operation": {
-        "type": "add",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 50,
-      "description": "HR says it's for wellness. Engineers say it's for deploys.",
-      "bonusTurn": true
-    },
-    {
-      "id": 107,
-      "name": "Recruiting Firm",
-      "type": "Services & Technology",
-      "cost": 2,
-      "operation": {
-        "type": "add",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "25% of a year's salary to lightly filter resumes.",
-      "triggerEffect": {
-        "type": "spend_cash_draw",
-        "cost": 25,
-        "draws": 2
-      }
-    },
-    {
-      "id": 108,
-      "name": "Podcast Sponsorship",
-      "type": "Services & Technology",
-      "cost": 2,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 0,
-      "description": "Now brought to you by a company you'll forget in ten seconds.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Prod/Design",
-        "operationBonus": {
-          "type": "add",
-          "value": 1
-        }
-      },
-      "triggerEffect": {
-        "type": "gain_cash",
-        "amount": 50
-      }
-    },
-    {
-      "id": 109,
-      "name": "AWS Contract",
-      "type": "Services & Technology",
-      "cost": 2,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 100,
-      "description": "Burns cash faster than your engineers.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "Engineering",
-        "operationBonus": {
-          "type": "add",
-          "value": 1
-        }
-      }
-    },
-    {
-      "id": 110,
-      "name": "Executive Coach",
-      "type": "Services & Technology",
-      "cost": 2,
-      "operation": {
-        "type": "multiply",
-        "value": 1.5
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 150,
-      "description": "Charges $500/hr to tell the CEO what everyone else says for free.",
-      "specialEffect": {
-        "type": "modify_type",
-        "targetType": "C-Suite",
-        "operationBonus": {
-          "type": "add",
-          "value": 1
-        }
-      }
-    },
-    {
-      "id": 111,
-      "name": "Salesforce Integration",
-      "type": "Services & Technology",
-      "cost": 3,
-      "operation": {
-        "type": "add",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Two months to implement a dashboard nobody checks.",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "Sales",
-          "operationBonus": {
-            "type": "add",
-            "value": 2
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Engineering",
-          "operationBonus": {
-            "type": "add",
-            "value": -0.5
-          }
-        }
-      ]
-    },
-    {
-      "id": 112,
-      "name": "Branding Agency",
-      "type": "Services & Technology",
-      "cost": 5,
-      "operation": {
-        "type": "multiply",
-        "value": 2
-      },
-      "eligibleRows": [
-        "cash",
-        "product",
-        "resources"
-      ],
-      "baseValue": 200,
-      "description": "Spent $200k to change the blue.",
-      "specialEffect": [
-        {
-          "type": "modify_type",
-          "targetType": "C-Suite",
-          "operationBonus": {
-            "type": "multiply",
-            "value": 2
-          }
-        },
-        {
-          "type": "modify_type",
-          "targetType": "Boardmember",
-          "operationBonus": {
-            "type": "multiply",
-            "value": 2
-          }
-        }
-      ]
-    }
-  ]
 }
