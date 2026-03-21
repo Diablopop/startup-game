@@ -63,7 +63,453 @@ class BootScene extends Phaser.Scene {
 
   preload() { this.load.json('cards', 'cards.json'); }
 
-  create() { this.scene.start('GameScene'); }
+  create() { this.scene.start('WelcomeScene'); }
+}
+
+// ============================================================
+// WELCOME SCENE
+// ============================================================
+class WelcomeScene extends Phaser.Scene {
+  constructor() { super({ key: 'WelcomeScene' }); }
+
+  create() {
+    const cx = GAME_W / 2;
+    const cy = GAME_H / 2;
+
+    // Background
+    this.add.rectangle(cx, cy, GAME_W, GAME_H, COLORS.bg);
+
+    // Large title
+    this.add.text(cx, cy - 200, 'S T A R T U P', {
+      fontSize: '72px',
+      fontFamily: 'monospace',
+      color: '#00ffff',
+      fontStyle: 'bold',
+      align: 'center',
+    }).setOrigin(0.5, 0.5);
+
+    // Tagline
+    const taglines = [
+      'Where being overvalued is the whole point.',
+      'Hire fast. Ship faster. Explain it to regulators later.',
+      'Change the world... and line your pockets.',
+      'Move fast and play cards.',
+      'Get hyped for hype.',
+      'Think about the social implications after the IPO.',
+      'Add AI if you want investors.',
+      "Entrepreneurs can still live with their parents, right?",
+    ];
+    const tagline = taglines[Math.floor(Math.random() * taglines.length)];
+    this.add.text(cx, cy - 118, `"${tagline}"`, {
+      fontSize: '16px',
+      fontFamily: 'monospace',
+      color: '#aaaacc',
+      fontStyle: 'italic',
+      align: 'center',
+      wordWrap: { width: 700 },
+    }).setOrigin(0.5, 0.5);
+
+    // PLAY GAME button (primary — green)
+    const playBtn = this.add.rectangle(cx, cy, 220, 52, 0x1a472a)
+      .setStrokeStyle(2, 0x40916c).setInteractive({ useHandCursor: true });
+    this.add.text(cx, cy, 'PLAY GAME', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5);
+    playBtn.on('pointerover', () => playBtn.setFillStyle(0x2d6a4f));
+    playBtn.on('pointerout',  () => playBtn.setFillStyle(0x1a472a));
+    playBtn.on('pointerdown', () => this.scene.start('GameScene'));
+
+    // HOW TO PLAY button (secondary — outlined)
+    const tutBtn = this.add.rectangle(cx, cy + 72, 220, 52, 0x0d0d1a)
+      .setStrokeStyle(2, 0x4ecdc4).setInteractive({ useHandCursor: true });
+    this.add.text(cx, cy + 72, 'HOW TO PLAY', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#4ecdc4', fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5);
+    tutBtn.on('pointerover', () => tutBtn.setFillStyle(0x0d2a2a));
+    tutBtn.on('pointerout',  () => tutBtn.setFillStyle(0x0d0d1a));
+    tutBtn.on('pointerdown', () => this.scene.start('TutorialScene'));
+
+    // Disclaimer
+    this.add.text(cx, GAME_H - 56,
+      'Prototype build — expect rough edges and placeholder art.', {
+        fontSize: '10px', fontFamily: 'monospace', color: '#445566', align: 'center'
+      }).setOrigin(0.5, 0.5);
+
+    // Copyright
+    this.add.text(cx, GAME_H - 36, '© 2026 Andrew Schauer', {
+      fontSize: '10px', fontFamily: 'monospace', color: '#334455', align: 'center'
+    }).setOrigin(0.5, 0.5);
+  }
+}
+
+// ============================================================
+// TUTORIAL SCENE
+// ============================================================
+class TutorialScene extends Phaser.Scene {
+  constructor() { super({ key: 'TutorialScene' }); }
+
+  create() {
+    this.currentPage = 1;
+    this.pageObjects = [];
+    this.cardsData = this.cache.json.get('cards').cards;
+    this._buildPage(this.currentPage);
+  }
+
+  _clearPage() {
+    this.pageObjects.forEach(o => { if (o && o.destroy) o.destroy(); });
+    this.pageObjects = [];
+  }
+
+  _buildPage(page) {
+    this._clearPage();
+    const cx = GAME_W / 2;
+    const cy = GAME_H / 2;
+
+    // Background
+    const bg = this.add.rectangle(cx, cy, GAME_W, GAME_H, COLORS.bg);
+    this.pageObjects.push(bg);
+
+    if (page === 1) this._buildPage1(cx);
+    if (page === 2) this._buildPage2(cx);
+    if (page === 3) this._buildPage3(cx);
+
+    this._buildNavBar(page);
+  }
+
+  _buildPage1(cx) {
+    let y = 40;
+
+    // Title
+    this.pageObjects.push(
+      this.add.text(cx, y, 'HOW TO PLAY', {
+        fontSize: '28px', fontFamily: 'monospace', color: '#00ffff', fontStyle: 'bold', align: 'center'
+      }).setOrigin(0.5, 0)
+    );
+    y += 52;
+
+    // YOUR GOAL
+    this.pageObjects.push(
+      this.add.text(cx - 480, y, 'YOUR GOAL', {
+        fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
+      }).setOrigin(0, 0)
+    );
+    y += 20;
+    this.pageObjects.push(
+      this.add.text(cx - 480, y,
+        'Build the most valuable startup in 4 rounds. Each round gives you a set number of\nturns to grow your company.', {
+          fontSize: '12px', fontFamily: 'monospace', color: '#ccccdd',
+          wordWrap: { width: 960 }
+        }).setOrigin(0, 0)
+    );
+    y += 46;
+
+    // ACTIONS
+    this.pageObjects.push(
+      this.add.text(cx - 480, y, 'EACH TURN, PICK ONE ACTION:', {
+        fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
+      }).setOrigin(0, 0)
+    );
+    y += 24;
+
+    const actions = [
+      { label: 'PLACE A CARD', desc: 'Drag a card from your hand into the first open spot in any row. Placing a card requires cash.' },
+      { label: 'RAISE $', desc: 'Activate your Cash row to generate funding. The base payout starts small and grows each round.' },
+      { label: 'RECRUIT', desc: 'Activate your Resources row to draw more cards into your hand.' },
+      { label: 'SHIP', desc: 'Activate your Product row to ship your product. Each ship adds to a cumulative product multiplier used at valuation.' },
+    ];
+
+    actions.forEach(a => {
+      this.pageObjects.push(
+        this.add.text(cx - 480, y, a.label, {
+          fontSize: '12px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold'
+        }).setOrigin(0, 0)
+      );
+      this.pageObjects.push(
+        this.add.text(cx - 480 + 20, y + 18, a.desc, {
+          fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc',
+          wordWrap: { width: 940 }
+        }).setOrigin(0, 0)
+      );
+      y += 52;
+    });
+
+    // ROWS
+    this.pageObjects.push(
+      this.add.text(cx - 480, y, 'ROWS', {
+        fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
+      }).setOrigin(0, 0)
+    );
+    y += 20;
+    this.pageObjects.push(
+      this.add.text(cx - 480, y,
+        'Placed cards trigger left to right when you activate that row. Each card\'s operation modifies the row\'s running score.', {
+          fontSize: '12px', fontFamily: 'monospace', color: '#ccccdd',
+          wordWrap: { width: 960 }
+        }).setOrigin(0, 0)
+    );
+    y += 36;
+
+    // VALUATION
+    this.pageObjects.push(
+      this.add.text(cx - 480, y, 'VALUATION', {
+        fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
+      }).setOrigin(0, 0)
+    );
+    y += 20;
+    this.pageObjects.push(
+      this.add.text(cx - 480, y,
+        'At the end of each round, your startup is valued: the value of all placed cards × your product multiplier.\nIf you never ship, your valuation is $0.', {
+          fontSize: '12px', fontFamily: 'monospace', color: '#ccccdd',
+          wordWrap: { width: 960 }
+        }).setOrigin(0, 0)
+    );
+  }
+
+  _buildPage2(cx) {
+    // Example card data (id 60 — "Ketamine Cowboy")
+    const exCard = this.cardsData.find(c => c.id === 60);
+
+    // Title
+    this.pageObjects.push(
+      this.add.text(cx, 30, 'UNDERSTANDING CARDS', {
+        fontSize: '28px', fontFamily: 'monospace', color: '#00ffff', fontStyle: 'bold', align: 'center'
+      }).setOrigin(0.5, 0)
+    );
+
+    // ── Card display — pixel-identical to buildCardVisual, rendered at 2× scale ──
+    const cardX = cx - 220;
+    const cardY = GAME_H / 2;
+
+    const typeColor = COLORS.typeColors[exCard.type] || 0x888888;
+
+    const container = this.add.container(cardX, cardY);
+
+    // Background
+    const bg = this.add.graphics();
+    bg.fillStyle(0x0d1b2a);
+    bg.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+    bg.lineStyle(1, typeColor);
+    bg.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+
+    // Type bar
+    const bar = this.add.graphics();
+    bar.fillStyle(typeColor);
+    bar.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 12, { tl: 5, tr: 5, bl: 0, br: 0 });
+
+    // Type label
+    const typeLabel = this.add.text(0, -CARD_H / 2 + 6, exCard.type.toUpperCase(), {
+      fontSize: '7px', fontFamily: 'monospace', color: '#000000', fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5, 0.5);
+
+    // Name
+    const nameText = this.add.text(0, -CARD_H / 2 + 42, exCard.name, {
+      fontSize: '11px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
+      align: 'center', wordWrap: { width: CARD_W - 10 }
+    }).setOrigin(0.5, 0.5);
+
+    // Divider
+    const divider = this.add.rectangle(0, -CARD_H / 2 + 72, CARD_W - 16, 1, 0x33334a).setOrigin(0.5, 0.5);
+
+    // Operation
+    const opLabel = exCard.operation.type === 'multiply'
+      ? `×${exCard.operation.value}`
+      : (exCard.operation.value < 0 ? `${exCard.operation.value}` : `+${exCard.operation.value}`);
+    const opText = this.add.text(0, -CARD_H / 2 + 82, opLabel, {
+      fontSize: '20px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5, 0);
+
+    container.add([bg, bar, typeLabel, nameText, divider, opText]);
+
+    // Effect icons — ★ for special/bonus-turn, ⚡ for trigger
+    const icons = [];
+    if (exCard.specialEffect || exCard.bonusTurn) icons.push({ symbol: '★', color: '#e9c46a' });
+    if (exCard.triggerEffect)                     icons.push({ symbol: '⚡', color: '#00ffff' });
+    if (icons.length > 0) {
+      const iconY  = -CARD_H / 2 + 118;
+      const spacing = 20;
+      const startIconX = -((icons.length - 1) * spacing) / 2;
+      icons.forEach((icon, i) => {
+        container.add(this.add.text(startIconX + i * spacing, iconY, icon.symbol, {
+          fontSize: '18px', fontFamily: 'monospace', color: icon.color, align: 'center'
+        }).setOrigin(0.5, 0.5));
+      });
+    }
+
+    // Cost
+    container.add(this.add.text(-CARD_W / 2 + 6, CARD_H / 2 - 16, `$${exCard.cost * 100}k`, {
+      fontSize: '11px', fontFamily: 'monospace', color: '#ff8888'
+    }).setOrigin(0, 0.5));
+
+    // Value
+    const valStr = exCard.baseValue > 0 ? `$${exCard.baseValue}k` : '—';
+    container.add(this.add.text(CARD_W / 2 - 6, CARD_H / 2 - 16, valStr, {
+      fontSize: '11px', fontFamily: 'monospace', color: '#80ffaa'
+    }).setOrigin(1, 0.5));
+
+    container.setScale(2);
+    this.pageObjects.push(container);
+
+    // ── Labels panel (right side) ─────────────────────────────
+    const labelX = cx + 60;
+    let labelY = 205;
+
+    const labelDefs = [
+      { label: 'TYPE',            color: '#ffffff',
+        desc: 'There are 7 types of cards. Card effects may help or hinder different types.' },
+      { label: 'NAME',            color: '#ffffff',
+        desc: "The card's identity — every card brings something different." },
+      { label: 'OP',              color: '#ffffff',
+        desc: "When a row activates, each card's op modifies the row's running score left to right." },
+      { label: '★ SPECIAL EFFECT', color: '#e9c46a',
+        desc: 'A persistent bonus that applies as long as the card is on the board.' },
+      { label: '⚡ TRIGGER EFFECT', color: '#00ffff',
+        desc: 'An effect that fires in sequence when its row is activated.' },
+      { label: 'COST (IN RED)',   color: '#ff8888',
+        desc: 'The cash required to place this card.' },
+      { label: 'VALUE (IN GREEN)', color: '#80ffaa',
+        desc: "How much a card is worth for your startup's valuation." },
+    ];
+
+    labelDefs.forEach(def => {
+      const lbl = this.add.text(labelX, labelY, def.label, {
+        fontSize: '13px', fontFamily: 'monospace', color: def.color, fontStyle: 'bold'
+      }).setOrigin(0, 0);
+      const desc = this.add.text(labelX + 4, labelY + 18, def.desc, {
+        fontSize: '10px', fontFamily: 'monospace', color: '#778899',
+        wordWrap: { width: 460 }
+      }).setOrigin(0, 0);
+
+      this.pageObjects.push(lbl, desc);
+
+      const descLines = Math.ceil(def.desc.length / 46);
+      labelY += 22 + descLines * 14;
+    });
+
+    // Footnote
+    this.pageObjects.push(
+      this.add.text(labelX, labelY + 8, 'Press and hold a card to see its details.', {
+        fontSize: '13px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+      }).setOrigin(0, 0)
+    );
+  }
+
+  _buildPage3(cx) {
+    let y = 40;
+
+    // Title
+    this.pageObjects.push(
+      this.add.text(cx, y, "WHAT'S AHEAD", {
+        fontSize: '28px', fontFamily: 'monospace', color: '#00ffff', fontStyle: 'bold', align: 'center'
+      }).setOrigin(0.5, 0)
+    );
+    y += 52;
+
+    // Intro
+    this.pageObjects.push(
+      this.add.text(cx, y,
+        "This prototype is actively in development. Here's what's coming:", {
+          fontSize: '13px', fontFamily: 'monospace', color: '#ccccdd',
+          align: 'center', wordWrap: { width: 800 }
+        }).setOrigin(0.5, 0)
+    );
+    y += 52;
+
+    const features = [
+      {
+        label: 'BOARD MEETINGS  (coming soon)',
+        desc: 'Between rounds, spend cash on strategic upgrades — extend your runway, pivot out weak cards, or hire powerful advisors.',
+      },
+      {
+        label: 'ECONOMIC EVENTS  (coming soon)',
+        desc: 'Random market shifts between rounds that change the playing field — boom times, downturns, and industry disruptions.',
+      },
+      {
+        label: '...AND MORE',
+        desc: 'Story elements, game art, card art, and additional card effects are all on the roadmap.',
+      },
+    ];
+
+    features.forEach(f => {
+      this.pageObjects.push(
+        this.add.text(cx - 380, y, f.label, {
+          fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
+        }).setOrigin(0, 0)
+      );
+      y += 22;
+      this.pageObjects.push(
+        this.add.text(cx - 380 + 16, y, f.desc, {
+          fontSize: '12px', fontFamily: 'monospace', color: '#aaaacc',
+          wordWrap: { width: 760 }
+        }).setOrigin(0, 0)
+      );
+      y += 56;
+    });
+
+    // CTA lead-in
+    y += 10;
+    this.pageObjects.push(
+      this.add.text(cx, y, 'Ready to build your startup?', {
+        fontSize: '16px', fontFamily: 'monospace', color: '#ccccdd', align: 'center'
+      }).setOrigin(0.5, 0)
+    );
+    y += 40;
+
+    // PLAY GAME button (primary)
+    const playBtn = this.add.rectangle(cx, y + 24, 220, 52, 0x1a472a)
+      .setStrokeStyle(2, 0x40916c).setInteractive({ useHandCursor: true });
+    this.add.text(cx, y + 24, 'PLAY GAME', {
+      fontSize: '18px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5);
+    playBtn.on('pointerover', () => playBtn.setFillStyle(0x2d6a4f));
+    playBtn.on('pointerout',  () => playBtn.setFillStyle(0x1a472a));
+    playBtn.on('pointerdown', () => this.scene.start('GameScene'));
+    this.pageObjects.push(playBtn);
+  }
+
+  _buildNavBar(page) {
+    const navY = GAME_H - 36;
+    const cx = GAME_W / 2;
+
+    // Page indicator
+    const indicator = this.add.text(cx, navY, `${page} / 3`, {
+      fontSize: '13px', fontFamily: 'monospace', color: '#778899', align: 'center'
+    }).setOrigin(0.5, 0.5);
+    this.pageObjects.push(indicator);
+
+    // BACK button (all pages)
+    const backBg = this.add.rectangle(80, navY, 130, 40, 0x1a1a2e)
+      .setStrokeStyle(1, 0x445566).setInteractive({ useHandCursor: true });
+    const backLbl = this.add.text(80, navY, '← BACK', {
+      fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc'
+    }).setOrigin(0.5, 0.5);
+    backBg.on('pointerover', () => { backBg.setFillStyle(0x22222e); backLbl.setColor('#ccccdd'); });
+    backBg.on('pointerout',  () => { backBg.setFillStyle(0x1a1a2e); backLbl.setColor('#aaaacc'); });
+    backBg.on('pointerdown', () => {
+      if (page === 1) {
+        this.scene.start('WelcomeScene');
+      } else {
+        this.currentPage -= 1;
+        this._buildPage(this.currentPage);
+      }
+    });
+    this.pageObjects.push(backBg, backLbl);
+
+    // NEXT button (pages 1 and 2 only)
+    if (page < 3) {
+      const nextBg = this.add.rectangle(GAME_W - 80, navY, 130, 40, 0x1a472a)
+        .setStrokeStyle(1, 0x40916c).setInteractive({ useHandCursor: true });
+      const nextLbl = this.add.text(GAME_W - 80, navY, 'NEXT →', {
+        fontSize: '13px', fontFamily: 'monospace', color: '#80ffaa'
+      }).setOrigin(0.5, 0.5);
+      nextBg.on('pointerover', () => nextBg.setFillStyle(0x2d6a4f));
+      nextBg.on('pointerout',  () => nextBg.setFillStyle(0x1a472a));
+      nextBg.on('pointerdown', () => {
+        this.currentPage += 1;
+        this._buildPage(this.currentPage);
+      });
+      this.pageObjects.push(nextBg, nextLbl);
+    }
+  }
 }
 
 // ============================================================
@@ -151,9 +597,6 @@ class GameScene extends Phaser.Scene {
     this.renderHand();
     this.updateHUD();
 
-    if (!carryOver) {
-      this.showWelcomeModal();
-    }
   }
 
   // ── Layout ────────────────────────────────────────────────
@@ -1912,82 +2355,6 @@ class GameScene extends Phaser.Scene {
     this.advanceTurn();
   }
 
-  // ── Welcome Modal ─────────────────────────────────────────
-  showWelcomeModal() {
-    const cx = GAME_W / 2;
-    const cy = GAME_H / 2;
-    const PW = 580;
-    const PH = 410;
-
-    const modal = this.add.container(0, 0).setDepth(100);
-
-    // Backdrop
-    modal.add(this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000, 0.75));
-
-    // Panel
-    modal.add(this.add.rectangle(cx, cy, PW, PH, 0x0d1b2a).setStrokeStyle(2, 0x00ffff));
-
-    // Header
-    modal.add(this.add.text(cx, cy - PH / 2 + 26, 'STARTUP', {
-      fontSize: '22px', fontFamily: 'monospace', color: '#00ffff', fontStyle: 'bold'
-    }).setOrigin(0.5, 0.5));
-    modal.add(this.add.text(cx, cy - PH / 2 + 46, 'Where being overvalued is overwhelming fun.', {
-      fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'italic'
-    }).setOrigin(0.5, 0.5));
-
-    // Divider
-    modal.add(this.add.rectangle(cx, cy - PH / 2 + 62, PW - 60, 1, 0x334455));
-
-    const lines = [
-      { text: 'Place cards into the three rows to build your startup.', color: '#aaaacc' },
-      { text: 'Some cards affect others, and some have trigger effects that\nfire when activated.', color: '#aaaacc' },
-      { text: '', color: '#aaaacc' },
-      { text: '⬡  PRODUCT ROW  — activate to ship your product. Each ship\n    adds to your cumulative valuation multiplier.', color: '#cd84ff' },
-      { text: '⬡  CASH ROW  — activate to generate money to place cards.', color: '#80ffaa' },
-      { text: '⬡  RESOURCES ROW  — activate to draw cards from the deck.', color: '#ffaa44' },
-      { text: '', color: '#aaaacc' },
-      { text: 'You have four rounds of valuations to scale to $1 billion.', color: '#aaaacc' },
-    ];
-
-    let textY = cy - PH / 2 + 80;
-    for (const line of lines) {
-      if (line.text === '') { textY += 8; continue; }
-      modal.add(this.add.text(cx - PW / 2 + 36, textY, line.text, {
-        fontSize: '11px', fontFamily: 'monospace', color: line.color,
-        wordWrap: { width: PW - 72 }
-      }).setOrigin(0, 0));
-      textY += line.text.split('\n').length * 16 + 4;
-    }
-
-    // Note at bottom
-    modal.add(this.add.text(cx, cy + PH / 2 - 88,
-      'Note: This is a wireframe prototype — the UI is rough and all cards are placeholders.',
-      {
-        fontSize: '9px', fontFamily: 'monospace', color: '#556677',
-        align: 'center', wordWrap: { width: PW - 60 }
-      }).setOrigin(0.5, 0));
-
-    // Copyright
-    const copyrightY = cy + PH / 2 - 16;
-    modal.add(this.add.text(cx, copyrightY, '© 2026 Andrew Schauer', {
-      fontSize: '8px', fontFamily: 'monospace', color: '#334455', align: 'center'
-    }).setOrigin(0.5, 0.5));
-
-    // PLAY button — anchored above copyright
-    const btnY = copyrightY - 36;
-    const playBg = this.add.rectangle(cx, btnY, 160, 38, 0x1a472a)
-      .setStrokeStyle(2, 0x40916c)
-      .setInteractive({ useHandCursor: true });
-    modal.add(playBg);
-    modal.add(this.add.text(cx, btnY, 'PLAY', {
-      fontSize: '14px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold'
-    }).setOrigin(0.5, 0.5));
-
-    playBg.on('pointerover', () => playBg.setFillStyle(0x2d6a4f));
-    playBg.on('pointerout',  () => playBg.setFillStyle(0x1a472a));
-    playBg.on('pointerdown', () => modal.destroy());
-  }
-
   // ── Trigger Effect Modals ─────────────────────────────────
   showTriggerModal(card, payout, resumeCallback) {
     const fx = card.triggerEffect;
@@ -3086,7 +3453,7 @@ const config = {
   width:           GAME_W,
   height:          GAME_H,
   backgroundColor: COLORS.bg,
-  scene:           [BootScene, GameScene, ValuationScene],
+  scene:           [BootScene, WelcomeScene, TutorialScene, GameScene, ValuationScene],
   parent:          document.body,
 };
 
