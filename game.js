@@ -381,8 +381,7 @@ class TutorialScene extends Phaser.Scene {
 
       this.pageObjects.push(lbl, desc);
 
-      const descLines = Math.ceil(def.desc.length / 46);
-      labelY += 22 + descLines * 14;
+      labelY += 18 + desc.height + 14;
     });
 
     // Footnote
