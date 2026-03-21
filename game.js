@@ -350,6 +350,17 @@ class GameScene extends Phaser.Scene {
     const zone = this.add.zone(x, y, SLOT_W, SLOT_H).setRectangleDropZone(SLOT_W, SLOT_H);
     zone.rowType   = 'product';
     zone.slotIndex = index;
+    zone.on('pointerdown', (pointer) => {
+      if (!container.cardId) return;
+      const card = this.cardsData.find(c => c.id === container.cardId);
+      if (!card) return;
+      this._holdOriginX = pointer.x;
+      this._holdOriginY = pointer.y;
+      this._holdTimer = this.time.delayedCall(300, () => {
+        this._holdTimer = null;
+        this.showCardInfoPopup(card, container.x, container.y, SLOT_H);
+      });
+    });
 
     return container;
   }
@@ -389,6 +400,17 @@ class GameScene extends Phaser.Scene {
     const zone = this.add.zone(x, y, SLOT_W, SLOT_H).setRectangleDropZone(SLOT_W, SLOT_H);
     zone.rowType   = 'cash';
     zone.slotIndex = index;
+    zone.on('pointerdown', (pointer) => {
+      if (!container.cardId) return;
+      const card = this.cardsData.find(c => c.id === container.cardId);
+      if (!card) return;
+      this._holdOriginX = pointer.x;
+      this._holdOriginY = pointer.y;
+      this._holdTimer = this.time.delayedCall(300, () => {
+        this._holdTimer = null;
+        this.showCardInfoPopup(card, container.x, container.y, SLOT_H);
+      });
+    });
 
     return container;
   }
@@ -470,6 +492,17 @@ class GameScene extends Phaser.Scene {
     const zone = this.add.zone(x, y, SLOT_W, SLOT_H).setRectangleDropZone(SLOT_W, SLOT_H);
     zone.rowType   = 'resources';
     zone.slotIndex = index;
+    zone.on('pointerdown', (pointer) => {
+      if (!container.cardId) return;
+      const card = this.cardsData.find(c => c.id === container.cardId);
+      if (!card) return;
+      this._holdOriginX = pointer.x;
+      this._holdOriginY = pointer.y;
+      this._holdTimer = this.time.delayedCall(300, () => {
+        this._holdTimer = null;
+        this.showCardInfoPopup(card, container.x, container.y, SLOT_H);
+      });
+    });
 
     return container;
   }
@@ -639,6 +672,14 @@ class GameScene extends Phaser.Scene {
       container.on('pointerout', () => {
         bg.setStrokeStyle(1, typeColor);
       });
+      container.on('pointerdown', (pointer) => {
+        this._holdOriginX = pointer.x;
+        this._holdOriginY = pointer.y;
+        this._holdTimer = this.time.delayedCall(300, () => {
+          this._holdTimer = null;
+          this.showCardInfoPopup(card, container.x, container.y, CARD_H);
+        });
+      });
     }
 
     return container;
@@ -690,12 +731,127 @@ class GameScene extends Phaser.Scene {
     return 'trigger effect';
   }
 
+  // ── Card Info Popup (press & hold) ────────────────────────
+  showCardInfoPopup(card, worldX, worldY, cardH = CARD_H) {
+    this.hideCardInfoPopup();
+
+    const PW  = 165;
+    const PAD = 10;
+    const typeColor    = COLORS.typeColors[card.type] || 0x888888;
+    const typeColorHex = '#' + typeColor.toString(16).padStart(6, '0');
+
+    // Dynamic height based on which sections are present
+    let PH = 108; // base: type + name + divider + description + padding
+    if (card.specialEffect) PH += 32;
+    if (card.bonusTurn)     PH += 24;
+    if (card.triggerEffect) PH += 26;
+
+    // Position: above card by default, flip below if too close to top edge
+    const gap        = 8;
+    const cardTopY   = worldY - cardH / 2;
+    let popupCenterY = cardTopY - gap - PH / 2;
+    if (popupCenterY - PH / 2 < 4) {
+      popupCenterY = worldY + cardH / 2 + gap + PH / 2;
+    }
+    // Clamp X so popup never clips off the left or right edge
+    const popupCenterX = Math.max(PW / 2 + 5, Math.min(GAME_W - PW / 2 - 5, worldX));
+
+    const popup = this.add.container(popupCenterX, popupCenterY).setDepth(200);
+
+    // Background panel
+    popup.add(this.add.rectangle(0, 0, PW, PH, 0x0d1b2a).setStrokeStyle(2, typeColor));
+
+    // Layout items from top; y is distance from popup center (0,0)
+    let y = -PH / 2 + 12;
+
+    // Card type
+    popup.add(this.add.text(0, y, card.type.toUpperCase(), {
+      fontSize: '8px', fontFamily: 'monospace', color: typeColorHex, align: 'center'
+    }).setOrigin(0.5, 0));
+    y += 14;
+
+    // Card name
+    popup.add(this.add.text(0, y, card.name, {
+      fontSize: '13px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
+      align: 'center', wordWrap: { width: PW - PAD * 2 }
+    }).setOrigin(0.5, 0));
+    y += 20;
+
+    // Divider
+    popup.add(this.add.rectangle(0, y, PW - 20, 1, 0x444466).setOrigin(0.5, 0));
+    y += 10;
+
+    // Description / quote (always shown)
+    popup.add(this.add.text(0, y, `"${card.description}"`, {
+      fontSize: '9px', fontFamily: 'monospace', color: '#888899', fontStyle: 'italic',
+      align: 'center', wordWrap: { width: PW - PAD * 2 }
+    }).setOrigin(0.5, 0));
+    y += 32;
+
+    // Special effect (★)
+    if (card.specialEffect) {
+      popup.add(this.add.rectangle(0, y, PW - 20, 1, 0x444466).setOrigin(0.5, 0));
+      y += 10;
+      popup.add(this.add.text(0, y, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
+        fontSize: '9px', fontFamily: 'monospace', color: '#e9c46a',
+        align: 'center', wordWrap: { width: PW - PAD * 2 }
+      }).setOrigin(0.5, 0));
+      y += 22;
+    }
+
+    // Bonus turn (★)
+    if (card.bonusTurn) {
+      popup.add(this.add.rectangle(0, y, PW - 20, 1, 0x444466).setOrigin(0.5, 0));
+      y += 10;
+      popup.add(this.add.text(0, y, '★ +1 Bonus Turn on placement', {
+        fontSize: '9px', fontFamily: 'monospace', color: '#e9c46a', align: 'center'
+      }).setOrigin(0.5, 0));
+      y += 14;
+    }
+
+    // Trigger effect (⚡)
+    if (card.triggerEffect) {
+      popup.add(this.add.rectangle(0, y, PW - 20, 1, 0x444466).setOrigin(0.5, 0));
+      y += 10;
+      popup.add(this.add.text(0, y, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
+        fontSize: '9px', fontFamily: 'monospace', color: '#00ffff',
+        align: 'center', wordWrap: { width: PW - PAD * 2 }
+      }).setOrigin(0.5, 0));
+    }
+
+    this.cardInfoPopup = popup;
+  }
+
+  hideCardInfoPopup() {
+    if (this.cardInfoPopup) { this.cardInfoPopup.destroy(); this.cardInfoPopup = null; }
+  }
+
   // ── Drag & Drop ───────────────────────────────────────────
   setupDragHandlers() {
     this.dragOrigin = null;
 
+    // ── Hold-to-inspect infrastructure ──────────────────────
+    // These three listeners are shared by all cards (hand + slots).
+    // Each card's pointerdown sets _holdTimer / _holdOrigin; these clean up.
+    this.input.on('pointermove', (pointer) => {
+      if (this._holdTimer) {
+        const dx = pointer.x - this._holdOriginX;
+        const dy = pointer.y - this._holdOriginY;
+        if (Math.sqrt(dx * dx + dy * dy) > 5) {
+          this._holdTimer.remove();
+          this._holdTimer = null;
+        }
+      }
+    });
+
+    this.input.on('pointerup', () => {
+      if (this._holdTimer) { this._holdTimer.remove(); this._holdTimer = null; }
+      this.hideCardInfoPopup();
+    });
+
     this.input.on('dragstart', (pointer, obj) => {
       if (this.state.phase !== 'playing') return;
+      if (this._holdTimer) { this._holdTimer.remove(); this._holdTimer = null; }
       this.dragOrigin = { x: obj.x, y: obj.y };
       this.children.bringToTop(obj);
     });
@@ -752,7 +908,10 @@ class GameScene extends Phaser.Scene {
     const slotList = rowType === 'product'   ? this.productSlotObjects
                    : rowType === 'resources' ? this.resSlotObjects
                    : this.slotObjects;
-    const slot     = slotList[slotIndex];
+
+    // Resolve the target slot: always the leftmost empty slot, not the dropped slot.
+    // C-Suite replacements are the one exception — they target the existing role's slot.
+    let targetSlotIndex = rowArray.indexOf(null);
 
     // ── Role enforcement for C-Suite cards ──────────────────
     if (card.role) {
@@ -770,23 +929,27 @@ class GameScene extends Phaser.Scene {
       if (existingRowKey) {
         const existingRowType = existingRowKey === 'cashRow'    ? 'cash'
                               : existingRowKey === 'productRow' ? 'product' : 'resources';
-        if (existingRowType !== rowType || existingSlotIdx !== slotIndex) {
-          const existingSlotList = existingRowKey === 'cashRow'      ? this.slotObjects
-                                 : existingRowKey === 'productRow'  ? this.productSlotObjects
+        if (existingRowType !== rowType) {
+          // Must replace in the same row as the existing role card
+          const existingSlotList = existingRowKey === 'cashRow'     ? this.slotObjects
+                                 : existingRowKey === 'productRow' ? this.productSlotObjects
                                  : this.resSlotObjects;
           const existingSlotObj = existingSlotList[existingSlotIdx];
           this.showFloat(existingSlotObj.x, existingSlotObj.y - 90, `REPLACE ${card.role}`, '#ff6b6b');
           this.snapBack(cardId);
           return;
         }
-        // Correct slot — discard old card, fall through to placement
+        // Same row — target the existing role's slot directly (override next-slot logic)
+        targetSlotIndex = existingSlotIdx;
         state[existingRowKey][existingSlotIdx] = null;
       }
     }
     // ────────────────────────────────────────────────────────
 
-    if (rowArray[slotIndex] !== null) {
-      this.showFloat(slot.x, slot.y - 90, 'SLOT OCCUPIED', '#ff6b6b');
+    const slot = slotList[targetSlotIndex] || slotList[0];
+
+    if (targetSlotIndex === -1) {
+      this.showFloat(slot.x, slot.y - 90, 'ROW FULL', '#ff6b6b');
       this.snapBack(cardId);
       return;
     }
@@ -799,13 +962,13 @@ class GameScene extends Phaser.Scene {
 
     // Commit
     state.cash -= effectiveCost;
-    rowArray[slotIndex] = cardId;
+    rowArray[targetSlotIndex] = cardId;
     state.hand = state.hand.filter(id => id !== cardId);
     this.handOffset = Math.min(this.handOffset, Math.max(0, state.hand.length - CAROUSEL_VISIBLE));
 
-    if (rowType === 'product')        this.renderProductSlotCard(slotIndex, card);
-    else if (rowType === 'resources') this.renderResSlotCard(slotIndex, card);
-    else                              this.renderSlotCard(slotIndex, card);
+    if (rowType === 'product')        this.renderProductSlotCard(targetSlotIndex, card);
+    else if (rowType === 'resources') this.renderResSlotCard(targetSlotIndex, card);
+    else                              this.renderSlotCard(targetSlotIndex, card);
 
     this.refreshBoardOpLabels();
     this.renderHand();
