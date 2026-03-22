@@ -196,7 +196,7 @@ class TutorialScene extends Phaser.Scene {
     y += 20;
     this.pageObjects.push(
       this.add.text(cx - 380, y,
-        'Build the most valuable startup in 4 rounds. Each round gives you a set number of turns to grow your company.', {
+        'Build the most valuable startup in 4 rounds. Each round gives you a limited number of turns to grow your company.', {
           fontSize: '14px', fontFamily: 'monospace', color: '#ccccdd',
           wordWrap: { width: 760 }
         }).setOrigin(0, 0)
@@ -258,7 +258,7 @@ class TutorialScene extends Phaser.Scene {
     y += 20;
     this.pageObjects.push(
       this.add.text(cx - 380, y,
-        'At the end of each round, your startup is valued: the value of all placed cards × your product multiplier.\nIf you never ship, your valuation is $0.', {
+        'At the end of each round, your startup is valued: the value of all placed cards × your product multiplier. If you never ship, your valuation is $0.', {
           fontSize: '14px', fontFamily: 'monospace', color: '#ccccdd',
           wordWrap: { width: 760 }
         }).setOrigin(0, 0)
@@ -3460,6 +3460,7 @@ const config = {
   backgroundColor: COLORS.bg,
   scene:           [BootScene, WelcomeScene, TutorialScene, GameScene, ValuationScene],
   parent:          document.body,
+  roundPixels: true,
   scale: {
     mode:       Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
