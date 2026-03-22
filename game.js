@@ -13,11 +13,11 @@ const SLOT_H = 145;   // reduced from 165 to fit three rows
 const CAROUSEL_VISIBLE = 6;
 
 // Row layout positions (top to bottom: Product → Cash → Resources)
-const ROW_PROD_Y      = 110;
-const ROW_CASH_Y      = 275;
-const ROW_RES_Y       = 440;
-const ROW_SLOT_X      = 400;   // x of first slot center
-const ACTIVATE_TILE_X = 284;   // x of activate tile / row label block
+const ROW_PROD_Y      = 95;
+const ROW_CASH_Y      = 260;
+const ROW_RES_Y       = 425;
+const ROW_SLOT_X      = 473;   // x of first slot center
+const ACTIVATE_TILE_X = 353;   // x of activate tile / row label block
 
 const TURNS_PER_ROUND     = [7, 7, 6, 5];
 const BASE_CASH_PER_ROUND = [25, 50, 75, 100];
@@ -603,56 +603,57 @@ class GameScene extends Phaser.Scene {
     const H = this.scale.height;
 
     // Left panel
-    this.add.rectangle(110, H / 2, 220, H, COLORS.panel).setOrigin(0.5, 0.5);
-    this.add.rectangle(221, H / 2, 2, H, COLORS.panelBorder).setOrigin(0.5, 0.5);
+    this.add.rectangle(140, H / 2, 240, H, COLORS.panel).setOrigin(0.5, 0.5);
+    this.add.rectangle(20, H / 2, 2, H, COLORS.panelBorder).setOrigin(0.5, 0.5);
+    this.add.rectangle(261, H / 2, 2, H, COLORS.panelBorder).setOrigin(0.5, 0.5);
 
     // Round / turn
-    this.hudRound = this.add.text(110, 50, '', {
+    this.hudRound = this.add.text(140, 50, '', {
       fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    this.hudTurnsLabel = this.add.text(110, 68, 'TURNS', {
+    this.hudTurnsLabel = this.add.text(140, 68, 'TURNS', {
       fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
     this.buildTurnBoxes(86);
 
     // Divider after round/turn block
-    this.add.rectangle(110, 104, 160, 1, 0x333355).setOrigin(0.5, 0.5);
+    this.add.rectangle(140, 104, 180, 1, 0x333355).setOrigin(0.5, 0.5);
 
     // Cash
-    this.add.text(110, 120, 'YOUR CASH', {
+    this.add.text(140, 120, 'YOUR CASH', {
       fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    this.hudCash = this.add.text(110, 144, '', {
+    this.hudCash = this.add.text(140, 144, '', {
       fontSize: '24px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Divider
-    this.add.rectangle(110, 168, 160, 1, 0x333355).setOrigin(0.5, 0.5);
+    this.add.rectangle(140, 168, 180, 1, 0x333355).setOrigin(0.5, 0.5);
 
     // Product multiplier
-    this.add.text(110, 182, 'PRODUCT MULT', {
+    this.add.text(140, 182, 'PRODUCT MULT', {
       fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    this.hudProductMultiplier = this.add.text(110, 206, '0×', {
+    this.hudProductMultiplier = this.add.text(140, 206, '0×', {
       fontSize: '28px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Draw pile counter
-    this.add.rectangle(110, 250, 160, 1, 0x333355).setOrigin(0.5, 0.5);
-    this.add.text(110, 264, 'DRAW PILE', {
+    this.add.rectangle(140, 250, 180, 1, 0x333355).setOrigin(0.5, 0.5);
+    this.add.text(140, 264, 'DRAW PILE', {
       fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
-    this.hudDrawPile = this.add.text(110, 286, '-- cards', {
+    this.hudDrawPile = this.add.text(140, 286, '-- cards', {
       fontSize: '18px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Eye button to preview draw pile
-    const eyeBg = this.add.rectangle(110, 308, 80, 20, 0x1a1000)
+    const eyeBg = this.add.rectangle(140, 332, 80, 44, 0x1a1000)
       .setStrokeStyle(1, 0x664400).setInteractive({ useHandCursor: true });
-    const eyeLabel = this.add.text(110, 308, '👁 preview', {
+    const eyeLabel = this.add.text(140, 332, '👁 preview', {
       fontSize: '9px', fontFamily: 'monospace', color: '#886622', align: 'center'
     }).setOrigin(0.5, 0.5);
     eyeBg.on('pointerover', () => { eyeBg.setFillStyle(0x3d2200); eyeLabel.setColor('#ffaa44'); });
@@ -665,15 +666,15 @@ class GameScene extends Phaser.Scene {
     this.buildResourcesRow();
 
     // Hand area
-    this.handLabel = this.add.text(GAME_W / 2, 538, 'YOUR CARDS', {
+    this.handLabel = this.add.text(GAME_W / 2 + 33, 523, 'YOUR CARDS', {
       fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     this.handCounter = null;
 
     const windowW    = CAROUSEL_VISIBLE * (CARD_W + 8) - 8;
-    const windowStartX = (GAME_W - windowW) / 2;
-    const arrowY     = 638;
+    const windowStartX = (GAME_W - windowW) / 2 + 33;
+    const arrowY     = 623;
     this.arrowLeft  = this.buildArrow(windowStartX - 22, arrowY, '◀');
     this.arrowRight = this.buildArrow(windowStartX + windowW + 22, arrowY, '▶');
   }
@@ -681,7 +682,11 @@ class GameScene extends Phaser.Scene {
   buildArrow(x, y, symbol) {
     const btn = this.add.text(x, y, symbol, {
       fontSize: '28px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
-    }).setOrigin(0.5, 0.5).setInteractive();
+    }).setOrigin(0.5, 0.5).setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(-22, -22, 44, 44),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      useHandCursor: true,
+    });
 
     btn.on('pointerover', () => { if (!btn.disabled) btn.setColor('#ffffff'); });
     btn.on('pointerout',  () => { if (!btn.disabled) btn.setColor('#aaaacc'); });
@@ -700,7 +705,7 @@ class GameScene extends Phaser.Scene {
     const BOX = 14;
     const GAP = 4;
     const totalW = maxTurns * BOX + (maxTurns - 1) * GAP;
-    const startX = 110 - totalW / 2 + BOX / 2;
+    const startX = 140 - totalW / 2 + BOX / 2;
 
     this.turnBoxes = [];
     for (let i = 0; i < maxTurns; i++) {
@@ -739,21 +744,20 @@ class GameScene extends Phaser.Scene {
   buildProductActivateTile(x, y) {
     const container = this.add.container(x, y);
 
-    const bg = this.add.rectangle(0, 0, 90, SLOT_H, COLORS.productSlotEmpty)
-      .setStrokeStyle(1, COLORS.productSlotBorder);
+    const bg = this.add.rectangle(0, 0, 104, SLOT_H, 0x000000, 0);
 
-    const title = this.add.text(0, -SLOT_H / 2 + 18, 'Product', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
+    const title = this.add.text(0, -40, 'Product', {
+      fontSize: '16px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    const subtitle = this.add.text(0, -SLOT_H / 2 + 36, 'Base: 1×', {
+    const subtitle = this.add.text(0, -18, 'Base: 1×', {
       fontSize: '9px', fontFamily: 'monospace', color: '#9966cc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    const btnBg = this.add.rectangle(0, SLOT_H / 2 - 28, 70, 30, 0x3d1a5e)
+    const btnBg = this.add.rectangle(0, 20, 96, 36, 0x3d1a5e)
       .setStrokeStyle(1, COLORS.productSlotBorder);
-    const btnText = this.add.text(0, SLOT_H / 2 - 28, 'SHIP', {
-      fontSize: '9px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
+    const btnText = this.add.text(0, 20, 'SHIP', {
+      fontSize: '12px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     container.add([bg, title, subtitle, btnBg, btnText]);
@@ -761,7 +765,7 @@ class GameScene extends Phaser.Scene {
     container.btnBg  = btnBg;
 
     container.setInteractive(
-      new Phaser.Geom.Rectangle(-45, -SLOT_H / 2, 90, SLOT_H),
+      new Phaser.Geom.Rectangle(-52, -SLOT_H / 2, 104, SLOT_H),
       Phaser.Geom.Rectangle.Contains
     );
     container.on('pointerover', () => {
@@ -861,25 +865,24 @@ class GameScene extends Phaser.Scene {
     const container = this.add.container(x, y);
 
     // Row background (full height, dark — acts as row heading panel)
-    const bg = this.add.rectangle(0, 0, 90, SLOT_H, 0x0d1f10)
-      .setStrokeStyle(1, 0x2d5a3d);
+    const bg = this.add.rectangle(0, 0, 104, SLOT_H, 0x000000, 0);
 
     // Title
-    const title = this.add.text(0, -SLOT_H / 2 + 18, 'Cash', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
+    const title = this.add.text(0, -40, 'Cash', {
+      fontSize: '16px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Subtitle
-    const subtitle = this.add.text(0, -SLOT_H / 2 + 36, `Base: $${BASE_CASH_PER_ROUND[0]}k`, {
+    const subtitle = this.add.text(0, -18, `Base: $${BASE_CASH_PER_ROUND[0]}k`, {
       fontSize: '9px', fontFamily: 'monospace', color: '#52b788', align: 'center'
     }).setOrigin(0.5, 0.5);
     this.cashSubtitle = subtitle;
 
     // Button
-    const btnBg = this.add.rectangle(0, SLOT_H / 2 - 28, 70, 30, COLORS.activateTile)
+    const btnBg = this.add.rectangle(0, 20, 96, 36, COLORS.activateTile)
       .setStrokeStyle(1, 0x40916c);
-    const btnText = this.add.text(0, SLOT_H / 2 - 28, 'RAISE $', {
-      fontSize: '9px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
+    const btnText = this.add.text(0, 20, 'RAISE $', {
+      fontSize: '12px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     container.add([bg, title, subtitle, btnBg, btnText]);
@@ -887,7 +890,7 @@ class GameScene extends Phaser.Scene {
     container.btnBg  = btnBg;
 
     container.setInteractive(
-      new Phaser.Geom.Rectangle(-45, -SLOT_H / 2, 90, SLOT_H),
+      new Phaser.Geom.Rectangle(-52, -SLOT_H / 2, 104, SLOT_H),
       Phaser.Geom.Rectangle.Contains
     );
     container.on('pointerover', () => {
@@ -953,24 +956,23 @@ class GameScene extends Phaser.Scene {
     const container = this.add.container(x, y);
 
     // Row background (full height, dark — acts as row heading panel)
-    const bg = this.add.rectangle(0, 0, 90, SLOT_H, 0x1a1000)
-      .setStrokeStyle(1, 0x664400);
+    const bg = this.add.rectangle(0, 0, 104, SLOT_H, 0x000000, 0);
 
     // Title
-    const title = this.add.text(0, -SLOT_H / 2 + 18, 'Resources', {
-      fontSize: '12px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold', align: 'center'
+    const title = this.add.text(0, -40, 'Resources', {
+      fontSize: '16px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Subtitle
-    const subtitle = this.add.text(0, -SLOT_H / 2 + 36, 'Base: 1 draw', {
+    const subtitle = this.add.text(0, -18, 'Base: 1 draw', {
       fontSize: '9px', fontFamily: 'monospace', color: '#886622', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Button
-    const btnBg = this.add.rectangle(0, SLOT_H / 2 - 28, 70, 30, COLORS.resTile)
+    const btnBg = this.add.rectangle(0, 20, 96, 36, COLORS.resTile)
       .setStrokeStyle(1, COLORS.resAccent);
-    const btnText = this.add.text(0, SLOT_H / 2 - 28, 'RECRUIT', {
-      fontSize: '9px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold', align: 'center'
+    const btnText = this.add.text(0, 20, 'RECRUIT', {
+      fontSize: '12px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     container.add([bg, title, subtitle, btnBg, btnText]);
@@ -978,7 +980,7 @@ class GameScene extends Phaser.Scene {
     container.btnBg  = btnBg;
 
     container.setInteractive(
-      new Phaser.Geom.Rectangle(-45, -SLOT_H / 2, 90, SLOT_H),
+      new Phaser.Geom.Rectangle(-52, -SLOT_H / 2, 104, SLOT_H),
       Phaser.Geom.Rectangle.Contains
     );
     container.on('pointerover', () => {
@@ -1009,18 +1011,22 @@ class GameScene extends Phaser.Scene {
     this.cardObjects = {};
 
     const ids   = this.state.hand;
-    const handY = 638;
+    const handY = 623;
 
     const maxOffset = Math.max(0, ids.length - CAROUSEL_VISIBLE);
     this.handOffset = Math.min(this.handOffset, maxOffset);
 
     const visible  = ids.slice(this.handOffset, this.handOffset + CAROUSEL_VISIBLE);
     const windowW  = CAROUSEL_VISIBLE * (CARD_W + 8) - 8;
-    const startX   = (GAME_W - windowW) / 2;
+    const startX   = (GAME_W - windowW) / 2 + 33;
+    const cardsTotalW = visible.length * (CARD_W + 8) - 8;
+    const drawStartX  = ids.length < CAROUSEL_VISIBLE
+      ? startX + (windowW - cardsTotalW) / 2
+      : startX;
 
     visible.forEach((id, i) => {
       const card = this.cardsData.find(c => c.id === id);
-      const x    = startX + i * (CARD_W + 8) + CARD_W / 2;
+      const x    = drawStartX + i * (CARD_W + 8) + CARD_W / 2;
       this.cardObjects[id] = this.buildCardVisual(card, x, handY, true);
     });
 
@@ -1854,7 +1860,7 @@ class GameScene extends Phaser.Scene {
 
   finalizePayout(payout) {
     this.state.cash += payout;
-    this.activateTile.tileBg.setFillStyle(COLORS.activateTile);
+    this.activateTile.tileBg.setFillStyle(0x000000, 0);
 
     const flash = this.add.text(740, ROW_CASH_Y, `+$${payout}k`, {
       fontSize: '52px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
@@ -2051,7 +2057,7 @@ class GameScene extends Phaser.Scene {
 
   finalizeDrawCount(drawCount) {
     const count = Math.max(1, Math.round(drawCount));
-    this.hireTile.tileBg.setFillStyle(COLORS.resTile);
+    this.hireTile.tileBg.setFillStyle(0x000000, 0);
 
     const flash = this.add.text(740, ROW_RES_Y, `DRAW ${count}`, {
       fontSize: '52px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold', align: 'center'
@@ -2347,7 +2353,7 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    this.hireTile.tileBg.setFillStyle(COLORS.resTile);
+    this.hireTile.tileBg.setFillStyle(0x000000, 0);
     this.state.phase = 'playing';
     this.renderHand();
     this.updateHUD();
@@ -3454,6 +3460,10 @@ const config = {
   backgroundColor: COLORS.bg,
   scene:           [BootScene, WelcomeScene, TutorialScene, GameScene, ValuationScene],
   parent:          document.body,
+  scale: {
+    mode:       Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
 };
 
 new Phaser.Game(config);
