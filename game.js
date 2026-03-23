@@ -2383,8 +2383,12 @@ class GameScene extends Phaser.Scene {
       const card = this.cardsData.find(c => c.id === cardId);
       if (card.triggerEffect) {
         // Pass cash (not score) so cash-earning triggers update the bank, not the ship score
+        // Capture cashBefore so we can apply a delta; modals that directly mutate state.cash
+        // (e.g. spend_cash_boost_op) return the original payout unchanged, so delta = 0 and
+        // the direct mutation is preserved. Gain effects return payout + earned, delta > 0.
+        const cashBefore = this.state.cash;
         this.showTriggerModal(card, this.state.cash, (updatedCash, pendingDraws) => {
-          this.state.cash = updatedCash;
+          this.state.cash += (updatedCash - cashBefore);
           if (pendingDraws) this.pendingDrawCount += pendingDraws;
           this.updateHUD();
           this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
