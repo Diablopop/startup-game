@@ -728,8 +728,8 @@ class RoundTitleScene extends Phaser.Scene {
         freePlayRow: null,
       };
 
-      // "Dealing your cards..."
-      this.add.text(cx, cy + 20, 'Dealing your cards...', {
+      // "Dealing your opening hand..."
+      this.add.text(cx, cy + 20, 'Dealing your opening hand...', {
         fontSize: '14px', fontFamily: 'monospace', color: '#556677', fontStyle: 'italic'
       }).setOrigin(0.5);
 
@@ -1571,7 +1571,7 @@ class GameScene extends Phaser.Scene {
       align: 'center', wordWrap: { width: PW - PAD * 2 }
     }).setOrigin(0.5, 0);
 
-    const descText = this.add.text(0, 0, `"${card.description}"`, {
+    const descText = this.add.text(0, 0, card.description, {
       fontSize: '12px', fontFamily: 'monospace', color: '#888899', fontStyle: 'italic',
       align: 'center', wordWrap: { width: PW - PAD * 2 }
     }).setOrigin(0.5, 0);
