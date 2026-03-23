@@ -3696,30 +3696,44 @@ class ValuationScene extends Phaser.Scene {
       fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    let y = 148;
+    // ── Card breakdown (scrollable box) ──────────────────────
+    const BOX_X = cx - 280;
+    const BOX_Y = 140;
+    const BOX_W = 560;
+    const BOX_H = 200;
+    const ROW_H = 23;
+    const PAD_TOP = 30;  // space for header inside box
+    const PAD_BOTTOM = 8;
 
-    // ── Card breakdown ───────────────────────────────────────
-    this.add.text(cx, y, 'CARDS ON BOARD', {
+    // Box background (game board color)
+    this.add.rectangle(cx, BOX_Y + BOX_H / 2, BOX_W, BOX_H, 0x1a1a2e)
+      .setStrokeStyle(1, 0x333355);
+
+    // Header inside box
+    this.add.text(cx, BOX_Y + 14, 'CARDS ON BOARD', {
       fontSize: '11px', fontFamily: 'monospace', color: '#555577', align: 'center'
     }).setOrigin(0.5, 0.5);
-    y += 26;
+
+    // Build list items in a container (positions relative to container origin)
+    const listContainer = this.add.container(0, 0);
+    let ly = 0;
 
     if (breakdown.length === 0) {
-      this.add.text(cx, y, '(no cards placed)', {
+      listContainer.add(this.add.text(cx, ly, '(no cards placed)', {
         fontSize: '13px', fontFamily: 'monospace', color: '#555577', align: 'center'
-      }).setOrigin(0.5, 0.5);
-      y += 26;
+      }).setOrigin(0.5, 0));
+      ly += 26;
     } else {
       breakdown.forEach(entry => {
         const rowTag   = entry.row === 'product' ? '[PROD] ' : entry.row === 'resources' ? '[RES]  ' : '[CASH] ';
         const tagColor = entry.row === 'product' ? '#9966cc' : entry.row === 'resources' ? '#aa7722' : '#446688';
-        this.add.text(cx - 230, y, rowTag, {
+        listContainer.add(this.add.text(cx - 230, ly, rowTag, {
           fontSize: '10px', fontFamily: 'monospace', color: tagColor
-        }).setOrigin(0, 0.5);
+        }).setOrigin(0, 0));
 
-        this.add.text(cx - 185, y, entry.name, {
+        listContainer.add(this.add.text(cx - 185, ly, entry.name, {
           fontSize: '12px', fontFamily: 'monospace', color: '#ffffff'
-        }).setOrigin(0, 0.5);
+        }).setOrigin(0, 0));
 
         let valStr;
         if (entry.bonus > 0) {
@@ -3727,58 +3741,118 @@ class ValuationScene extends Phaser.Scene {
         } else {
           valStr = entry.total > 0 ? fmtVal(entry.total) : '—';
         }
-        this.add.text(cx + 230, y, valStr, {
+        listContainer.add(this.add.text(cx + 230, ly, valStr, {
           fontSize: '12px', fontFamily: 'monospace', color: '#80ffaa', align: 'right'
-        }).setOrigin(1, 0.5);
+        }).setOrigin(1, 0));
 
-        y += 23;
+        ly += ROW_H;
       });
     }
 
+    const listContentH = ly;
+    const listAreaTop = BOX_Y + PAD_TOP;
+    const listAreaH = BOX_H - PAD_TOP - PAD_BOTTOM;
+    listContainer.y = listAreaTop;
+
+    // Mask to clip list to the box area
+    const maskShape = this.make.graphics({ add: false });
+    maskShape.fillRect(BOX_X, listAreaTop, BOX_W, listAreaH);
+    listContainer.setMask(new Phaser.Display.Masks.GeometryMask(this, maskShape));
+
+    // Scrollbar + scroll input (only if content overflows)
+    const needsScroll = listContentH > listAreaH;
+    if (needsScroll) {
+      const maxScroll = listContentH - listAreaH;
+      const trackX = BOX_X + BOX_W - 8;
+      const trackH = listAreaH - 8;
+      const trackTop = listAreaTop + 4;
+      const thumbH = Math.max(20, (listAreaH / listContentH) * trackH);
+
+      // Scrollbar track
+      this.add.rectangle(trackX, trackTop + trackH / 2, 4, trackH, 0x333355).setOrigin(0.5, 0.5);
+
+      // Scrollbar thumb
+      const thumb = this.add.rectangle(trackX, trackTop + thumbH / 2, 4, thumbH, 0x666688).setOrigin(0.5, 0.5);
+
+      const scrollList = (dy) => {
+        listContainer.y = Phaser.Math.Clamp(
+          listContainer.y - dy, listAreaTop - maxScroll, listAreaTop
+        );
+        const scrollPct = (listAreaTop - listContainer.y) / maxScroll;
+        thumb.y = trackTop + thumbH / 2 + scrollPct * (trackH - thumbH);
+      };
+
+      // Interactive hit zone over the box for drag + wheel input
+      const hitZone = this.add.rectangle(cx, BOX_Y + BOX_H / 2, BOX_W, BOX_H, 0x000000, 0)
+        .setInteractive();
+
+      // Drag to scroll
+      this.input.setDraggable(hitZone);
+      hitZone.on('drag', (_pointer, _dragX, _dragY, _dropped) => {});
+      this.input.on('drag', (_pointer, gameObject, _dragX, dragY) => {
+        if (gameObject !== hitZone) return;
+      });
+      let lastDragY = 0;
+      hitZone.on('pointerdown', (pointer) => { lastDragY = pointer.y; });
+      hitZone.on('pointermove', (pointer) => {
+        if (!pointer.isDown) return;
+        const dy = lastDragY - pointer.y;
+        lastDragY = pointer.y;
+        scrollList(dy);
+      });
+
+      // Mouse wheel scroll (via the canvas element directly)
+      this.game.canvas.addEventListener('wheel', (e) => {
+        if (this.scene.isActive()) {
+          scrollList(e.deltaY * 0.5);
+          e.preventDefault();
+        }
+      }, { passive: false });
+    }
+
+    // ── Fixed bottom section ──────────────────────────────────
+    let y = BOX_Y + BOX_H + 14;
+
     // Base total subtotal
-    y += 6;
-    this.add.rectangle(cx, y, 560, 1, 0x333355).setOrigin(0.5, 0.5);
-    y += 18;
     this.add.text(cx - 230, y, 'BASE TOTAL', {
       fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc'
     }).setOrigin(0, 0.5);
     this.add.text(cx + 230, y, fmtVal(baseTotal), {
       fontSize: '15px', fontFamily: 'monospace', color: '#aaaacc', align: 'right'
     }).setOrigin(1, 0.5);
-    y += 30;
+    y += 26;
 
     // ── Product Multiplier ────────────────────────────────────
     this.add.text(cx, y, 'PRODUCT MULTIPLIER', {
       fontSize: '11px', fontFamily: 'monospace', color: '#555577', align: 'center'
     }).setOrigin(0.5, 0.5);
-    y += 24;
+    y += 22;
 
     this.add.text(cx, y, `${productMultiplier}×`, {
       fontSize: '20px', fontFamily: 'monospace', color: '#cd84ff', align: 'center', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5);
-    y += 36;
+    y += 30;
 
     // ── Final valuation ───────────────────────────────────────
     this.add.rectangle(cx, y, 560, 2, 0x555577).setOrigin(0.5, 0.5);
-    y += 24;
+    y += 20;
 
     const calcStr = `${fmtVal(baseTotal)}  ×  ${productMultiplier}×  =`;
     this.add.text(cx, y, calcStr, {
       fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
-    y += 30;
+    y += 26;
 
     this.add.text(cx, y, fmtVal(finalTotal), {
-      fontSize: '42px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold', align: 'center'
+      fontSize: '36px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
-    y += 52;
+    y += 42;
 
     // Result message
     this.add.text(cx, y, this.resultMessage(finalTotal, isEndGame), {
-      fontSize: '13px', fontFamily: 'monospace', color: '#ffffff', align: 'center',
+      fontSize: '12px', fontFamily: 'monospace', color: '#ffffff', align: 'center',
       wordWrap: { width: 620 }
     }).setOrigin(0.5, 0.5);
-    y += 36;
 
     // ── Button ────────────────────────────────────────────────
     const btnY   = GAME_H - 60;
