@@ -213,15 +213,16 @@ class WelcomeScene extends Phaser.Scene {
     const cy = GAME_H / 2;
 
     // Background
-    this.add.rectangle(cx, cy, GAME_W, GAME_H, COLORS.bg);
+    this.cameras.main.setBackgroundColor(0x000000);
+    this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000);
 
     // Large title
-    this.add.text(cx, cy - 200, 'S T A R T U P', {
-      fontSize: '72px',
-      fontFamily: 'monospace',
+    this.add.text(cx, cy - 200, ' STARTUP ', {
+      fontSize: '120px',
+      fontFamily: '"Londrina Shadow", sans-serif',
       color: '#00ffff',
-      fontStyle: 'bold',
       align: 'center',
+      padding: { right: 16 },
     }).setOrigin(0.5, 0.5);
 
     // Tagline
@@ -236,7 +237,7 @@ class WelcomeScene extends Phaser.Scene {
       "Entrepreneurs can still live with their parents, right?",
     ];
     const tagline = taglines[Math.floor(Math.random() * taglines.length)];
-    this.add.text(cx, cy - 118, `"${tagline}"`, {
+    this.add.text(cx, cy - 118, tagline, {
       fontSize: '16px',
       fontFamily: 'monospace',
       color: '#aaaacc',
@@ -317,11 +318,11 @@ class TutorialScene extends Phaser.Scene {
 
     // Title
     this.pageObjects.push(
-      this.add.text(cx, y, 'HOW TO PLAY', {
-        fontSize: '28px', fontFamily: 'monospace', color: '#00ffff', fontStyle: 'bold', align: 'center'
+      this.add.text(cx, y, ' HOW TO PLAY ', {
+        fontSize: '48px', fontFamily: '"Londrina Shadow", sans-serif', color: '#00ffff', align: 'center', padding: { right: 16 }
       }).setOrigin(0.5, 0)
     );
-    y += 52;
+    y += 68;
 
     // YOUR GOAL
     this.pageObjects.push(
@@ -407,8 +408,8 @@ class TutorialScene extends Phaser.Scene {
 
     // Title
     this.pageObjects.push(
-      this.add.text(cx, 40, 'UNDERSTANDING CARDS', {
-        fontSize: '28px', fontFamily: 'monospace', color: '#00ffff', fontStyle: 'bold', align: 'center'
+      this.add.text(cx, 40, ' UNDERSTANDING CARDS ', {
+        fontSize: '48px', fontFamily: '"Londrina Shadow", sans-serif', color: '#00ffff', align: 'center', padding: { right: 16 }
       }).setOrigin(0.5, 0)
     );
 
@@ -533,11 +534,11 @@ class TutorialScene extends Phaser.Scene {
 
     // Title
     this.pageObjects.push(
-      this.add.text(cx, y, "WHAT'S AHEAD", {
-        fontSize: '28px', fontFamily: 'monospace', color: '#00ffff', fontStyle: 'bold', align: 'center'
+      this.add.text(cx, y, " WHAT'S AHEAD ", {
+        fontSize: '48px', fontFamily: '"Londrina Shadow", sans-serif', color: '#00ffff', align: 'center', padding: { right: 16 }
       }).setOrigin(0.5, 0)
     );
-    y += 52;
+    y += 68;
 
     // Intro
     this.pageObjects.push(
@@ -677,8 +678,8 @@ class RoundTitleScene extends Phaser.Scene {
 
     // ── Layout ──────────────────────────────────────────────
     // "ROUND X"
-    this.add.text(cx, cy - 120, `ROUND ${round || 1}`, {
-      fontSize: '52px', fontFamily: 'monospace', color: '#4ecdc4', fontStyle: 'bold'
+    this.add.text(cx, cy - 120, ` ROUND ${round || 1} `, {
+      fontSize: '72px', fontFamily: '"Londrina Shadow", sans-serif', color: '#4ecdc4', padding: { right: 16 }
     }).setOrigin(0.5);
 
     // Turn count
@@ -3687,8 +3688,8 @@ class ValuationScene extends Phaser.Scene {
     this.add.rectangle(cx, GAME_H / 2, GAME_W, GAME_H, 0x000000, 0.90);
 
     // Header
-    this.add.text(cx, 60, 'VALUATION', {
-      fontSize: '48px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold', align: 'center'
+    this.add.text(cx, 60, ' VALUATION ', {
+      fontSize: '72px', fontFamily: '"Londrina Shadow", sans-serif', color: '#e9c46a', align: 'center', padding: { right: 16 }
     }).setOrigin(0.5, 0.5);
 
     this.add.text(cx, 108, `END OF ROUND ${round}`, {
@@ -3836,4 +3837,6 @@ const config = {
   },
 };
 
-new Phaser.Game(config);
+document.fonts.ready.then(() => {
+  new Phaser.Game(config);
+});
