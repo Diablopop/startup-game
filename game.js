@@ -3837,6 +3837,6 @@ const config = {
   },
 };
 
-document.fonts.ready.then(() => {
+document.fonts.load('48px "Londrina Shadow"').then(() => {
   new Phaser.Game(config);
 });
