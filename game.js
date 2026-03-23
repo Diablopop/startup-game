@@ -21,6 +21,7 @@ const ACTIVATE_TILE_X = 353;   // x of activate tile / row label block
 
 const TURNS_PER_ROUND     = [7, 7, 6, 5];
 const BASE_CASH_PER_ROUND = [25, 50, 75, 100];
+const MAX_COST_PER_ROUND  = [1, 2, Infinity, Infinity];
 
 const COLORS = {
   bg:             0x1a1a2e,
@@ -51,9 +52,139 @@ const COLORS = {
     'Investor':              0xffd32a,
     'C-Suite':               0xe9c46a,
     'Boardmember':           0xcd84ff,
-    'Services & Technology': 0x00d2d3,
+    'Services/Tech': 0x00d2d3,
   }
 };
+
+// ── Utility functions ───────────────────────────────────────
+function operationLabel(op) {
+  if (op.type === 'add')      return op.value < 0 ? `${op.value}` : `+${op.value}`;
+  if (op.type === 'multiply') return `\u00d7${op.value}`;
+  return '?';
+}
+
+// ── Scene transition helpers ────────────────────────────────
+function fadeToScene(scene, targetKey, data = {}, duration = 400) {
+  scene.cameras.main.fadeOut(duration, 0, 0, 0);
+  scene.cameras.main.once('camerafadeoutcomplete', () => {
+    scene.scene.start(targetKey, data);
+  });
+}
+
+// Iris transition using a persistent overlay scene that survives scene switches.
+// Call irisTransition(scene, target, data) — it handles close + open seamlessly.
+function irisTransition(scene, targetKey, data = {}, closeDuration = 400, openDuration = 500) {
+  const overlay = scene.scene.get('IrisOverlay');
+  overlay.runTransition(targetKey, data, closeDuration, openDuration, scene);
+}
+
+// ============================================================
+// IRIS OVERLAY SCENE — persistent scene that draws iris wipe on top of everything
+// ============================================================
+class IrisOverlayScene extends Phaser.Scene {
+  constructor() { super({ key: 'IrisOverlay' }); }
+
+  create() {
+    // Full-screen black rectangle, hidden until needed
+    this.overlay = this.add.graphics();
+    this.overlay.setDepth(9999);
+    this.overlay.setVisible(false);
+  }
+
+  drawIris(radius) {
+    const cx = GAME_W / 2;
+    const cy = GAME_H / 2;
+    this.overlay.clear();
+
+    if (radius <= 0) {
+      // Fully closed — solid black
+      this.overlay.fillStyle(0x000000, 1);
+      this.overlay.fillRect(0, 0, GAME_W, GAME_H);
+      return;
+    }
+
+    // Draw black border with circular cutout using even-odd fill via canvas
+    // We draw 4 rects around the circle to approximate the mask
+    const r = radius;
+    this.overlay.fillStyle(0x000000, 1);
+
+    // Top strip
+    this.overlay.fillRect(0, 0, GAME_W, Math.max(0, cy - r));
+    // Bottom strip
+    this.overlay.fillRect(0, Math.min(GAME_H, cy + r), GAME_W, Math.max(0, GAME_H - (cy + r)));
+    // Left strip
+    this.overlay.fillRect(0, Math.max(0, cy - r), Math.max(0, cx - r), r * 2);
+    // Right strip
+    this.overlay.fillRect(Math.min(GAME_W, cx + r), Math.max(0, cy - r), Math.max(0, GAME_W - (cx + r)), r * 2);
+
+    // Fill the corners around the circle with small wedge segments
+    const steps = 64;
+    for (let i = 0; i < steps; i++) {
+      const a1 = (i / steps) * Math.PI * 2;
+      const a2 = ((i + 1) / steps) * Math.PI * 2;
+      const x1 = cx + Math.cos(a1) * r;
+      const y1 = cy + Math.sin(a1) * r;
+      const x2 = cx + Math.cos(a2) * r;
+      const y2 = cy + Math.sin(a2) * r;
+
+      // For each segment, fill the rectangular corner area outside the arc
+      // We'll use a different approach: draw the circle border region with triangles
+      // extending to the bounding box edges
+      const bx1 = cx + Math.cos(a1) * (r + GAME_W);
+      const by1 = cy + Math.sin(a1) * (r + GAME_H);
+      const bx2 = cx + Math.cos(a2) * (r + GAME_W);
+      const by2 = cy + Math.sin(a2) * (r + GAME_H);
+
+      this.overlay.beginPath();
+      this.overlay.moveTo(x1, y1);
+      this.overlay.lineTo(bx1, by1);
+      this.overlay.lineTo(bx2, by2);
+      this.overlay.lineTo(x2, y2);
+      this.overlay.closePath();
+      this.overlay.fillPath();
+    }
+  }
+
+  runTransition(targetKey, data, closeDuration, openDuration, callingScene) {
+    const maxR = Math.sqrt((GAME_W / 2) ** 2 + (GAME_H / 2) ** 2);
+    this.scene.bringToTop();
+    this.overlay.setVisible(true);
+
+    const progress = { r: maxR };
+
+    // Phase 1: Iris close
+    this.tweens.add({
+      targets: progress,
+      r: 0,
+      duration: closeDuration,
+      ease: 'Quad.easeIn',
+      onUpdate: () => this.drawIris(progress.r),
+      onComplete: () => {
+        // Screen is solid black — safe to switch scenes
+        this.drawIris(0);
+
+        // Switch the underlying scene
+        callingScene.scene.start(targetKey, data);
+
+        // Phase 2: Iris open (after a brief delay for the new scene to render)
+        this.time.delayedCall(50, () => {
+          const openProgress = { r: 0 };
+          this.tweens.add({
+            targets: openProgress,
+            r: maxR,
+            duration: openDuration,
+            ease: 'Quad.easeOut',
+            onUpdate: () => this.drawIris(openProgress.r),
+            onComplete: () => {
+              this.overlay.clear();
+              this.overlay.setVisible(false);
+            }
+          });
+        });
+      }
+    });
+  }
+}
 
 // ============================================================
 // BOOT SCENE
@@ -63,7 +194,11 @@ class BootScene extends Phaser.Scene {
 
   preload() { this.load.json('cards', 'cards.json'); }
 
-  create() { this.scene.start('WelcomeScene'); }
+  create() {
+    // Launch the persistent iris overlay (runs in parallel, always on top)
+    this.scene.launch('IrisOverlay');
+    this.scene.start('WelcomeScene');
+  }
 }
 
 // ============================================================
@@ -73,6 +208,7 @@ class WelcomeScene extends Phaser.Scene {
   constructor() { super({ key: 'WelcomeScene' }); }
 
   create() {
+    this.cameras.main.fadeIn(400, 0, 0, 0);
     const cx = GAME_W / 2;
     const cy = GAME_H / 2;
 
@@ -117,7 +253,7 @@ class WelcomeScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5);
     playBtn.on('pointerover', () => playBtn.setFillStyle(0x2d6a4f));
     playBtn.on('pointerout',  () => playBtn.setFillStyle(0x1a472a));
-    playBtn.on('pointerdown', () => this.scene.start('GameScene'));
+    playBtn.on('pointerdown', () => fadeToScene(this, 'RoundTitleScene', { round: 1, carryOver: null, dealCards: true }));
 
     // HOW TO PLAY button (secondary — outlined)
     const tutBtn = this.add.rectangle(cx, cy + 72, 220, 52, 0x0d0d1a)
@@ -461,7 +597,7 @@ class TutorialScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5);
     playBtn.on('pointerover', () => playBtn.setFillStyle(0x2d6a4f));
     playBtn.on('pointerout',  () => playBtn.setFillStyle(0x1a472a));
-    playBtn.on('pointerdown', () => this.scene.start('GameScene'));
+    playBtn.on('pointerdown', () => fadeToScene(this, 'RoundTitleScene', { round: 1, carryOver: null, dealCards: true }));
     this.pageObjects.push(playBtn);
   }
 
@@ -512,17 +648,229 @@ class TutorialScene extends Phaser.Scene {
 }
 
 // ============================================================
+// ROUND TITLE SCENE
+// ============================================================
+class RoundTitleScene extends Phaser.Scene {
+  constructor() { super({ key: 'RoundTitleScene' }); }
+
+  create() {
+    const { round, carryOver, dealCards } = this.scene.settings.data || {};
+    this.scene.settings.data = {};
+
+    this.cameras.main.fadeIn(400, 0, 0, 0);
+    this.cameras.main.setBackgroundColor(0x000000);
+    this.children.removeAll(true);
+
+    const cx = GAME_W / 2;
+    const cy = GAME_H / 2;
+    const cardsData = this.cache.json.get('cards').cards;
+
+    // Count cards available this round
+    const maxCost = MAX_COST_PER_ROUND[(round || 1) - 1];
+    const totalCards = cardsData.filter(c => c.cost <= maxCost).length;
+
+    // Turn count
+    const baseTurns = TURNS_PER_ROUND[(round || 1) - 1];
+    const bonusTurns = carryOver ? (carryOver.totalBonusTurns ?? 0) : 0;
+    const totalTurns = baseTurns + bonusTurns;
+    const bonusLabel = bonusTurns > 0 ? ` (+${bonusTurns} bonus)` : '';
+
+    // ── Layout ──────────────────────────────────────────────
+    // "ROUND X"
+    this.add.text(cx, cy - 120, `ROUND ${round || 1}`, {
+      fontSize: '52px', fontFamily: 'monospace', color: '#4ecdc4', fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    // Turn count
+    this.add.text(cx, cy - 55, `${totalTurns} Turns${bonusLabel}`, {
+      fontSize: '20px', fontFamily: 'monospace', color: '#aaaacc'
+    }).setOrigin(0.5);
+
+    // Deck label
+    const deckLabel = maxCost === Infinity
+      ? `Full deck \u2014 all ${totalCards} cards unlocked`
+      : maxCost <= 1
+        ? `Garage deck \u2014 ${totalCards} cards up to $100k`
+        : `Seed deck \u2014 ${totalCards} cards up to $${maxCost * 100}k`;
+    this.add.text(cx, cy - 25, deckLabel, {
+      fontSize: '16px', fontFamily: 'monospace', color: '#778899'
+    }).setOrigin(0.5);
+
+    // ── Deal animation (round 1 only) ───────────────────────
+    if (dealCards && !carryOver) {
+      // Build filtered deck for round 1
+      const eligibleIds = cardsData.filter(c => c.cost <= MAX_COST_PER_ROUND[0]).map(c => c.id);
+      const shuffled = [...eligibleIds].sort(() => Math.random() - 0.5);
+
+      const hand = shuffled.slice(0, 4);
+      const revealedCards = shuffled.slice(4, 6);
+      const drawPile = shuffled.slice(6);
+
+      // Pre-built state to pass to GameScene
+      this.preBuiltState = {
+        round:        1,
+        turn:         1,
+        maxTurns:     TURNS_PER_ROUND[0],
+        cash:         75,
+        hand,
+        cashRow:        [null, null, null, null, null],
+        productRow:     [null, null, null, null, null],
+        resourcesRow:   [null, null, null, null, null],
+        drawPile,
+        revealedCards,
+        phase:          'playing',
+        cardOpBoosts:   {},
+        valueBonuses:   {},
+        productMultiplier: 0,
+        totalBonusTurns: 0,
+        freePlay: false,
+        freePlayRow: null,
+      };
+
+      // "Dealing your cards..."
+      this.add.text(cx, cy + 20, 'Dealing your cards...', {
+        fontSize: '14px', fontFamily: 'monospace', color: '#556677', fontStyle: 'italic'
+      }).setOrigin(0.5);
+
+      // Card placeholders
+      const cardSpacing = CARD_W + 20;
+      const startX = cx - (cardSpacing * 1.5);
+      const cardY = cy + 110;
+
+      const placeholders = [];
+      for (let i = 0; i < 4; i++) {
+        const x = startX + i * cardSpacing;
+
+        // Card back (placeholder)
+        const back = this.add.container(x, cardY);
+        const backGfx = this.add.graphics();
+        backGfx.fillStyle(0x16213e);
+        backGfx.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+        backGfx.lineStyle(2, 0x333355);
+        backGfx.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+        const backText = this.add.text(0, 0, '?', {
+          fontSize: '36px', fontFamily: 'monospace', color: '#333355', fontStyle: 'bold'
+        }).setOrigin(0.5);
+        back.add([backGfx, backText]);
+
+        // Card face (hidden initially)
+        const card = cardsData.find(c => c.id === hand[i]);
+        const face = this.add.container(x, cardY);
+        face.setScale(0, 1);
+
+        const typeColor = COLORS.typeColors[card.type] || 0x888888;
+
+        // Rounded background
+        const faceGfx = this.add.graphics();
+        faceGfx.fillStyle(COLORS.cardBg);
+        faceGfx.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+        faceGfx.lineStyle(1, typeColor);
+        faceGfx.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+
+        // Type bar (rounded top corners)
+        const barGfx = this.add.graphics();
+        barGfx.fillStyle(typeColor);
+        barGfx.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 12, { tl: 5, tr: 5, bl: 0, br: 0 });
+
+        const typeLabel = this.add.text(0, -CARD_H / 2 + 6, card.type.toUpperCase(), {
+          fontSize: '7px', fontFamily: 'monospace', color: '#000000', fontStyle: 'bold'
+        }).setOrigin(0.5);
+
+        const nameText = this.add.text(0, -CARD_H / 2 + 42, card.name, {
+          fontSize: '11px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
+          align: 'center', wordWrap: { width: CARD_W - 10 }
+        }).setOrigin(0.5);
+
+        const divider = this.add.rectangle(0, -CARD_H / 2 + 72, CARD_W - 16, 1, 0x33334a)
+          .setOrigin(0.5);
+
+        const opText = this.add.text(0, -CARD_H / 2 + 82, operationLabel(card.operation), {
+          fontSize: '20px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold'
+        }).setOrigin(0.5, 0);
+
+        face.add([faceGfx, barGfx, typeLabel, nameText, divider, opText]);
+
+        // Effect icons
+        const icons = [];
+        if (card.specialEffect || card.bonusTurn) icons.push({ symbol: '\u2605', color: '#e9c46a' });
+        if (card.triggerEffect)                   icons.push({ symbol: '\u26a1', color: '#00ffff' });
+        if (icons.length > 0) {
+          const iconY = -CARD_H / 2 + 118;
+          const spacing = 20;
+          const totalW = (icons.length - 1) * spacing;
+          icons.forEach((ic, j) => {
+            face.add(this.add.text(-totalW / 2 + j * spacing, iconY, ic.symbol, {
+              fontSize: '16px', fontFamily: 'monospace', color: ic.color
+            }).setOrigin(0.5));
+          });
+        }
+
+        // Cost (bottom-left, red)
+        face.add(this.add.text(-CARD_W / 2 + 6, CARD_H / 2 - 16, `$${card.cost * 100}k`, {
+          fontSize: '11px', fontFamily: 'monospace', color: '#ff8888'
+        }).setOrigin(0, 0.5));
+
+        // Value (bottom-right, green)
+        const valStr = card.baseValue > 0 ? `$${card.baseValue}k` : '\u2014';
+        face.add(this.add.text(CARD_W / 2 - 6, CARD_H / 2 - 16, valStr, {
+          fontSize: '11px', fontFamily: 'monospace', color: '#80ffaa'
+        }).setOrigin(1, 0.5));
+
+        placeholders.push({ back, face });
+      }
+
+      // Stagger-reveal each card
+      for (let i = 0; i < 4; i++) {
+        const delay = 800 + i * 600;
+        const { back, face } = placeholders[i];
+
+        this.time.delayedCall(delay, () => {
+          // Flip back out
+          this.tweens.add({
+            targets: back,
+            scaleX: 0,
+            duration: 150,
+            ease: 'Quad.easeIn',
+            onComplete: () => {
+              back.setVisible(false);
+              // Flip face in
+              this.tweens.add({
+                targets: face,
+                scaleX: 1,
+                duration: 150,
+                ease: 'Quad.easeOut',
+              });
+            }
+          });
+        });
+      }
+
+      // After all cards revealed, iris-close then iris-open on GameScene
+      const totalDelay = 800 + 3 * 600 + 300 + 1000; // last card flip + pause
+      this.time.delayedCall(totalDelay, () => {
+        irisTransition(this, 'GameScene', { preBuiltState: this.preBuiltState });
+      });
+
+    } else {
+      // ── Rounds 2+ (no card deal) ──────────────────────────
+      // Iris-close then iris-open on GameScene
+      this.time.delayedCall(2000, () => {
+        irisTransition(this, 'GameScene', { carryOver });
+      });
+    }
+  }
+}
+
+// ============================================================
 // GAME SCENE
 // ============================================================
 class GameScene extends Phaser.Scene {
   constructor() { super({ key: 'GameScene' }); }
 
   create() {
-    // Always read startup data from settings.data — Phaser sets this on every scene.start()
-    // regardless of whether the scene is fully restarted or woken from sleep.
-    const carryOver = (this.scene.settings.data && this.scene.settings.data.carryOver)
-      ? this.scene.settings.data.carryOver
-      : null;
+    // Read startup data from settings.data — Phaser sets this on every scene.start()
+    const preBuilt = this.scene.settings.data?.preBuiltState || null;
+    const carryOver = this.scene.settings.data?.carryOver || null;
 
     // Wipe settings.data immediately so a subsequent restart with no data doesn't reuse it.
     this.scene.settings.data = {};
@@ -530,7 +878,10 @@ class GameScene extends Phaser.Scene {
     this.children.removeAll(true);   // destroy any leftover display objects
     this.cardsData = this.cache.json.get('cards').cards;
 
-    if (carryOver) {
+    if (preBuilt) {
+      // State pre-built by RoundTitleScene (round 1 card deal)
+      this.state = { ...preBuilt };
+    } else if (carryOver) {
       const round = carryOver.round + 1;
       this.state = {
         round,
@@ -551,10 +902,30 @@ class GameScene extends Phaser.Scene {
         freePlay: false,
         freePlayRow: null,
       };
+
+      // Inject newly eligible cards into the draw pile when cost threshold increases
+      const prevMaxCost = MAX_COST_PER_ROUND[round - 2];
+      const currMaxCost = MAX_COST_PER_ROUND[round - 1];
+      if (currMaxCost > prevMaxCost) {
+        const inGame = new Set([
+          ...this.state.hand,
+          ...this.state.cashRow.filter(Boolean),
+          ...this.state.productRow.filter(Boolean),
+          ...this.state.resourcesRow.filter(Boolean),
+          ...this.state.drawPile,
+          ...this.state.revealedCards,
+        ]);
+        const newCards = this.cardsData
+          .filter(c => c.cost > prevMaxCost && c.cost <= currMaxCost && !inGame.has(c.id))
+          .map(c => c.id);
+        this.state.drawPile.push(...newCards);
+        this.state.drawPile.sort(() => Math.random() - 0.5);
+      }
     } else {
-      // Fresh game — shuffle deck, deal 4 to hand, 2 face-up, rest to draw pile
-      const allIds = this.cardsData.map(c => c.id);
-      const shuffled = [...allIds].sort(() => Math.random() - 0.5);
+      // Fresh game — shuffle cost-eligible deck, deal 4 to hand, 2 face-up, rest to draw pile
+      const maxCost = MAX_COST_PER_ROUND[0];
+      const eligibleIds = this.cardsData.filter(c => c.cost <= maxCost).map(c => c.id);
+      const shuffled = [...eligibleIds].sort(() => Math.random() - 0.5);
       this.state = {
         round:        1,
         turn:         1,
@@ -1137,9 +1508,7 @@ class GameScene extends Phaser.Scene {
   }
 
   operationLabel(op) {
-    if (op.type === 'add')      return op.value < 0 ? `${op.value}` : `+${op.value}`;
-    if (op.type === 'multiply') return `×${op.value}`;
-    return '?';
+    return operationLabel(op);
   }
 
   specialEffectLabel(fx) {
@@ -3190,7 +3559,7 @@ class GameScene extends Phaser.Scene {
     const finalTotal      = Math.round(baseTotal * productMultiplier);
     const isEndGame       = this.state.round === TURNS_PER_ROUND.length;
 
-    this.scene.start('ValuationScene', {
+    irisTransition(this, 'ValuationScene', {
       breakdown,
       baseTotal,
       productMultiplier,
@@ -3430,9 +3799,9 @@ class ValuationScene extends Phaser.Scene {
     btn.on('pointerout',  () => btn.setFillStyle(0x1a472a));
     btn.on('pointerdown', () => {
       if (isEndGame) {
-        this.scene.start('GameScene');
+        fadeToScene(this, 'WelcomeScene', {});
       } else {
-        this.scene.start('GameScene', { carryOver });
+        fadeToScene(this, 'RoundTitleScene', { round: round + 1, carryOver, dealCards: false });
       }
     });
   }
@@ -3458,7 +3827,7 @@ const config = {
   width:           GAME_W,
   height:          GAME_H,
   backgroundColor: COLORS.bg,
-  scene:           [BootScene, WelcomeScene, TutorialScene, GameScene, ValuationScene],
+  scene:           [BootScene, IrisOverlayScene, WelcomeScene, TutorialScene, RoundTitleScene, GameScene, ValuationScene],
   parent:          document.body,
   roundPixels: true,
   scale: {

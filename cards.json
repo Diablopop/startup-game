@@ -600,7 +600,7 @@
                   "role": "COO",
                   "specialEffect": {
                         "type": "modify_type",
-                        "targetType": "Services & Technology",
+                        "targetType": "Services/Tech",
                         "operationBonus": {
                               "type": "add",
                               "value": 2
@@ -608,7 +608,7 @@
                   },
                   "triggerEffect": {
                         "type": "boost_op",
-                        "target": "Services & Technology",
+                        "target": "Services/Tech",
                         "value": 0.5
                   }
             },
@@ -1516,7 +1516,7 @@
             },
             {
                   "id": 62,
-                  "name": "CEO's Niece",
+                  "name": "Your Cousin's Kid",
                   "type": "Product/Design",
                   "cost": 0,
                   "operation": {
@@ -2018,7 +2018,7 @@
             },
             {
                   "id": 83,
-                  "name": "CMO's Nephew",
+                  "name": "Neighbor's Kid",
                   "type": "Sales",
                   "cost": 0,
                   "operation": {
@@ -2290,11 +2290,11 @@
             {
                   "id": 95,
                   "name": "Office Cleanse",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 0,
                   "operation": {
                         "type": "add",
-                        "value": 0
+                        "value": 0.5
                   },
                   "eligibleRows": [
                         "cash",
@@ -2315,7 +2315,7 @@
             {
                   "id": 96,
                   "name": "Keg in the Kitchen",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 0,
                   "operation": {
                         "type": "add",
@@ -2350,7 +2350,7 @@
             {
                   "id": 97,
                   "name": "Dusty Ping Pong Table",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 0,
                   "operation": {
                         "type": "add",
@@ -2372,7 +2372,7 @@
             {
                   "id": 98,
                   "name": "Networking event (all dudes)",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 0,
                   "operation": {
                         "type": "add",
@@ -2394,7 +2394,7 @@
             {
                   "id": 99,
                   "name": "Catered Lunch",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 0.5,
                   "operation": {
                         "type": "add",
@@ -2417,7 +2417,7 @@
             {
                   "id": 100,
                   "name": "\"Unlimited\" PTO",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 0.5,
                   "operation": {
                         "type": "add",
@@ -2439,7 +2439,7 @@
             {
                   "id": 101,
                   "name": "All Hands Meeting",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 1,
                   "operation": {
                         "type": "add",
@@ -2464,7 +2464,7 @@
             {
                   "id": 102,
                   "name": "Standing Desks",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 1,
                   "operation": {
                         "type": "add",
@@ -2489,7 +2489,7 @@
             {
                   "id": 103,
                   "name": "Slack Premium",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 1,
                   "operation": {
                         "type": "add",
@@ -2524,7 +2524,7 @@
             {
                   "id": 104,
                   "name": "Swag Drop",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 1,
                   "operation": {
                         "type": "add",
@@ -2546,7 +2546,7 @@
             {
                   "id": 105,
                   "name": "Team Offsite",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 1,
                   "operation": {
                         "type": "add",
@@ -2569,7 +2569,7 @@
             {
                   "id": 106,
                   "name": "Nap Pod",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 1,
                   "operation": {
                         "type": "add",
@@ -2587,7 +2587,7 @@
             {
                   "id": 107,
                   "name": "Recruiting Firm",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 2,
                   "operation": {
                         "type": "add",
@@ -2609,7 +2609,7 @@
             {
                   "id": 108,
                   "name": "Podcast Sponsorship",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 2,
                   "operation": {
                         "type": "multiply",
@@ -2638,7 +2638,7 @@
             {
                   "id": 109,
                   "name": "AWS Contract",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 2,
                   "operation": {
                         "type": "multiply",
@@ -2663,7 +2663,7 @@
             {
                   "id": 110,
                   "name": "Executive Coach",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 2,
                   "operation": {
                         "type": "multiply",
@@ -2688,7 +2688,7 @@
             {
                   "id": 111,
                   "name": "Salesforce Integration",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 3,
                   "operation": {
                         "type": "add",
@@ -2723,7 +2723,7 @@
             {
                   "id": 112,
                   "name": "Branding Agency",
-                  "type": "Services & Technology",
+                  "type": "Services/Tech",
                   "cost": 5,
                   "operation": {
                         "type": "multiply",
@@ -2754,6 +2754,190 @@
                               }
                         }
                   ]
+            },
+            {
+                  "id": 113,
+                  "name": "Unicorn Dreamer",
+                  "type": "Sales",
+                  "cost": 0.5,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Drives an Uber on the weekends and hopes to retire at 35."
+            },
+            {
+                  "id": 114,
+                  "name": "Not a Numbers Guy",
+                  "type": "Sales",
+                  "cost": 0.5,
+                  "operation": {
+                        "type": "add",
+                        "value": 0.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 0,
+                  "description": "Negotiated their 0.5% equity to 0.25%."
+            },
+            {
+                  "id": 115,
+                  "name": "RevOps Evader",
+                  "type": "Sales",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "You can't measure what isn't reported.",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Sales",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 1
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Prod/Design",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ]
+            },
+            {
+                  "id": 116,
+                  "name": "Whale Chaser",
+                  "type": "Sales",
+                  "cost": 1,
+                  "operation": {
+                        "type": "add",
+                        "value": 1
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 50,
+                  "description": "If we could just land that deal with Costco...",
+                  "specialEffect": [
+                        {
+                              "type": "modify_type",
+                              "targetType": "Sales",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": 1
+                              }
+                        },
+                        {
+                              "type": "modify_type",
+                              "targetType": "Engineering",
+                              "operationBonus": {
+                                    "type": "add",
+                                    "value": -0.5
+                              }
+                        }
+                  ]
+            },
+            {
+                  "id": 117,
+                  "name": "The Wolf of Our Street",
+                  "type": "Sales",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Learned everything they know from 'Boiler Room'.",
+                  "triggerEffect": {
+                        "type": "boost_op",
+                        "target": "Sales",
+                        "value": 0.5
+                  }
+            },
+            {
+                  "id": 118,
+                  "name": "Quota Balancer",
+                  "type": "Sales",
+                  "cost": 2,
+                  "operation": {
+                        "type": "add",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 100,
+                  "description": "Never misses a target, but never goes over it either.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Sales",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 0.5
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 25
+                  }
+            },
+            {
+                  "id": 119,
+                  "name": "The Vibe Closer",
+                  "type": "Sales",
+                  "cost": 3,
+                  "operation": {
+                        "type": "multiply",
+                        "value": 1.5
+                  },
+                  "eligibleRows": [
+                        "cash",
+                        "product",
+                        "resources"
+                  ],
+                  "baseValue": 150,
+                  "description": "No deck, no plan, just a feeling.",
+                  "specialEffect": {
+                        "type": "modify_type",
+                        "targetType": "Sales",
+                        "operationBonus": {
+                              "type": "add",
+                              "value": 1
+                        }
+                  },
+                  "triggerEffect": {
+                        "type": "gain_cash",
+                        "amount": 25
+                  }
             }
       ]
 }
