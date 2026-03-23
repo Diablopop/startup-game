@@ -480,7 +480,7 @@ class TutorialScene extends Phaser.Scene {
     // Value
     const valStr = exCard.baseValue > 0 ? `$${exCard.baseValue}k` : '—';
     container.add(this.add.text(CARD_W / 2 - 6, CARD_H / 2 - 16, valStr, {
-      fontSize: '11px', fontFamily: 'monospace', color: '#80ffaa'
+      fontSize: '11px', fontFamily: 'monospace', color: '#ccccdd'
     }).setOrigin(1, 0.5));
 
     container.setScale(2);
@@ -503,7 +503,7 @@ class TutorialScene extends Phaser.Scene {
         desc: 'An effect that fires in sequence when its row is activated.' },
       { label: 'COST (IN RED)',   color: '#ff8888',
         desc: 'The cash required to place this card.' },
-      { label: 'VALUE (IN GREEN)', color: '#80ffaa',
+      { label: 'VALUE (IN SILVER)', color: '#ccccdd',
         desc: "How much a card is worth for your startup's valuation." },
     ];
 
@@ -736,7 +736,7 @@ class RoundTitleScene extends Phaser.Scene {
       // Card placeholders
       const cardSpacing = CARD_W + 20;
       const startX = cx - (cardSpacing * 1.5);
-      const cardY = cy + 110;
+      const cardY = cy + 130;
 
       const placeholders = [];
       for (let i = 0; i < 4; i++) {
@@ -814,7 +814,7 @@ class RoundTitleScene extends Phaser.Scene {
         // Value (bottom-right, green)
         const valStr = card.baseValue > 0 ? `$${card.baseValue}k` : '\u2014';
         face.add(this.add.text(CARD_W / 2 - 6, CARD_H / 2 - 16, valStr, {
-          fontSize: '11px', fontFamily: 'monospace', color: '#80ffaa'
+          fontSize: '11px', fontFamily: 'monospace', color: '#ccccdd'
         }).setOrigin(1, 0.5));
 
         placeholders.push({ back, face });
@@ -963,6 +963,7 @@ class GameScene extends Phaser.Scene {
     if (carryOver) {
       this.restoreCarryOverState();
       this.refreshBoardOpLabels();
+    this.refreshBoardValueLabels();
     }
 
     this.renderHand();
@@ -992,13 +993,13 @@ class GameScene extends Phaser.Scene {
     // Divider after round/turn block
     this.add.rectangle(140, 104, 180, 1, 0x333355).setOrigin(0.5, 0.5);
 
-    // Cash
-    this.add.text(140, 120, 'YOUR CASH', {
+    // Team Value (sum of all card baseValues on board)
+    this.add.text(140, 120, 'TEAM VALUE', {
       fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    this.hudCash = this.add.text(140, 144, '', {
-      fontSize: '24px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
+    this.hudTeamValue = this.add.text(140, 144, '$0k', {
+      fontSize: '24px', fontFamily: 'monospace', color: '#ccccdd', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Divider
@@ -1013,19 +1014,32 @@ class GameScene extends Phaser.Scene {
       fontSize: '28px', fontFamily: 'monospace', color: '#cd84ff', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    // Draw pile counter
-    this.add.rectangle(140, 250, 180, 1, 0x333355).setOrigin(0.5, 0.5);
-    this.add.text(140, 264, 'DRAW PILE', {
+    // ── Bottom section of rail ────────────────────────────────
+
+    // Cash (in cost red)
+    this.add.text(140, GAME_H - 200, 'YOUR CASH', {
       fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
-    this.hudDrawPile = this.add.text(140, 286, '-- cards', {
+
+    this.hudCash = this.add.text(140, GAME_H - 176, '', {
+      fontSize: '24px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5, 0.5);
+
+    // Divider
+    this.add.rectangle(140, GAME_H - 152, 180, 1, 0x333355).setOrigin(0.5, 0.5);
+
+    // Draw pile counter
+    this.add.text(140, GAME_H - 136, 'DRAW PILE', {
+      fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
+    }).setOrigin(0.5, 0.5);
+    this.hudDrawPile = this.add.text(140, GAME_H - 114, '-- cards', {
       fontSize: '18px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Eye button to preview draw pile
-    const eyeBg = this.add.rectangle(140, 332, 80, 44, 0x1a1000)
+    const eyeBg = this.add.rectangle(140, GAME_H - 78, 80, 44, 0x1a1000)
       .setStrokeStyle(1, 0x664400).setInteractive({ useHandCursor: true });
-    const eyeLabel = this.add.text(140, 332, '👁 preview', {
+    const eyeLabel = this.add.text(140, GAME_H - 78, '👁 preview', {
       fontSize: '9px', fontFamily: 'monospace', color: '#886622', align: 'center'
     }).setOrigin(0.5, 0.5);
     eyeBg.on('pointerover', () => { eyeBg.setFillStyle(0x3d2200); eyeLabel.setColor('#ffaa44'); });
@@ -1481,7 +1495,7 @@ class GameScene extends Phaser.Scene {
 
     const valStr = card.baseValue > 0 ? `$${card.baseValue}k` : '—';
     container.add(this.add.text(CARD_W / 2 - 6, CARD_H / 2 - 16, valStr, {
-      fontSize: '11px', fontFamily: 'monospace', color: '#80ffaa'
+      fontSize: '11px', fontFamily: 'monospace', color: '#ccccdd'
     }).setOrigin(1, 0.5));
 
     if (draggable) {
@@ -1809,6 +1823,7 @@ class GameScene extends Phaser.Scene {
     this._reRenderSlot(rowType, targetSlotIndex);
 
     this.refreshBoardOpLabels();
+    this.refreshBoardValueLabels();
     this.renderHand();
     this.updateHUD();
 
@@ -1882,11 +1897,13 @@ class GameScene extends Phaser.Scene {
     slot.opText = cashOpText;
 
     const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
-    if (dispVal > 0) {
-      slot.add(this.add.text(0, SLOT_H / 2 - 14, `$${dispVal}k`, {
-        fontSize: '9px', fontFamily: 'monospace', color: '#80ffaa', align: 'center'
-      }).setOrigin(0.5, 0.5));
-    }
+    const valText = this.add.text(0, SLOT_H / 2 - 14, dispVal > 0 ? `$${dispVal}k` : '', {
+      fontSize: '9px', fontFamily: 'monospace', color: '#ccccdd', align: 'center'
+    }).setOrigin(0.5, 0.5);
+    valText.setVisible(dispVal > 0);
+    slot.add(valText);
+    slot.valText = valText;
+
     const slotIcons = [];
     if (card.specialEffect || card.bonusTurn) slotIcons.push({ symbol: '★', color: '#e9c46a' });
     if (card.triggerEffect)                   slotIcons.push({ symbol: '⚡', color: '#00ffff' });
@@ -1928,11 +1945,13 @@ class GameScene extends Phaser.Scene {
     slot.opText = ipOpText;
 
     const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
-    if (dispVal > 0) {
-      slot.add(this.add.text(0, SLOT_H / 2 - 14, `$${dispVal}k`, {
-        fontSize: '9px', fontFamily: 'monospace', color: '#cd84ff', align: 'center'
-      }).setOrigin(0.5, 0.5));
-    }
+    const valText = this.add.text(0, SLOT_H / 2 - 14, dispVal > 0 ? `$${dispVal}k` : '', {
+      fontSize: '9px', fontFamily: 'monospace', color: '#ccccdd', align: 'center'
+    }).setOrigin(0.5, 0.5);
+    valText.setVisible(dispVal > 0);
+    slot.add(valText);
+    slot.valText = valText;
+
     const slotIcons = [];
     if (card.specialEffect || card.bonusTurn) slotIcons.push({ symbol: '★', color: '#e9c46a' });
     if (card.triggerEffect)                   slotIcons.push({ symbol: '⚡', color: '#00ffff' });
@@ -1973,11 +1992,13 @@ class GameScene extends Phaser.Scene {
     slot.opText = resOpText;
 
     const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
-    if (dispVal > 0) {
-      slot.add(this.add.text(0, SLOT_H / 2 - 14, `$${dispVal}k`, {
-        fontSize: '9px', fontFamily: 'monospace', color: '#ffaa44', align: 'center'
-      }).setOrigin(0.5, 0.5));
-    }
+    const valText = this.add.text(0, SLOT_H / 2 - 14, dispVal > 0 ? `$${dispVal}k` : '', {
+      fontSize: '9px', fontFamily: 'monospace', color: '#ccccdd', align: 'center'
+    }).setOrigin(0.5, 0.5);
+    valText.setVisible(dispVal > 0);
+    slot.add(valText);
+    slot.valText = valText;
+
     const slotIcons = [];
     if (card.specialEffect || card.bonusTurn) slotIcons.push({ symbol: '★', color: '#e9c46a' });
     if (card.triggerEffect)                   slotIcons.push({ symbol: '⚡', color: '#00ffff' });
@@ -1996,6 +2017,60 @@ class GameScene extends Phaser.Scene {
   // ── Board op label refresh ────────────────────────────────
   // Called after every card placement. Re-reads effective ops for all placed
   // cards and updates the operation text on each slot. Gold color = boosted.
+  refreshBoardValueLabels() {
+    // Compute live valueBonus from all modify_type specialEffects on board
+    const allIds = [...this.state.cashRow, ...this.state.productRow, ...this.state.resourcesRow].filter(Boolean);
+    const liveBonuses = {};
+
+    // Start from any accumulated state bonuses (from trigger effects)
+    Object.entries(this.state.valueBonuses).forEach(([id, v]) => { liveBonuses[id] = v; });
+
+    // Add passive valueBonus from specialEffect modify_type cards on board
+    allIds.forEach(id => {
+      const card = this.cardsData.find(c => c.id === id);
+      if (!card || !card.specialEffect) return;
+      const effects = Array.isArray(card.specialEffect) ? card.specialEffect : [card.specialEffect];
+      effects.forEach(fx => {
+        if (fx.type !== 'modify_type' || !fx.valueBonus) return;
+        allIds.forEach(tid => {
+          if (tid === id) return;
+          const tc = this.cardsData.find(c => c.id === tid);
+          if (tc && this._typeMatches(tc, fx.targetType, id)) {
+            liveBonuses[tid] = (liveBonuses[tid] || 0) + fx.valueBonus;
+          }
+        });
+      });
+    });
+
+    // Update displayed values on all slot cards
+    const updateSlots = (slotObjects, rowArray) => {
+      slotObjects.forEach((slot, i) => {
+        const id = rowArray[i];
+        if (!id) return;
+        const card = this.cardsData.find(c => c.id === id);
+        if (!card) return;
+        const bonus = liveBonuses[id] || 0;
+        const dispVal = card.baseValue + bonus;
+        if (slot.valText) {
+          if (dispVal > 0) {
+            slot.valText.setText(`$${dispVal}k`);
+            slot.valText.setColor(bonus > 0 ? '#ffd32a' : '#ccccdd');
+            slot.valText.setVisible(true);
+          } else {
+            slot.valText.setVisible(false);
+          }
+        }
+      });
+    };
+
+    updateSlots(this.slotObjects, this.state.cashRow);
+    updateSlots(this.productSlotObjects, this.state.productRow);
+    updateSlots(this.resSlotObjects, this.state.resourcesRow);
+
+    // Store for HUD team value calculation
+    this._liveBonuses = liveBonuses;
+  }
+
   refreshBoardOpLabels() {
     const cashIds = this.state.cashRow.filter(Boolean);
     const productIds = this.state.productRow.filter(Boolean);
@@ -3457,6 +3532,7 @@ class GameScene extends Phaser.Scene {
                   : 'resources';
     this._reRenderSlot(rowType, csuiteEntry.slotIndex);
     this.refreshBoardOpLabels();
+    this.refreshBoardValueLabels();
     this.renderHand();
     this.updateHUD();
 
@@ -3470,6 +3546,7 @@ class GameScene extends Phaser.Scene {
       for (let i = 0; i < 5; i++) this._reRenderSlot(rowType, i);
     });
     this.refreshBoardOpLabels();
+    this.refreshBoardValueLabels();
   }
 
   _reRenderSlot(rowType, slotIndex) {
@@ -3612,6 +3689,16 @@ class GameScene extends Phaser.Scene {
     this.hudProductMultiplier.setText(`${state.productMultiplier}×`);
 
     if (this.hudDrawPile) this.hudDrawPile.setText(`${state.drawPile.length} cards`);
+
+    // Team value: sum of all card baseValues (+ live bonuses) on board
+    const allBoardIds = [...state.cashRow, ...state.productRow, ...state.resourcesRow];
+    const bonuses = this._liveBonuses || state.valueBonuses;
+    let teamVal = 0;
+    allBoardIds.forEach(id => {
+      const card = this.cardsData.find(c => c.id === id);
+      if (card) teamVal += card.baseValue + (bonuses[id] || 0);
+    });
+    if (this.hudTeamValue) this.hudTeamValue.setText(fmtVal(teamVal));
   }
 
   // ── Utility ───────────────────────────────────────────────
@@ -3742,7 +3829,7 @@ class ValuationScene extends Phaser.Scene {
           valStr = entry.total > 0 ? fmtVal(entry.total) : '—';
         }
         listContainer.add(this.add.text(cx + 230, ly, valStr, {
-          fontSize: '12px', fontFamily: 'monospace', color: '#80ffaa', align: 'right'
+          fontSize: '12px', fontFamily: 'monospace', color: '#ccccdd', align: 'right'
         }).setOrigin(1, 0));
 
         ly += ROW_H;
