@@ -495,7 +495,7 @@ class TutorialScene extends Phaser.Scene {
         desc: 'There are 7 types of cards. Card effects may help or hinder different types.' },
       { label: 'NAME',            color: '#ffffff',
         desc: "The card's identity — every card brings something different." },
-      { label: 'OP',              color: '#ffffff',
+      { label: 'OPERATOR (OP)',    color: '#ffffff',
         desc: "When a row activates, each card's op modifies the row's running score left to right." },
       { label: '★ SPECIAL EFFECT', color: '#e9c46a',
         desc: 'A persistent bonus that applies as long as the card is on the board.' },
