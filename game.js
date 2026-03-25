@@ -338,7 +338,7 @@ class TutorialScene extends Phaser.Scene {
     const cy = GAME_H / 2;
 
     // Background
-    const bg = this.add.rectangle(cx, cy, GAME_W, GAME_H, COLORS.bg);
+    const bg = this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000);
     this.pageObjects.push(bg);
 
     if (page === 1) this._buildPage1(cx);
@@ -2939,6 +2939,11 @@ class GameScene extends Phaser.Scene {
     const PH = 220;
 
     // Auto effects — no modal needed
+    if (fx.type === 'gain_cash') {
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.amount}k`, '#80ffaa', 1200);
+      return resumeCallback(payout + fx.amount, 0);
+    }
+
     if (fx.type === 'gain_cash_per_type') {
       const count = this._countBoardCardsOfType(fx.targetType);
       const earned = fx.amount * count;
@@ -3005,9 +3010,7 @@ class GameScene extends Phaser.Scene {
       fontSize: '13px', fontFamily: 'monospace', color: '#00ffff', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5));
 
-    if (fx.type === 'gain_cash') {
-      this._renderGainCashModal(modal, cx, cy, PH, payout, fx, resumeCallback);
-    } else if (fx.type === 'spend_cash_draw_resource') {
+    if (fx.type === 'spend_cash_draw_resource') {
       this._renderSpendCashModal(modal, cx, cy, PH, payout, fx, resumeCallback);
     } else if (fx.type === 'swap_csuite') {
       this._renderSwapCsuiteModal(modal, cx, cy, PH, payout, fx, resumeCallback);
