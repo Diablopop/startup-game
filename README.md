@@ -20,4 +20,4 @@ Then open the URL shown in your terminal.
 
 ---
 
-&copy; 2025 Andrew Schauer. All rights reserved.
+&copy; 2026 Andrew Schauer. All rights reserved.
