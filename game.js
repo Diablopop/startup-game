@@ -220,7 +220,7 @@ class WelcomeScene extends Phaser.Scene {
 
     // Attribution
     this.add.text(cx, cy - 264, "Andrew Schauer's", {
-      fontSize: '16px', fontFamily: FONT_UI, color: '#66ddee', align: 'center'
+      fontSize: '16px', fontFamily: FONT_UI, color: '#4dbbcc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Large title
@@ -235,13 +235,15 @@ class WelcomeScene extends Phaser.Scene {
     // Tagline
     const taglines = [
       'Where being overvalued is the whole point.',
-      'Hire fast. Ship faster. Explain it to regulators later.',
-      'Change the world... and line your pockets.',
+      'Ship fast. Scale faster. Clear it with regulators later.',
+      'Change the world... and your bank account.',
       'Move fast and play cards.',
       'Get hyped for hype.',
       'Think about the social implications after the IPO.',
-      'Add AI if you want investors.',
-      "Entrepreneurs can still live with their parents, right?",
+      'Call it AI if you want investors.',
+      'Entrepreneurs can live with their parents, right?',
+      'Solve a problem no one has.',
+      'Your work-life balance is due for disruption.',
     ];
     const tagline = taglines[Math.floor(Math.random() * taglines.length)];
     this.add.text(cx, cy - 118, tagline, {
