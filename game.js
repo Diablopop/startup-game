@@ -47,7 +47,7 @@ const COLORS = {
   resAccent:      0xffaa44,
   typeColors: {
     'Product/Design':        0x6a9eff,
-    'Engineering':           0x7bed9f,
+    'Engineering':           0xc4e538,
     'Sales':                 0xff6b81,
     'Investor':              0xffd32a,
     'C-Suite':               0xe9c46a,
@@ -501,8 +501,8 @@ class TutorialScene extends Phaser.Scene {
         desc: 'A persistent bonus that applies as long as the card is on the board.' },
       { label: '⚡ TRIGGER EFFECT', color: '#00ffff',
         desc: 'An effect that fires in sequence when its row is activated.' },
-      { label: 'COST (IN RED)',   color: '#ff8888',
-        desc: 'The cash required to place this card.' },
+      { label: 'COST (RED OR GREEN)',   color: '#ff8888',
+        desc: 'The cash required to place this card. Green if you can afford it.' },
       { label: 'VALUE (IN SILVER)', color: '#ccccdd',
         desc: "How much a card is worth for your startup's valuation." },
     ];
@@ -806,9 +806,11 @@ class RoundTitleScene extends Phaser.Scene {
           });
         }
 
-        // Cost (bottom-left, red)
+        // Cost (bottom-left, green if affordable with starting cash)
+        const startingCash = 75;
+        const canAfford = card.cost * 100 <= startingCash;
         face.add(this.add.text(-CARD_W / 2 + 6, CARD_H / 2 - 16, `$${card.cost * 100}k`, {
-          fontSize: '11px', fontFamily: 'monospace', color: '#ff8888'
+          fontSize: '11px', fontFamily: 'monospace', color: canAfford ? '#80ffaa' : '#ff8888'
         }).setOrigin(0, 0.5));
 
         // Value (bottom-right, green)
@@ -1489,8 +1491,10 @@ class GameScene extends Phaser.Scene {
       });
     }
 
+    const effectiveCost = this.getEffectiveCost ? this.getEffectiveCost(card) : card.cost * 100;
+    const canAfford = this.state && this.state.cash >= effectiveCost;
     container.add(this.add.text(-CARD_W / 2 + 6, CARD_H / 2 - 16, `$${card.cost * 100}k`, {
-      fontSize: '11px', fontFamily: 'monospace', color: '#ff8888'
+      fontSize: '11px', fontFamily: 'monospace', color: canAfford ? '#80ffaa' : '#ff8888'
     }).setOrigin(0, 0.5));
 
     const valStr = card.baseValue > 0 ? `$${card.baseValue}k` : '—';
@@ -1743,18 +1747,7 @@ class GameScene extends Phaser.Scene {
     }
 
     const card = this.cardsData.find(c => c.id === cardId);
-    let effectiveCost = card.cost * 100;
-    // Apply costDiscount from board specialEffects
-    [...state.cashRow, ...state.productRow, ...state.resourcesRow].filter(Boolean).forEach(bid => {
-      const bc = this.cardsData.find(c => c.id === bid);
-      if (!bc || !bc.specialEffect) return;
-      const effects = Array.isArray(bc.specialEffect) ? bc.specialEffect : [bc.specialEffect];
-      effects.forEach(fx => {
-        if (fx.type === 'modify_type' && fx.costDiscount && this._typeMatches(card, fx.targetType)) {
-          effectiveCost = Math.max(0, effectiveCost - fx.costDiscount * 100);
-        }
-      });
-    });
+    const effectiveCost = this.getEffectiveCost(card);
 
     const rowArray = rowType === 'product'   ? state.productRow
                    : rowType === 'resources' ? state.resourcesRow
@@ -2192,6 +2185,22 @@ class GameScene extends Phaser.Scene {
     return norm(card.type) === norm(targetType) || card.role === targetType;
   }
 
+  getEffectiveCost(card) {
+    let cost = card.cost * 100;
+    if (!this.state) return cost;
+    [...this.state.cashRow, ...this.state.productRow, ...this.state.resourcesRow].filter(Boolean).forEach(bid => {
+      const bc = this.cardsData.find(c => c.id === bid);
+      if (!bc || !bc.specialEffect) return;
+      const effects = Array.isArray(bc.specialEffect) ? bc.specialEffect : [bc.specialEffect];
+      effects.forEach(fx => {
+        if (fx.type === 'modify_type' && fx.costDiscount && this._typeMatches(card, fx.targetType)) {
+          cost = Math.max(0, cost - fx.costDiscount * 100);
+        }
+      });
+    });
+    return cost;
+  }
+
   _countBoardCardsOfType(targetType) {
     return [...this.state.cashRow, ...this.state.productRow, ...this.state.resourcesRow]
       .filter(id => {
@@ -2322,6 +2331,7 @@ class GameScene extends Phaser.Scene {
     });
 
     this.updateHUD();
+    this.renderHand();
 
     if (this.pendingDrawCount > 0) {
       const draws = this.pendingDrawCount;
@@ -2391,6 +2401,7 @@ class GameScene extends Phaser.Scene {
           this.state.cash += (updatedCash - cashBefore);
           if (pendingDraws) this.pendingDrawCount += pendingDraws;
           this.updateHUD();
+          this.renderHand();
           this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
         });
       } else {
