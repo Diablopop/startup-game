@@ -3,6 +3,8 @@
 // ============================================================
 
 // ── Constants ────────────────────────────────────────────────
+const FONT_UI    = '"Cabin", sans-serif';
+const FONT_BOARD = 'monospace';
 const GAME_W = 1280;
 const GAME_H = 720;
 
@@ -239,7 +241,7 @@ class WelcomeScene extends Phaser.Scene {
     const tagline = taglines[Math.floor(Math.random() * taglines.length)];
     this.add.text(cx, cy - 118, tagline, {
       fontSize: '16px',
-      fontFamily: 'monospace',
+      fontFamily: FONT_UI,
       color: '#aaaacc',
       fontStyle: 'italic',
       align: 'center',
@@ -250,7 +252,7 @@ class WelcomeScene extends Phaser.Scene {
     const playBtn = this.add.rectangle(cx, cy, 220, 52, 0x1a472a)
       .setStrokeStyle(2, 0x40916c).setInteractive({ useHandCursor: true });
     this.add.text(cx, cy, 'PLAY GAME', {
-      fontSize: '18px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold'
+      fontSize: '18px', fontFamily: FONT_UI, color: '#80ffaa', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5);
     playBtn.on('pointerover', () => playBtn.setFillStyle(0x2d6a4f));
     playBtn.on('pointerout',  () => playBtn.setFillStyle(0x1a472a));
@@ -260,7 +262,7 @@ class WelcomeScene extends Phaser.Scene {
     const tutBtn = this.add.rectangle(cx, cy + 72, 220, 52, 0x0d0d1a)
       .setStrokeStyle(2, 0x4ecdc4).setInteractive({ useHandCursor: true });
     this.add.text(cx, cy + 72, 'HOW TO PLAY', {
-      fontSize: '18px', fontFamily: 'monospace', color: '#4ecdc4', fontStyle: 'bold'
+      fontSize: '18px', fontFamily: FONT_UI, color: '#4ecdc4', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5);
     tutBtn.on('pointerover', () => tutBtn.setFillStyle(0x0d2a2a));
     tutBtn.on('pointerout',  () => tutBtn.setFillStyle(0x0d0d1a));
@@ -269,12 +271,12 @@ class WelcomeScene extends Phaser.Scene {
     // Disclaimer
     this.add.text(cx, GAME_H - 56,
       'Prototype build — expect rough edges and placeholder art.', {
-        fontSize: '10px', fontFamily: 'monospace', color: '#445566', align: 'center'
+        fontSize: '10px', fontFamily: FONT_UI, color: '#445566', align: 'center'
       }).setOrigin(0.5, 0.5);
 
     // Copyright
     this.add.text(cx, GAME_H - 36, '© 2026 Andrew Schauer', {
-      fontSize: '10px', fontFamily: 'monospace', color: '#334455', align: 'center'
+      fontSize: '10px', fontFamily: FONT_UI, color: '#334455', align: 'center'
     }).setOrigin(0.5, 0.5);
   }
 }
@@ -327,14 +329,14 @@ class TutorialScene extends Phaser.Scene {
     // YOUR GOAL
     this.pageObjects.push(
       this.add.text(cx - 380, y, 'YOUR GOAL', {
-        fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
+        fontSize: '13px', fontFamily: FONT_UI, color: '#e9c46a', fontStyle: 'bold'
       }).setOrigin(0, 0)
     );
     y += 20;
     this.pageObjects.push(
       this.add.text(cx - 380, y,
         'Build the most valuable startup in 4 rounds. Each round gives you a limited number of turns to grow your company.', {
-          fontSize: '14px', fontFamily: 'monospace', color: '#ccccdd',
+          fontSize: '14px', fontFamily: FONT_UI, color: '#ccccdd',
           wordWrap: { width: 760 }
         }).setOrigin(0, 0)
     );
@@ -343,7 +345,7 @@ class TutorialScene extends Phaser.Scene {
     // ACTIONS
     this.pageObjects.push(
       this.add.text(cx - 380, y, 'EACH TURN, PICK ONE ACTION:', {
-        fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
+        fontSize: '13px', fontFamily: FONT_UI, color: '#e9c46a', fontStyle: 'bold'
       }).setOrigin(0, 0)
     );
     y += 24;
@@ -358,45 +360,46 @@ class TutorialScene extends Phaser.Scene {
     actions.forEach(a => {
       this.pageObjects.push(
         this.add.text(cx - 356, y, a.label, {
-          fontSize: '12px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold'
+          fontSize: '12px', fontFamily: FONT_UI, color: '#80ffaa', fontStyle: 'bold'
         }).setOrigin(0, 0)
       );
       this.pageObjects.push(
         this.add.text(cx - 356, y + 18, a.desc, {
-          fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc',
+          fontSize: '13px', fontFamily: FONT_UI, color: '#aaaacc',
           wordWrap: { width: 736 }
         }).setOrigin(0, 0)
       );
       y += 52;
     });
+    y += 10;
 
     // ROWS
     this.pageObjects.push(
       this.add.text(cx - 380, y, 'ROWS', {
-        fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
+        fontSize: '13px', fontFamily: FONT_UI, color: '#e9c46a', fontStyle: 'bold'
       }).setOrigin(0, 0)
     );
     y += 20;
     this.pageObjects.push(
       this.add.text(cx - 380, y,
         'Placed cards trigger left to right when you activate that row. Each card\'s operation modifies the row\'s running score.', {
-          fontSize: '14px', fontFamily: 'monospace', color: '#ccccdd',
+          fontSize: '14px', fontFamily: FONT_UI, color: '#ccccdd',
           wordWrap: { width: 760 }
         }).setOrigin(0, 0)
     );
-    y += 56;
+    y += 46;
 
     // VALUATION
     this.pageObjects.push(
       this.add.text(cx - 380, y, 'VALUATION', {
-        fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
+        fontSize: '13px', fontFamily: FONT_UI, color: '#e9c46a', fontStyle: 'bold'
       }).setOrigin(0, 0)
     );
     y += 20;
     this.pageObjects.push(
       this.add.text(cx - 380, y,
         'At the end of each round, your startup is valued: the value of all placed cards × your product multiplier. If you never ship, your valuation is $0.', {
-          fontSize: '14px', fontFamily: 'monospace', color: '#ccccdd',
+          fontSize: '14px', fontFamily: FONT_UI, color: '#ccccdd',
           wordWrap: { width: 760 }
         }).setOrigin(0, 0)
     );
@@ -410,6 +413,13 @@ class TutorialScene extends Phaser.Scene {
     this.pageObjects.push(
       this.add.text(cx, 40, ' UNDERSTANDING CARDS ', {
         fontSize: '48px', fontFamily: '"Londrina Shadow", sans-serif', color: '#00ffff', align: 'center', padding: { right: 16 }
+      }).setOrigin(0.5, 0)
+    );
+
+    // Subtitle
+    this.pageObjects.push(
+      this.add.text(cx, 108, 'Press and hold a card to see its details.', {
+        fontSize: '13px', fontFamily: FONT_UI, color: '#ffffff', fontStyle: 'bold', align: 'center'
       }).setOrigin(0.5, 0)
     );
 
@@ -486,9 +496,9 @@ class TutorialScene extends Phaser.Scene {
     container.setScale(2);
     this.pageObjects.push(container);
 
-    // ── Labels panel (right side) ─────────────────────────────
+    // ── Labels panel (right side, vertically aligned with card) ──
     const labelX = cx - 120;
-    let labelY = 160;
+    let labelY = cardY - CARD_H;
 
     const labelDefs = [
       { label: 'TYPE',            color: '#ffffff',
@@ -509,10 +519,10 @@ class TutorialScene extends Phaser.Scene {
 
     labelDefs.forEach(def => {
       const lbl = this.add.text(labelX, labelY, def.label, {
-        fontSize: '13px', fontFamily: 'monospace', color: def.color, fontStyle: 'bold'
+        fontSize: '13px', fontFamily: FONT_UI, color: def.color, fontStyle: 'bold'
       }).setOrigin(0, 0);
       const desc = this.add.text(labelX, labelY + 18, def.desc, {
-        fontSize: '13px', fontFamily: 'monospace', color: '#778899',
+        fontSize: '13px', fontFamily: FONT_UI, color: '#778899',
         wordWrap: { width: 500 }
       }).setOrigin(0, 0);
 
@@ -521,12 +531,6 @@ class TutorialScene extends Phaser.Scene {
       labelY += 18 + desc.height + 14;
     });
 
-    // Footnote
-    this.pageObjects.push(
-      this.add.text(labelX, labelY + 8, 'Press and hold a card to see its details.', {
-        fontSize: '13px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
-      }).setOrigin(0, 0)
-    );
   }
 
   _buildPage3(cx) {
@@ -540,15 +544,13 @@ class TutorialScene extends Phaser.Scene {
     );
     y += 68;
 
-    // Intro
+    // Subtitle
     this.pageObjects.push(
-      this.add.text(cx, y,
-        "This prototype is actively in development. Here's what's coming:", {
-          fontSize: '14px', fontFamily: 'monospace', color: '#ccccdd',
-          align: 'center', wordWrap: { width: 800 }
-        }).setOrigin(0.5, 0)
+      this.add.text(cx, y, "This prototype is actively in development. Here's what's coming:", {
+        fontSize: '13px', fontFamily: FONT_UI, color: '#ffffff', fontStyle: 'bold', align: 'center'
+      }).setOrigin(0.5, 0)
     );
-    y += 52;
+    y += 36;
 
     const features = [
       {
@@ -568,13 +570,13 @@ class TutorialScene extends Phaser.Scene {
     features.forEach(f => {
       this.pageObjects.push(
         this.add.text(cx - 380, y, f.label, {
-          fontSize: '13px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold'
+          fontSize: '13px', fontFamily: FONT_UI, color: '#e9c46a', fontStyle: 'bold'
         }).setOrigin(0, 0)
       );
       y += 22;
       this.pageObjects.push(
         this.add.text(cx - 380, y, f.desc, {
-          fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc',
+          fontSize: '14px', fontFamily: FONT_UI, color: '#aaaacc',
           wordWrap: { width: 760 }
         }).setOrigin(0, 0)
       );
@@ -585,7 +587,7 @@ class TutorialScene extends Phaser.Scene {
     y += 10;
     this.pageObjects.push(
       this.add.text(cx, y, 'Ready to build your startup?', {
-        fontSize: '16px', fontFamily: 'monospace', color: '#ccccdd', align: 'center'
+        fontSize: '16px', fontFamily: FONT_UI, color: '#ccccdd', align: 'center'
       }).setOrigin(0.5, 0)
     );
     y += 40;
@@ -594,7 +596,7 @@ class TutorialScene extends Phaser.Scene {
     const playBtn = this.add.rectangle(cx, y + 24, 220, 52, 0x1a472a)
       .setStrokeStyle(2, 0x40916c).setInteractive({ useHandCursor: true });
     this.add.text(cx, y + 24, 'PLAY GAME', {
-      fontSize: '18px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold'
+      fontSize: '18px', fontFamily: FONT_UI, color: '#80ffaa', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5);
     playBtn.on('pointerover', () => playBtn.setFillStyle(0x2d6a4f));
     playBtn.on('pointerout',  () => playBtn.setFillStyle(0x1a472a));
@@ -608,7 +610,7 @@ class TutorialScene extends Phaser.Scene {
 
     // Page indicator
     const indicator = this.add.text(cx, navY, `${page} / 3`, {
-      fontSize: '13px', fontFamily: 'monospace', color: '#778899', align: 'center'
+      fontSize: '13px', fontFamily: FONT_UI, color: '#778899', align: 'center'
     }).setOrigin(0.5, 0.5);
     this.pageObjects.push(indicator);
 
@@ -616,7 +618,7 @@ class TutorialScene extends Phaser.Scene {
     const backBg = this.add.rectangle(80, navY, 130, 40, 0x1a1a2e)
       .setStrokeStyle(1, 0x445566).setInteractive({ useHandCursor: true });
     const backLbl = this.add.text(80, navY, '← BACK', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc'
+      fontSize: '13px', fontFamily: FONT_UI, color: '#aaaacc'
     }).setOrigin(0.5, 0.5);
     backBg.on('pointerover', () => { backBg.setFillStyle(0x22222e); backLbl.setColor('#ccccdd'); });
     backBg.on('pointerout',  () => { backBg.setFillStyle(0x1a1a2e); backLbl.setColor('#aaaacc'); });
@@ -635,7 +637,7 @@ class TutorialScene extends Phaser.Scene {
       const nextBg = this.add.rectangle(GAME_W - 80, navY, 130, 40, 0x1a472a)
         .setStrokeStyle(1, 0x40916c).setInteractive({ useHandCursor: true });
       const nextLbl = this.add.text(GAME_W - 80, navY, 'NEXT →', {
-        fontSize: '13px', fontFamily: 'monospace', color: '#80ffaa'
+        fontSize: '13px', fontFamily: FONT_UI, color: '#80ffaa'
       }).setOrigin(0.5, 0.5);
       nextBg.on('pointerover', () => nextBg.setFillStyle(0x2d6a4f));
       nextBg.on('pointerout',  () => nextBg.setFillStyle(0x1a472a));
@@ -684,7 +686,7 @@ class RoundTitleScene extends Phaser.Scene {
 
     // Turn count
     this.add.text(cx, cy - 55, `${totalTurns} Turns${bonusLabel}`, {
-      fontSize: '20px', fontFamily: 'monospace', color: '#aaaacc'
+      fontSize: '20px', fontFamily: FONT_UI, color: '#aaaacc'
     }).setOrigin(0.5);
 
     // Deck label
@@ -694,7 +696,7 @@ class RoundTitleScene extends Phaser.Scene {
         ? `Garage deck \u2014 ${totalCards} cards up to $100k`
         : `Seed deck \u2014 ${totalCards} cards up to $${maxCost * 100}k`;
     this.add.text(cx, cy - 25, deckLabel, {
-      fontSize: '16px', fontFamily: 'monospace', color: '#778899'
+      fontSize: '16px', fontFamily: FONT_UI, color: '#778899'
     }).setOrigin(0.5);
 
     // ── Deal animation (round 1 only) ───────────────────────
@@ -730,7 +732,7 @@ class RoundTitleScene extends Phaser.Scene {
 
       // "Dealing your opening hand..."
       this.add.text(cx, cy + 20, 'Dealing your opening hand...', {
-        fontSize: '14px', fontFamily: 'monospace', color: '#556677', fontStyle: 'italic'
+        fontSize: '14px', fontFamily: FONT_UI, color: '#556677', fontStyle: 'italic'
       }).setOrigin(0.5);
 
       // Card placeholders
@@ -3795,7 +3797,7 @@ class ValuationScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5);
 
     this.add.text(cx, 108, `END OF ROUND ${round}`, {
-      fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
+      fontSize: '13px', fontFamily: FONT_UI, color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // ── Card breakdown (scrollable box) ──────────────────────
@@ -3813,7 +3815,7 @@ class ValuationScene extends Phaser.Scene {
 
     // Header inside box
     this.add.text(cx, BOX_Y + 14, 'CARDS ON BOARD', {
-      fontSize: '11px', fontFamily: 'monospace', color: '#555577', align: 'center'
+      fontSize: '11px', fontFamily: FONT_UI, color: '#555577', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Build list items in a container (positions relative to container origin)
@@ -3822,7 +3824,7 @@ class ValuationScene extends Phaser.Scene {
 
     if (breakdown.length === 0) {
       listContainer.add(this.add.text(cx, ly, '(no cards placed)', {
-        fontSize: '13px', fontFamily: 'monospace', color: '#555577', align: 'center'
+        fontSize: '13px', fontFamily: FONT_UI, color: '#555577', align: 'center'
       }).setOrigin(0.5, 0));
       ly += 26;
     } else {
@@ -3830,11 +3832,11 @@ class ValuationScene extends Phaser.Scene {
         const rowTag   = entry.row === 'product' ? '[PROD] ' : entry.row === 'resources' ? '[RES]  ' : '[CASH] ';
         const tagColor = entry.row === 'product' ? '#9966cc' : entry.row === 'resources' ? '#aa7722' : '#446688';
         listContainer.add(this.add.text(cx - 230, ly, rowTag, {
-          fontSize: '10px', fontFamily: 'monospace', color: tagColor
+          fontSize: '10px', fontFamily: FONT_UI, color: tagColor
         }).setOrigin(0, 0));
 
         listContainer.add(this.add.text(cx - 185, ly, entry.name, {
-          fontSize: '12px', fontFamily: 'monospace', color: '#ffffff'
+          fontSize: '12px', fontFamily: FONT_UI, color: '#ffffff'
         }).setOrigin(0, 0));
 
         let valStr;
@@ -3844,7 +3846,7 @@ class ValuationScene extends Phaser.Scene {
           valStr = entry.total > 0 ? fmtVal(entry.total) : '—';
         }
         listContainer.add(this.add.text(cx + 230, ly, valStr, {
-          fontSize: '12px', fontFamily: 'monospace', color: '#ccccdd', align: 'right'
+          fontSize: '12px', fontFamily: FONT_UI, color: '#ccccdd', align: 'right'
         }).setOrigin(1, 0));
 
         ly += ROW_H;
@@ -3917,21 +3919,21 @@ class ValuationScene extends Phaser.Scene {
 
     // Base total subtotal
     this.add.text(cx - 230, y, 'BASE TOTAL', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc'
+      fontSize: '13px', fontFamily: FONT_UI, color: '#aaaacc'
     }).setOrigin(0, 0.5);
     this.add.text(cx + 230, y, fmtVal(baseTotal), {
-      fontSize: '15px', fontFamily: 'monospace', color: '#aaaacc', align: 'right'
+      fontSize: '15px', fontFamily: FONT_UI, color: '#aaaacc', align: 'right'
     }).setOrigin(1, 0.5);
     y += 26;
 
     // ── Product Multiplier ────────────────────────────────────
     this.add.text(cx, y, 'PRODUCT MULTIPLIER', {
-      fontSize: '11px', fontFamily: 'monospace', color: '#555577', align: 'center'
+      fontSize: '11px', fontFamily: FONT_UI, color: '#555577', align: 'center'
     }).setOrigin(0.5, 0.5);
     y += 22;
 
     this.add.text(cx, y, `${productMultiplier}×`, {
-      fontSize: '20px', fontFamily: 'monospace', color: '#cd84ff', align: 'center', fontStyle: 'bold'
+      fontSize: '20px', fontFamily: FONT_UI, color: '#cd84ff', align: 'center', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5);
     y += 30;
 
@@ -3941,18 +3943,18 @@ class ValuationScene extends Phaser.Scene {
 
     const calcStr = `${fmtVal(baseTotal)}  ×  ${productMultiplier}×  =`;
     this.add.text(cx, y, calcStr, {
-      fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc', align: 'center'
+      fontSize: '14px', fontFamily: FONT_UI, color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
     y += 26;
 
     this.add.text(cx, y, fmtVal(finalTotal), {
-      fontSize: '36px', fontFamily: 'monospace', color: '#e9c46a', fontStyle: 'bold', align: 'center'
+      fontSize: '36px', fontFamily: FONT_UI, color: '#e9c46a', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
     y += 42;
 
     // Result message
     this.add.text(cx, y, this.resultMessage(finalTotal, isEndGame), {
-      fontSize: '12px', fontFamily: 'monospace', color: '#ffffff', align: 'center',
+      fontSize: '12px', fontFamily: FONT_UI, color: '#ffffff', align: 'center',
       wordWrap: { width: 620 }
     }).setOrigin(0.5, 0.5);
 
@@ -3960,7 +3962,7 @@ class ValuationScene extends Phaser.Scene {
     const btnY   = GAME_H - 60;
 
     this.add.text(cx, btnY - 40, `Cash remaining: ${fmtVal(finalCash)}`, {
-      fontSize: '11px', fontFamily: 'monospace', color: '#555577', align: 'center'
+      fontSize: '11px', fontFamily: FONT_UI, color: '#555577', align: 'center'
     }).setOrigin(0.5, 0.5);
     const btnW   = isEndGame ? 200 : 280;
     const btnLbl = isEndGame ? 'PLAY AGAIN'
@@ -3969,7 +3971,7 @@ class ValuationScene extends Phaser.Scene {
     const btn = this.add.rectangle(cx, btnY, btnW, 48, 0x1a472a)
       .setStrokeStyle(2, 0x40916c).setInteractive();
     this.add.text(cx, btnY, btnLbl, {
-      fontSize: '14px', fontFamily: 'monospace', color: '#80ffaa', fontStyle: 'bold'
+      fontSize: '14px', fontFamily: FONT_UI, color: '#80ffaa', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5);
 
     btn.on('pointerover', () => btn.setFillStyle(0x2d6a4f));
@@ -4013,6 +4015,9 @@ const config = {
   },
 };
 
-document.fonts.load('48px "Londrina Shadow"').then(() => {
+Promise.all([
+  document.fonts.load('48px "Londrina Shadow"'),
+  document.fonts.load('16px "Cabin"'),
+]).then(() => {
   new Phaser.Game(config);
 });
