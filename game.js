@@ -7,6 +7,17 @@ const FONT_UI    = '"Cabin", sans-serif';
 const FONT_BOARD = 'monospace';
 const GAME_W = 1280;
 const GAME_H = 720;
+const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+function tryFullscreen() {
+  const el = document.documentElement;
+  const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+  if (rfs) {
+    rfs.call(el).catch(() => {});
+  } else {
+    window.scrollTo(0, 1);
+  }
+}
 
 const CARD_W = 110;
 const CARD_H = 155;
@@ -284,6 +295,20 @@ class WelcomeScene extends Phaser.Scene {
     this.add.text(cx, GAME_H - 36, '© 2026 Andrew Schauer', {
       fontSize: '10px', fontFamily: FONT_UI, color: '#334455', align: 'center'
     }).setOrigin(0.5, 0.5);
+
+    // Mobile: fullscreen tap prompt
+    if (IS_MOBILE) {
+      const fsOverlay = this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000, 0.7)
+        .setDepth(100).setInteractive();
+      const fsText = this.add.text(cx, cy, 'TAP TO START', {
+        fontSize: '28px', fontFamily: FONT_UI, color: '#4ecdc4', fontStyle: 'bold'
+      }).setOrigin(0.5).setDepth(101);
+      fsOverlay.on('pointerdown', () => {
+        tryFullscreen();
+        fsOverlay.destroy();
+        fsText.destroy();
+      });
+    }
   }
 }
 
@@ -4025,5 +4050,11 @@ Promise.all([
   document.fonts.load('48px "Londrina Shadow"'),
   document.fonts.load('16px "Cabin"'),
 ]).then(() => {
-  new Phaser.Game(config);
+  const game = new Phaser.Game(config);
+
+  if (IS_MOBILE) {
+    window.addEventListener('resize', () => {
+      setTimeout(() => game.scale.refresh(), 100);
+    });
+  }
 });

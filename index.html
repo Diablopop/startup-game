@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Startup | A card game by Andrew Schauer</title>
   <meta name="description" content="Build your company to a billion-dollar valuation in this single-player engine-building card game. Raise cash, hire talent, and ship products.">
 
@@ -30,9 +32,24 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #1a1a2e; overflow: hidden; }
     canvas { display: block; touch-action: none; }
+    #rotate-prompt {
+      display: none; position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #1a1a2e; z-index: 9999;
+      justify-content: center; align-items: center;
+    }
+    @media (orientation: portrait) and (max-width: 1024px) {
+      #rotate-prompt { display: flex; }
+    }
   </style>
 </head>
 <body>
+  <div id="rotate-prompt">
+    <div style="text-align:center; color:#4ecdc4; font-family:Cabin,sans-serif;">
+      <div style="font-size:48px; margin-bottom:16px;">&#x21BB;</div>
+      <div style="font-size:20px;">Rotate your device to landscape</div>
+    </div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
   <script src="game.js"></script>
 </body>
