@@ -4053,8 +4053,17 @@ Promise.all([
   const game = new Phaser.Game(config);
 
   if (IS_MOBILE) {
-    window.addEventListener('resize', () => {
-      setTimeout(() => game.scale.refresh(), 100);
-    });
+    const refreshScale = () => {
+      setTimeout(() => {
+        if (window.visualViewport) {
+          document.body.style.height = window.visualViewport.height + 'px';
+        }
+        game.scale.refresh();
+      }, 100);
+    };
+    window.addEventListener('resize', refreshScale);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', refreshScale);
+    }
   }
 });
