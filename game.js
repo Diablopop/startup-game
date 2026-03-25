@@ -24,6 +24,8 @@ const CARD_H = 155;
 const SLOT_W = 120;
 const SLOT_H = 145;   // reduced from 165 to fit three rows
 const CAROUSEL_VISIBLE = 6;
+const CAROUSEL_SLIDE_MS = 180;    // carousel scroll animation duration — adjust to taste
+const CAROUSEL_EXIT_SLIDE = true; // set true to zip exiting cards off-screen; false = fade in place
 
 // Row layout positions (top to bottom: Product → Cash → Resources)
 const ROW_PROD_Y      = 95;
@@ -1113,9 +1115,8 @@ class GameScene extends Phaser.Scene {
     btn.on('pointerout',  () => { if (!btn.disabled) btn.setColor('#aaaacc'); });
     btn.on('pointerdown', () => {
       if (btn.disabled) return;
-      if (symbol === '◀') this.handOffset = Math.max(0, this.handOffset - 1);
-      else                this.handOffset = Math.min(this.state.hand.length - CAROUSEL_VISIBLE, this.handOffset + 1);
-      this.renderHand();
+      if (symbol === '◀') this.scrollHand(-1);
+      else                this.scrollHand(+1);
     });
 
     return btn;
@@ -1427,6 +1428,82 @@ class GameScene extends Phaser.Scene {
   }
 
   // ── Hand Rendering ────────────────────────────────────────
+  scrollHand(delta) {
+    const ids = this.state.hand;
+    const maxOffset = Math.max(0, ids.length - CAROUSEL_VISIBLE);
+    const newOffset = Math.max(0, Math.min(maxOffset, this.handOffset + delta));
+    if (newOffset === this.handOffset) return;
+
+    // Lock arrows for the duration of the animation
+    this.setArrowState(this.arrowLeft,  false);
+    this.setArrowState(this.arrowRight, false);
+
+    const windowW   = CAROUSEL_VISIBLE * (CARD_W + 8) - 8;
+    const startX    = (GAME_W - windowW) / 2 + 33;
+    const handY     = 623;
+    const slotX     = i => startX + i * (CARD_W + 8) + CARD_W / 2;
+    const slideLeft = delta > 0;  // cards move left when scrolling right
+
+    const oldVisible = ids.slice(this.handOffset, this.handOffset + CAROUSEL_VISIBLE);
+    const newVisible = ids.slice(newOffset,        newOffset        + CAROUSEL_VISIBLE);
+
+    const exiting  = oldVisible.filter(id => !newVisible.includes(id));
+    const staying  = oldVisible.filter(id =>  newVisible.includes(id));
+    const entering = newVisible.filter(id => !oldVisible.includes(id));
+
+    const exitX  = slideLeft ? startX - CARD_W               : startX + windowW + CARD_W;
+    const enterX = slideLeft ? startX + windowW + CARD_W / 2 : startX - CARD_W / 2;
+
+    // Slide exiting cards off screen and destroy
+    exiting.forEach(id => {
+      const obj = this.cardObjects[id];
+      if (!obj) return;
+      this.tweens.add({
+        targets: obj, alpha: 0,
+        ...(CAROUSEL_EXIT_SLIDE ? { x: exitX } : {}),
+        duration: CAROUSEL_SLIDE_MS, ease: 'Quad.easeInOut',
+        onComplete: () => obj.destroy()
+      });
+      delete this.cardObjects[id];
+    });
+
+    // Slide staying cards to their new slot positions
+    staying.forEach(id => {
+      this.tweens.add({
+        targets: this.cardObjects[id],
+        x: slotX(newVisible.indexOf(id)),
+        duration: CAROUSEL_SLIDE_MS, ease: 'Quad.easeInOut',
+      });
+    });
+
+    // Spawn entering cards off-screen and slide them in
+    entering.forEach(id => {
+      const card = this.cardsData.find(c => c.id === id);
+      const obj  = this.buildCardVisual(card, enterX, handY, true);
+      obj.setAlpha(0);
+      this.cardObjects[id] = obj;
+      this.tweens.add({
+        targets: obj,
+        x: slotX(newVisible.indexOf(id)), alpha: 1,
+        duration: CAROUSEL_SLIDE_MS, ease: 'Quad.easeInOut',
+      });
+    });
+
+    // Commit new offset and restore UI after animation completes
+    this.handOffset = newOffset;
+    this.time.delayedCall(CAROUSEL_SLIDE_MS, () => {
+      const canLeft  = this.handOffset > 0;
+      const canRight = this.handOffset < maxOffset;
+      this.setArrowState(this.arrowLeft,  canLeft);
+      this.setArrowState(this.arrowRight, canRight);
+      if (ids.length > CAROUSEL_VISIBLE) {
+        const from = this.handOffset + 1;
+        const to   = Math.min(this.handOffset + CAROUSEL_VISIBLE, ids.length);
+        this.handLabel.setText(`YOUR CARDS (${from}–${to} of ${ids.length})`);
+      }
+    });
+  }
+
   renderHand() {
     Object.values(this.cardObjects).forEach(c => c.destroy());
     this.cardObjects = {};
@@ -3976,7 +4053,7 @@ class ValuationScene extends Phaser.Scene {
     this.add.text(cx, y, calcStr, {
       fontSize: '14px', fontFamily: FONT_UI, color: '#aaaacc', align: 'center'
     }).setOrigin(0.5, 0.5);
-    y += 26;
+    y += 42;
 
     this.add.text(cx, y, fmtVal(finalTotal), {
       fontSize: '36px', fontFamily: FONT_UI, color: '#e9c46a', fontStyle: 'bold', align: 'center'
