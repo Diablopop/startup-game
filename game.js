@@ -218,6 +218,11 @@ class WelcomeScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(0x000000);
     this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000);
 
+    // Attribution
+    this.add.text(cx, cy - 264, "Andrew Schauer's", {
+      fontSize: '16px', fontFamily: FONT_UI, color: '#66ddee', align: 'center'
+    }).setOrigin(0.5, 0.5);
+
     // Large title
     this.add.text(cx, cy - 200, ' STARTUP ', {
       fontSize: '120px',
@@ -240,10 +245,9 @@ class WelcomeScene extends Phaser.Scene {
     ];
     const tagline = taglines[Math.floor(Math.random() * taglines.length)];
     this.add.text(cx, cy - 118, tagline, {
-      fontSize: '16px',
+      fontSize: '20px',
       fontFamily: FONT_UI,
-      color: '#aaaacc',
-      fontStyle: 'italic',
+      color: '#ccccdd',
       align: 'center',
       wordWrap: { width: 700 },
     }).setOrigin(0.5, 0.5);
@@ -693,8 +697,8 @@ class RoundTitleScene extends Phaser.Scene {
     const deckLabel = maxCost === Infinity
       ? `Full deck \u2014 all ${totalCards} cards unlocked`
       : maxCost <= 1
-        ? `Garage deck \u2014 ${totalCards} cards up to $100k`
-        : `Seed deck \u2014 ${totalCards} cards up to $${maxCost * 100}k`;
+        ? `Garage deck \u2014 ${totalCards} cards, up to $100k`
+        : `Seed deck \u2014 ${totalCards} cards, up to $${maxCost * 100}k`;
     this.add.text(cx, cy - 25, deckLabel, {
       fontSize: '16px', fontFamily: FONT_UI, color: '#778899'
     }).setOrigin(0.5);
