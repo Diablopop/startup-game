@@ -990,9 +990,10 @@ class GameScene extends Phaser.Scene {
     this.productSlotObjects  = [];
     this.resSlotObjects      = [];
     this.handOffset          = 0;
-    this.drawModal       = null;
-    this.pendingDrawCount = 0;
-    this.triggerModal    = null;
+    this.drawModal           = null;
+    this.pendingDrawCount    = 0;
+    this.triggerModal        = null;
+    this.drawPileViewerModal = null;
 
     this.buildLayout();
     this.setupDragHandlers();
@@ -2809,12 +2810,15 @@ class GameScene extends Phaser.Scene {
   }
 
   showDrawPileViewer() {
+    if (this.drawPileViewerModal) return;
+
     const cx = GAME_W / 2;
     const cy = GAME_H / 2;
     const PW = 780;
     const PH = 380;
 
     const modal = this.add.container(0, 0).setDepth(50);
+    this.drawPileViewerModal = modal;
 
     modal.add(this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000, 0.75));
     modal.add(this.add.rectangle(cx, cy, PW, PH, 0x0d1b2a).setStrokeStyle(2, COLORS.resAccent));
@@ -2880,7 +2884,7 @@ class GameScene extends Phaser.Scene {
     }).setOrigin(0.5, 0.5));
     closeBg.on('pointerover', () => closeBg.setFillStyle(0x333344));
     closeBg.on('pointerout',  () => closeBg.setFillStyle(0x1a1a2e));
-    closeBg.on('pointerdown', () => modal.destroy());
+    closeBg.on('pointerdown', () => { modal.destroy(); this.drawPileViewerModal = null; });
   }
 
   takeFaceUpCard(cardId, revealedIndex, modal) {
