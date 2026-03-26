@@ -2272,6 +2272,8 @@ class GameScene extends Phaser.Scene {
 
       const card = this.cardsData.find(c => c.id === cardId);
       if (card.triggerEffect) {
+        card._slotX = slot.x;
+        card._slotY = slot.y;
         this.showTriggerModal(card, payout, (updatedPayout, pendingDraws) => {
           payout = updatedPayout;
           if (pendingDraws) this.pendingDrawCount += pendingDraws;
@@ -2503,6 +2505,8 @@ class GameScene extends Phaser.Scene {
 
       const card = this.cardsData.find(c => c.id === cardId);
       if (card.triggerEffect) {
+        card._slotX = slot.x;
+        card._slotY = slot.y;
         // Pass cash (not score) so cash-earning triggers update the bank, not the ship score
         // Capture cashBefore so we can apply a delta; modals that directly mutate state.cash
         // (e.g. spend_cash_boost_op) return the original payout unchanged, so delta = 0 and
@@ -2602,6 +2606,8 @@ class GameScene extends Phaser.Scene {
 
       const card = this.cardsData.find(c => c.id === cardId);
       if (card.triggerEffect) {
+        card._slotX = slot.x;
+        card._slotY = slot.y;
         if (card.triggerEffect.type === 'gain_cash') {
           // Pass current cash as payout so the modal shows correct cash values.
           // On resolve, write updated cash back to state; drawCount is unchanged.
