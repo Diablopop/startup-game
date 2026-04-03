@@ -4,7 +4,7 @@
 
 // ── Constants ────────────────────────────────────────────────
 const FONT_UI    = '"Cabin", sans-serif';
-const FONT_BOARD = 'monospace';
+const FONT_BOARD = '"Roboto Condensed", monospace';
 const GAME_W = 1280;
 const GAME_H = 720;
 const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -40,40 +40,41 @@ const MAX_COST_PER_ROUND  = [1, 2, Infinity, Infinity];
 
 const COLORS = {
   // ── Board structure ──────────────────────────────────────────
-  bg:             0x1a1a2e,
-  panel:          0x16213e,
+  bg:             0xfffbf3,
+  panel:          0xfdedcd,
   panelBorder:    0x0f3460,
-  divider:        0x333355,   // HUD panel dividers, turn box borders
+  divider:        0x4f4f4f,   // HUD panel dividers, turn box borders
 
   // ── Cash row ─────────────────────────────────────────────────
-  slotEmpty:      0x0d1f10,
+  slotEmpty:      0xe2edd7,
   slotBorder:     0x2d6a4f,
-  activateTile:   0x1a472a,
-  activateHover:  0x2d6a4f,
-  activateActive: 0x40916c,
+  activateTile:   0x41922d,
+  activateHover:  0x357524,
+  activateActive: 0xe2edd7,
 
   // ── Product row ──────────────────────────────────────────────
-  productSlotEmpty:    0x1a1430,
+  productSlotEmpty:    0xf2e3f2,
   productSlotBorder:   0x5544aa,
-  productTile:         0x3d1a5e,  // SHIP button bg
-  productTileHover:    0x5c2080,  // SHIP button hover
+  productTile:         0x6c02b5,  // SHIP button bg
+  productTileBtnHover: 0x5a0299,  // SHIP button mouse-hover (darker)
+  productTileHover:    0xf2e3f2,  // SHIP tile activation highlight
   productAccent:       0xcd84ff,
 
   // ── Resources row ────────────────────────────────────────────
-  resSlotEmpty:   0x1a1000,
+  resSlotEmpty:   0xebdfce,
   resSlotBorder:  0xaa7722,
-  resTile:        0x3d2200,
-  resTileHover:   0x6b3d00,
-  resTileActive:  0xaa6600,
+  resTile:        0x895d27,
+  resTileHover:   0x724e20,
+  resTileActive:  0xebdfce,
   resAccent:      0xffaa44,
 
   // ── Cards ────────────────────────────────────────────────────
-  cardBg:         0x0d1b2a,
-  cardPlaced:     0x2b4d6b,
-  productCardPlaced:   0x1e1840,
-  resCardPlaced:  0x3d2800,
-  cardDivider:    0x33334a,   // divider line inside card visuals
-  popupDivider:   0x444466,   // dividers inside card info popup
+  cardBg:              0xffffff,
+  cardPlaced:          0xffffff,
+  productCardPlaced:   0xffffff,
+  resCardPlaced:       0xffffff,
+  cardDivider:    0xd1d1d1,   // divider line inside card visuals
+  popupDivider:   0xd1d1d1,   // dividers inside card info popup
 
   // ── Turn tracker ─────────────────────────────────────────────
   turnDone:       0x1a3a2a,   // completed turn box fill
@@ -86,7 +87,7 @@ const COLORS = {
     'Sales':                 0xff6b81,
     'Investor':              0xffd32a,
     'C-Suite':               0xe9c46a,
-    'Boardmember':           0xcd84ff,
+    'Boardmember':           0xfd84ff,
     'Services/Tech':         0x00d2d3,
   },
 
@@ -94,26 +95,28 @@ const COLORS = {
   // All game board text colors. Update values here during palette overhaul.
   text: {
     primary:    '#ffffff',  // card names, modal headers
-    secondary:  '#aaaacc',  // HUD labels, secondary info
-    value:      '#ccccdd',  // numeric values (card base value, HUD totals)
+    secondary:  '#4f4f4f',  // HUD labels, secondary info
+    value:      '#4f4f4f',  // numeric values (card base value, HUD totals)
     muted:      '#555577',  // dimmed section headers, less-important labels
     disabled:   '#333344',  // slot placeholders, empty/unavailable states
     positive:   '#80ffaa',  // cash ops, can-afford, enabled actions, bonus notices
+    cardOp:     '#1b4923',  // operation text on card face
     negative:   '#ff6b6b',  // error floats: row full, need cash, wrong row
-    negLight:   '#ff8888',  // softer negative: unaffordable card cost indicator
-    gold:       '#e9c46a',  // special effects ★, valuation total, trigger floats
-    boost:      '#ffd32a',  // boosted op color (modified by a special effect)
-    cyan:       '#00ffff',  // trigger effects ⚡, trigger float messages
+    negLight:   '#b71010',  // softer negative: unaffordable card cost indicator
+    gold:       '#ffa109',  // special effects ★, valuation total, trigger floats
+    boost:      '#ffa109',  // boosted op color (modified by a special effect)
+    cyan:       '#0bbcbc',  // trigger effects ⚡, trigger float messages
     cyanLight:  '#a8dadc',  // softer trigger float (boost_value / boost_op)
     orange:     '#ffaa44',  // resources row header, draw pile counter
-    purple:     '#cd84ff',  // product row op label, product multiplier HUD
+    purple:     '#6c02b5',  // product row op label, product multiplier HUD
     onType:     '#000000',  // text on colored type bar
     disabledBtn:'#777788',  // done/skip/close button labels
     desc:       '#888899',  // card description text (italic popup)
-    cashSub:    '#52b788',  // cash row subtitle label (softer green)
-    resSub:     '#886622',  // resources row subtitle label (dark orange/brown)
-    productSub: '#9966cc',  // product row subtitle + product valuation row tag
+    cashSub:    '#41922d',  // cash row heading, subtitle, and slot labels
+    resSub:     '#895d27',  // resources row heading, subtitle, and slot labels
+    productSub: '#6c02b5',  // product row subtitle + product valuation row tag
     hint:       '#556677',  // hint text in modals and subtitles
+    bonusTurn:  '#a33596',  // bonus turn effect icon + label
   },
 };
 
@@ -524,12 +527,12 @@ class TutorialScene extends Phaser.Scene {
 
     // Type label
     const typeLabel = this.add.text(0, -CARD_H / 2 + 6, exCard.type.toUpperCase(), {
-      fontSize: '7px', fontFamily: 'monospace', color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
+      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Name
     const nameText = this.add.text(0, -CARD_H / 2 + 42, exCard.name, {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.primary, fontStyle: 'bold',
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.primary, fontStyle: 'bold',
       align: 'center', wordWrap: { width: CARD_W - 10 }
     }).setOrigin(0.5, 0.5);
 
@@ -541,14 +544,15 @@ class TutorialScene extends Phaser.Scene {
       ? `×${exCard.operation.value}`
       : (exCard.operation.value < 0 ? `${exCard.operation.value}` : `+${exCard.operation.value}`);
     const opText = this.add.text(0, -CARD_H / 2 + 82, opLabel, {
-      fontSize: '20px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold', align: 'center'
+      fontSize: '20px', fontFamily: FONT_BOARD, color: COLORS.text.positive, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0);
 
     container.add([bg, bar, typeLabel, nameText, divider, opText]);
 
     // Effect icons — ★ for special/bonus-turn, ⚡ for trigger
     const icons = [];
-    if (exCard.specialEffect || exCard.bonusTurn) icons.push({ symbol: '★', color: COLORS.text.gold });
+    if (exCard.specialEffect) icons.push({ symbol: '★', color: COLORS.text.gold });
+    if (exCard.bonusTurn)     icons.push({ symbol: '+', color: COLORS.text.bonusTurn });
     if (exCard.triggerEffect)                     icons.push({ symbol: '⚡', color: COLORS.text.cyan });
     if (icons.length > 0) {
       const iconY  = -CARD_H / 2 + 118;
@@ -556,20 +560,20 @@ class TutorialScene extends Phaser.Scene {
       const startIconX = -((icons.length - 1) * spacing) / 2;
       icons.forEach((icon, i) => {
         container.add(this.add.text(startIconX + i * spacing, iconY, icon.symbol, {
-          fontSize: '18px', fontFamily: 'monospace', color: icon.color, align: 'center'
+          fontSize: '18px', fontFamily: FONT_BOARD, color: icon.color, align: 'center'
         }).setOrigin(0.5, 0.5));
       });
     }
 
     // Cost
     container.add(this.add.text(-CARD_W / 2 + 6, CARD_H / 2 - 16, `$${exCard.cost * 100}k`, {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.negLight
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.negLight
     }).setOrigin(0, 0.5));
 
     // Value
     const valStr = exCard.baseValue > 0 ? `$${exCard.baseValue}k` : '—';
     container.add(this.add.text(CARD_W / 2 - 6, CARD_H / 2 - 16, valStr, {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.value
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.value
     }).setOrigin(1, 0.5));
 
     container.setScale(2);
@@ -831,7 +835,7 @@ class RoundTitleScene extends Phaser.Scene {
         backGfx.lineStyle(2, COLORS.divider);
         backGfx.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
         const backText = this.add.text(0, 0, '?', {
-          fontSize: '36px', fontFamily: 'monospace', color: '#333355', fontStyle: 'bold'
+          fontSize: '36px', fontFamily: FONT_BOARD, color: '#333355', fontStyle: 'bold'
         }).setOrigin(0.5);
         back.add([backGfx, backText]);
 
@@ -855,11 +859,11 @@ class RoundTitleScene extends Phaser.Scene {
         barGfx.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 12, { tl: 5, tr: 5, bl: 0, br: 0 });
 
         const typeLabel = this.add.text(0, -CARD_H / 2 + 6, card.type.toUpperCase(), {
-          fontSize: '7px', fontFamily: 'monospace', color: COLORS.text.onType, fontStyle: 'bold'
+          fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold'
         }).setOrigin(0.5);
 
         const nameText = this.add.text(0, -CARD_H / 2 + 42, card.name, {
-          fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.primary, fontStyle: 'bold',
+          fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.primary, fontStyle: 'bold',
           align: 'center', wordWrap: { width: CARD_W - 10 }
         }).setOrigin(0.5);
 
@@ -867,14 +871,15 @@ class RoundTitleScene extends Phaser.Scene {
           .setOrigin(0.5);
 
         const opText = this.add.text(0, -CARD_H / 2 + 82, operationLabel(card.operation), {
-          fontSize: '20px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold'
+          fontSize: '20px', fontFamily: FONT_BOARD, color: COLORS.text.positive, fontStyle: 'bold'
         }).setOrigin(0.5, 0);
 
         face.add([faceGfx, barGfx, typeLabel, nameText, divider, opText]);
 
         // Effect icons
         const icons = [];
-        if (card.specialEffect || card.bonusTurn) icons.push({ symbol: '\u2605', color: COLORS.text.gold });
+        if (card.specialEffect) icons.push({ symbol: '\u2605', color: COLORS.text.gold });
+        if (card.bonusTurn)     icons.push({ symbol: '+', color: COLORS.text.bonusTurn });
         if (card.triggerEffect)                   icons.push({ symbol: '\u26a1', color: COLORS.text.cyan });
         if (icons.length > 0) {
           const iconY = -CARD_H / 2 + 118;
@@ -882,7 +887,7 @@ class RoundTitleScene extends Phaser.Scene {
           const totalW = (icons.length - 1) * spacing;
           icons.forEach((ic, j) => {
             face.add(this.add.text(-totalW / 2 + j * spacing, iconY, ic.symbol, {
-              fontSize: '16px', fontFamily: 'monospace', color: ic.color
+              fontSize: '16px', fontFamily: FONT_BOARD, color: ic.color
             }).setOrigin(0.5));
           });
         }
@@ -891,13 +896,13 @@ class RoundTitleScene extends Phaser.Scene {
         const startingCash = 75;
         const canAfford = card.cost * 100 <= startingCash;
         face.add(this.add.text(-CARD_W / 2 + 6, CARD_H / 2 - 16, `$${card.cost * 100}k`, {
-          fontSize: '11px', fontFamily: 'monospace', color: canAfford ? COLORS.text.positive : COLORS.text.negLight
+          fontSize: '11px', fontFamily: FONT_BOARD, color: canAfford ? COLORS.text.positive : COLORS.text.negLight
         }).setOrigin(0, 0.5));
 
         // Value (bottom-right, green)
         const valStr = card.baseValue > 0 ? `$${card.baseValue}k` : '\u2014';
         face.add(this.add.text(CARD_W / 2 - 6, CARD_H / 2 - 16, valStr, {
-          fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.value
+          fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.value
         }).setOrigin(1, 0.5));
 
         placeholders.push({ back, face });
@@ -1060,17 +1065,16 @@ class GameScene extends Phaser.Scene {
     const H = this.scale.height;
 
     // Left panel
+    this.add.rectangle(137, H / 2, 240, H, 0x000000).setAlpha(0.6).setOrigin(0.5, 0.5);
     this.add.rectangle(140, H / 2, 240, H, COLORS.panel).setOrigin(0.5, 0.5);
-    this.add.rectangle(20, H / 2, 2, H, COLORS.panelBorder).setOrigin(0.5, 0.5);
-    this.add.rectangle(261, H / 2, 2, H, COLORS.panelBorder).setOrigin(0.5, 0.5);
 
     // Round / turn
     this.hudRound = this.add.text(140, 50, '', {
-      fontSize: '13px', fontFamily: 'monospace', color: COLORS.text.secondary, align: 'center'
+      fontSize: '13px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
 
     this.hudTurnsLabel = this.add.text(140, 68, 'TURNS', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.secondary, align: 'center'
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
     this.buildTurnBoxes(86);
 
@@ -1079,11 +1083,11 @@ class GameScene extends Phaser.Scene {
 
     // Team Value (sum of all card baseValues on board)
     this.add.text(140, 120, 'TEAM VALUE', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.secondary, align: 'center'
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
 
     this.hudTeamValue = this.add.text(140, 144, '$0k', {
-      fontSize: '24px', fontFamily: 'monospace', color: COLORS.text.value, fontStyle: 'bold', align: 'center'
+      fontSize: '24px', fontFamily: FONT_BOARD, color: COLORS.text.value, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Divider
@@ -1091,22 +1095,22 @@ class GameScene extends Phaser.Scene {
 
     // Product multiplier
     this.add.text(140, 182, 'PRODUCT MULT', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.secondary, align: 'center'
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
 
     this.hudProductMultiplier = this.add.text(140, 206, '0×', {
-      fontSize: '28px', fontFamily: 'monospace', color: COLORS.text.purple, fontStyle: 'bold', align: 'center'
+      fontSize: '28px', fontFamily: FONT_BOARD, color: COLORS.text.purple, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // ── Bottom section of rail ────────────────────────────────
 
     // Cash (in cost red)
     this.add.text(140, GAME_H - 200, 'YOUR CASH', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.secondary, align: 'center'
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
 
     this.hudCash = this.add.text(140, GAME_H - 176, '', {
-      fontSize: '24px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold', align: 'center'
+      fontSize: '24px', fontFamily: FONT_BOARD, color: COLORS.text.cashSub, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Divider
@@ -1114,20 +1118,20 @@ class GameScene extends Phaser.Scene {
 
     // Draw pile counter
     this.add.text(140, GAME_H - 136, 'DRAW PILE', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.secondary, align: 'center'
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
     this.hudDrawPile = this.add.text(140, GAME_H - 114, '-- cards', {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.orange, fontStyle: 'bold', align: 'center'
+      fontSize: '18px', fontFamily: FONT_BOARD, color: COLORS.text.resSub, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Eye button to preview draw pile
-    const eyeBg = this.add.rectangle(140, GAME_H - 78, 80, 44, 0x1a1000)
-      .setStrokeStyle(1, 0x664400).setInteractive({ useHandCursor: true });
-    const eyeLabel = this.add.text(140, GAME_H - 78, '👁 preview', {
-      fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.resSub, align: 'center'
-    }).setOrigin(0.5, 0.5);
-    eyeBg.on('pointerover', () => { eyeBg.setFillStyle(0x3d2200); eyeLabel.setColor(COLORS.text.orange); });
-    eyeBg.on('pointerout',  () => { eyeBg.setFillStyle(0x1a1000); eyeLabel.setColor(COLORS.text.resSub); });
+    const eyeBg = this.add.rectangle(140, GAME_H - 78, 96, 36, COLORS.panel)
+      .setStrokeStyle(1, 0x895d27).setInteractive({ useHandCursor: true });
+    this.add.text(140, GAME_H - 78, '👁 PREVIEW', {
+      fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.resSub, align: 'center'
+    }).setOrigin(0.5, 1);
+    eyeBg.on('pointerover', () => eyeBg.setFillStyle(0xf0debb));
+    eyeBg.on('pointerout',  () => eyeBg.setFillStyle(COLORS.panel));
     eyeBg.on('pointerdown', () => this.showDrawPileViewer());
 
     // Rows
@@ -1137,7 +1141,7 @@ class GameScene extends Phaser.Scene {
 
     // Hand area
     this.handLabel = this.add.text(GAME_W / 2 + 33, 523, 'YOUR CARDS', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.secondary, align: 'center'
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
 
     this.handCounter = null;
@@ -1151,7 +1155,7 @@ class GameScene extends Phaser.Scene {
 
   buildArrow(x, y, symbol) {
     const btn = this.add.text(x, y, symbol, {
-      fontSize: '28px', fontFamily: 'monospace', color: COLORS.text.secondary, align: 'center'
+      fontSize: '28px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5).setInteractive({
       hitArea: new Phaser.Geom.Rectangle(-22, -22, 44, 44),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
@@ -1179,9 +1183,9 @@ class GameScene extends Phaser.Scene {
     this.turnBoxes = [];
     for (let i = 0; i < maxTurns; i++) {
       const x = startX + i * (BOX + GAP);
-      const box   = this.add.rectangle(x, y, BOX, BOX, 0x1a1a2e).setStrokeStyle(1, COLORS.divider);
+      const box   = this.add.rectangle(x, y, BOX, BOX, 0xffffff);
       const check = this.add.text(x, y, '✓', {
-        fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold'
+        fontSize: '10px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, fontStyle: 'bold'
       }).setOrigin(0.5, 0.5).setVisible(false);
       this.turnBoxes.push({ box, check });
     }
@@ -1216,17 +1220,16 @@ class GameScene extends Phaser.Scene {
     const bg = this.add.rectangle(0, 0, 104, SLOT_H, 0x000000, 0);
 
     const title = this.add.text(0, -40, 'Product', {
-      fontSize: '16px', fontFamily: 'monospace', color: COLORS.text.purple, fontStyle: 'bold', align: 'center'
+      fontSize: '16px', fontFamily: FONT_BOARD, color: COLORS.text.purple, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     const subtitle = this.add.text(0, -18, 'Base: 1×', {
-      fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.productSub, align: 'center'
+      fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.productSub, align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    const btnBg = this.add.rectangle(0, 20, 96, 36, COLORS.productTile)
-      .setStrokeStyle(1, COLORS.productSlotBorder);
+    const btnBg = this.add.rectangle(0, 20, 96, 36, COLORS.productTile);
     const btnText = this.add.text(0, 20, 'SHIP', {
-      fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.purple, fontStyle: 'bold', align: 'center'
+      fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.primary, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     container.add([bg, title, subtitle, btnBg, btnText]);
@@ -1238,7 +1241,7 @@ class GameScene extends Phaser.Scene {
       Phaser.Geom.Rectangle.Contains
     );
     container.on('pointerover', () => {
-      if (this.state.phase === 'playing') btnBg.setFillStyle(COLORS.productTileHover);
+      if (this.state.phase === 'playing') btnBg.setFillStyle(COLORS.productTileBtnHover);
     });
     container.on('pointerout',  () => btnBg.setFillStyle(COLORS.productTile));
     container.on('pointerdown', () => this.onActivateProductClicked());
@@ -1249,12 +1252,11 @@ class GameScene extends Phaser.Scene {
   buildProductSlot(x, y, index) {
     const container = this.add.container(x, y);
 
-    const bg = this.add.rectangle(0, 0, SLOT_W, SLOT_H, COLORS.productSlotEmpty)
-      .setStrokeStyle(1, COLORS.productSlotBorder);
+    const bg = this.add.rectangle(0, 0, SLOT_W, SLOT_H, COLORS.productSlotEmpty);
 
-    const label = this.add.text(0, 8, `SLOT ${index + 1}`, {
-      fontSize: '9px', fontFamily: 'monospace', color: '#443366', align: 'center'
-    }).setOrigin(0.5, 0.5);
+    const label = this.add.text(0, SLOT_H / 2 - 20, `SLOT ${index + 1}`, {
+      fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.purple, align: 'center'
+    }).setOrigin(0.5, 1);
 
     container.add([bg, label]);
     container.slotBg    = bg;
@@ -1299,12 +1301,11 @@ class GameScene extends Phaser.Scene {
   buildSlot(x, y, index) {
     const container = this.add.container(x, y);
 
-    const bg = this.add.rectangle(0, 0, SLOT_W, SLOT_H, COLORS.slotEmpty)
-      .setStrokeStyle(1, COLORS.slotBorder);
+    const bg = this.add.rectangle(0, 0, SLOT_W, SLOT_H, COLORS.slotEmpty);
 
-    const label = this.add.text(0, 8, `SLOT ${index + 1}`, {
-      fontSize: '9px', fontFamily: 'monospace', color: '#2d6a4f', align: 'center'
-    }).setOrigin(0.5, 0.5);
+    const label = this.add.text(0, SLOT_H / 2 - 20, `SLOT ${index + 1}`, {
+      fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.cashSub, align: 'center'
+    }).setOrigin(0.5, 1);
 
     container.add([bg, label]);
     container.slotBg    = bg;
@@ -1338,20 +1339,19 @@ class GameScene extends Phaser.Scene {
 
     // Title
     const title = this.add.text(0, -40, 'Cash', {
-      fontSize: '16px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold', align: 'center'
+      fontSize: '16px', fontFamily: FONT_BOARD, color: COLORS.text.cashSub, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Subtitle
     const subtitle = this.add.text(0, -18, `Base: $${BASE_CASH_PER_ROUND[0]}k`, {
-      fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.cashSub, align: 'center'
+      fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.cashSub, align: 'center'
     }).setOrigin(0.5, 0.5);
     this.cashSubtitle = subtitle;
 
     // Button
-    const btnBg = this.add.rectangle(0, 20, 96, 36, COLORS.activateTile)
-      .setStrokeStyle(1, 0x40916c);
+    const btnBg = this.add.rectangle(0, 20, 96, 36, COLORS.activateTile);
     const btnText = this.add.text(0, 20, 'RAISE $', {
-      fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold', align: 'center'
+      fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.primary, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     container.add([bg, title, subtitle, btnBg, btnText]);
@@ -1390,12 +1390,11 @@ class GameScene extends Phaser.Scene {
   buildResSlot(x, y, index) {
     const container = this.add.container(x, y);
 
-    const bg = this.add.rectangle(0, 0, SLOT_W, SLOT_H, COLORS.resSlotEmpty)
-      .setStrokeStyle(1, COLORS.resSlotBorder);
+    const bg = this.add.rectangle(0, 0, SLOT_W, SLOT_H, COLORS.resSlotEmpty);
 
-    const label = this.add.text(0, 8, `SLOT ${index + 1}`, {
-      fontSize: '9px', fontFamily: 'monospace', color: '#443300', align: 'center'
-    }).setOrigin(0.5, 0.5);
+    const label = this.add.text(0, SLOT_H / 2 - 20, `SLOT ${index + 1}`, {
+      fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.resSub, align: 'center'
+    }).setOrigin(0.5, 1);
 
     container.add([bg, label]);
     container.slotBg    = bg;
@@ -1429,19 +1428,18 @@ class GameScene extends Phaser.Scene {
 
     // Title
     const title = this.add.text(0, -40, 'Resources', {
-      fontSize: '16px', fontFamily: 'monospace', color: COLORS.text.orange, fontStyle: 'bold', align: 'center'
+      fontSize: '16px', fontFamily: FONT_BOARD, color: COLORS.text.resSub, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Subtitle
     const subtitle = this.add.text(0, -18, 'Base: 1 draw', {
-      fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.resSub, align: 'center'
-    }).setOrigin(0.5, 0.5);
+      fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.resSub, align: 'center'
+    }).setOrigin(0.5, 1);
 
     // Button
-    const btnBg = this.add.rectangle(0, 20, 96, 36, COLORS.resTile)
-      .setStrokeStyle(1, COLORS.resAccent);
+    const btnBg = this.add.rectangle(0, 20, 96, 36, COLORS.resTile);
     const btnText = this.add.text(0, 20, 'RECRUIT', {
-      fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.orange, fontStyle: 'bold', align: 'center'
+      fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.primary, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     container.add([bg, title, subtitle, btnBg, btnText]);
@@ -1601,6 +1599,13 @@ class GameScene extends Phaser.Scene {
 
     const typeColor = COLORS.typeColors[card.type] || 0x888888;
 
+    const shadow = draggable ? (() => {
+      const s = this.add.graphics();
+      s.fillStyle(0x000000, 0.6);
+      s.fillRoundedRect(-CARD_W / 2 - 3, -CARD_H / 2 + 6, CARD_W, CARD_H, 5);
+      return s;
+    })() : null;
+
     const bg = this.add.graphics();
     const drawBg = (strokeW, strokeC) => {
       bg.clear();
@@ -1617,25 +1622,26 @@ class GameScene extends Phaser.Scene {
     bar.fillStyle(typeColor);
     bar.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 12, { tl: 5, tr: 5, bl: 0, br: 0 });
     const typeLabel = this.add.text(0, -CARD_H / 2 + 6, card.type.toUpperCase(), {
-      fontSize: '7px', fontFamily: 'monospace', color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
+      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     const nameText = this.add.text(0, -CARD_H / 2 + 42, card.name, {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.primary, fontStyle: 'bold',
+      fontSize: '11px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold',
       align: 'center', wordWrap: { width: CARD_W - 10 }
     }).setOrigin(0.5, 0.5);
 
     const divider = this.add.rectangle(0, -CARD_H / 2 + 72, CARD_W - 16, 1, COLORS.cardDivider).setOrigin(0.5, 0.5);
 
     const opText = this.add.text(0, -CARD_H / 2 + 82, this.operationLabel(card.operation), {
-      fontSize: '20px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold', align: 'center'
+      fontSize: '20px', fontFamily: FONT_BOARD, color: COLORS.text.cardOp, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0);
 
-    container.add([bg, bar, typeLabel, nameText, divider, opText]);
+    container.add([...(shadow ? [shadow] : []), bg, bar, typeLabel, nameText, divider, opText]);
 
     // Effect icons — ★ for special/bonus-turn effects, ⚡ for trigger effects
     const icons = [];
-    if (card.specialEffect || card.bonusTurn) icons.push({ symbol: '★', color: COLORS.text.gold });
+    if (card.specialEffect) icons.push({ symbol: '★', color: COLORS.text.gold });
+    if (card.bonusTurn)     icons.push({ symbol: '+', color: COLORS.text.bonusTurn });
     if (card.triggerEffect)                   icons.push({ symbol: '⚡', color: COLORS.text.cyan });
     if (icons.length > 0) {
       const iconY   = -CARD_H / 2 + 118;
@@ -1643,7 +1649,7 @@ class GameScene extends Phaser.Scene {
       const startX  = -((icons.length - 1) * spacing) / 2;
       icons.forEach((icon, i) => {
         container.add(this.add.text(startX + i * spacing, iconY, icon.symbol, {
-          fontSize: '18px', fontFamily: 'monospace', color: icon.color, align: 'center'
+          fontSize: '18px', fontFamily: FONT_BOARD, color: icon.color, align: 'center'
         }).setOrigin(0.5, 0.5));
       });
     }
@@ -1651,12 +1657,12 @@ class GameScene extends Phaser.Scene {
     const effectiveCost = this.getEffectiveCost ? this.getEffectiveCost(card) : card.cost * 100;
     const canAfford = this.state && this.state.cash >= effectiveCost;
     container.add(this.add.text(-CARD_W / 2 + 6, CARD_H / 2 - 16, `$${card.cost * 100}k`, {
-      fontSize: '11px', fontFamily: 'monospace', color: canAfford ? COLORS.text.positive : COLORS.text.negLight
+      fontSize: '11px', fontFamily: FONT_BOARD, color: canAfford ? COLORS.text.cashSub : COLORS.text.negLight
     }).setOrigin(0, 0.5));
 
     const valStr = card.baseValue > 0 ? `$${card.baseValue}k` : '—';
     container.add(this.add.text(CARD_W / 2 - 6, CARD_H / 2 - 16, valStr, {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.value
+      fontSize: '11px', fontFamily: FONT_BOARD, color: '#919191'
     }).setOrigin(1, 0.5));
 
     if (draggable) {
@@ -1665,7 +1671,7 @@ class GameScene extends Phaser.Scene {
       this.input.setDraggable(container);
 
       container.on('pointerover', () => {
-        if (this.state.phase === 'playing') bg.setStrokeStyle(2, 0xffffff);
+        if (this.state.phase === 'playing') bg.setStrokeStyle(2, 0x000000);
       });
       container.on('pointerout', () => {
         bg.setStrokeStyle(1, typeColor);
@@ -1738,34 +1744,34 @@ class GameScene extends Phaser.Scene {
 
     // Build all text objects first so we can measure their actual heights
     const typeText = this.add.text(0, 0, card.type.toUpperCase(), {
-      fontSize: '10px', fontFamily: 'monospace', color: typeColorHex, align: 'center'
+      fontSize: '10px', fontFamily: FONT_BOARD, color: typeColorHex, align: 'center'
     }).setOrigin(0.5, 0);
 
     const nameText = this.add.text(0, 0, card.name, {
-      fontSize: '17px', fontFamily: 'monospace', color: COLORS.text.primary, fontStyle: 'bold',
+      fontSize: '17px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold',
       align: 'center', wordWrap: { width: PW - PAD * 2 }
     }).setOrigin(0.5, 0);
 
     const descText = this.add.text(0, 0, card.description, {
-      fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.desc, fontStyle: 'italic',
+      fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, fontStyle: 'italic',
       align: 'center', wordWrap: { width: PW - PAD * 2 }
     }).setOrigin(0.5, 0);
 
     let specialText = null, bonusText = null, triggerText = null;
     if (card.specialEffect) {
       specialText = this.add.text(0, 0, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
-        fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.gold,
+        fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.gold,
         align: 'center', wordWrap: { width: PW - PAD * 2 }
       }).setOrigin(0.5, 0);
     }
     if (card.bonusTurn) {
-      bonusText = this.add.text(0, 0, '★ +1 Bonus Turn on placement', {
-        fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.gold, align: 'center'
+      bonusText = this.add.text(0, 0, '+ +1 Bonus Turn on placement', {
+        fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.bonusTurn, align: 'center'
       }).setOrigin(0.5, 0);
     }
     if (card.triggerEffect) {
       triggerText = this.add.text(0, 0, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
-        fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.cyan,
+        fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.cyan,
         align: 'center', wordWrap: { width: PW - PAD * 2 }
       }).setOrigin(0.5, 0);
     }
@@ -1794,7 +1800,8 @@ class GameScene extends Phaser.Scene {
     const popupCenterX = Math.max(PW / 2 + 5, Math.min(GAME_W - PW / 2 - 5, worldX));
 
     const popup = this.add.container(popupCenterX, popupCenterY).setDepth(200);
-    popup.add(this.add.rectangle(0, 0, PW, PH, 0x0d1b2a).setStrokeStyle(2, typeColor));
+    popup.add(this.add.rectangle(-3, 6, PW, PH, 0x000000).setAlpha(0.6));
+    popup.add(this.add.rectangle(0, 0, PW, PH, 0xffffff).setStrokeStyle(2, typeColor));
 
     // Layout: place items top-to-bottom starting from -PH/2 + TOP_PAD
     let y = -PH / 2 + TOP_PAD;
@@ -2032,36 +2039,37 @@ class GameScene extends Phaser.Scene {
 
     slot.add(this.add.rectangle(0, -SLOT_H / 2 + 6, SLOT_W, 12, typeColor).setOrigin(0.5, 0.5));
     slot.add(this.add.text(0, -SLOT_H / 2 + 6, card.type.toUpperCase(), {
-      fontSize: '7px', fontFamily: 'monospace', color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
+      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5));
 
     slot.add(this.add.text(0, -SLOT_H / 2 + 22, card.name, {
-      fontSize: '8px', fontFamily: 'monospace', color: COLORS.text.primary, fontStyle: 'bold',
+      fontSize: '8px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold',
       align: 'center', wordWrap: { width: SLOT_W - 12, useAdvancedWrap: true }
     }).setOrigin(0.5, 0));
 
     const cashOpText = this.add.text(0, 8, this.operationLabel(card.operation), {
-      fontSize: '22px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold', align: 'center'
+      fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.cashSub, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
     slot.add(cashOpText);
     slot.opText = cashOpText;
 
     const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
     const valText = this.add.text(0, SLOT_H / 2 - 14, dispVal > 0 ? `$${dispVal}k` : '', {
-      fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.value, align: 'center'
+      fontSize: '9px', fontFamily: FONT_BOARD, color: '#919191', align: 'center'
     }).setOrigin(0.5, 0.5);
     valText.setVisible(dispVal > 0);
     slot.add(valText);
     slot.valText = valText;
 
     const slotIcons = [];
-    if (card.specialEffect || card.bonusTurn) slotIcons.push({ symbol: '★', color: COLORS.text.gold });
+    if (card.specialEffect) slotIcons.push({ symbol: '★', color: COLORS.text.gold });
+    if (card.bonusTurn)     slotIcons.push({ symbol: '+', color: COLORS.text.bonusTurn });
     if (card.triggerEffect)                   slotIcons.push({ symbol: '⚡', color: COLORS.text.cyan });
     if (slotIcons.length > 0) {
       const startX = -((slotIcons.length - 1) * 22) / 2;
       slotIcons.forEach((icon, i) => {
         slot.add(this.add.text(startX + i * 22, 32, icon.symbol, {
-          fontSize: '18px', fontFamily: 'monospace', color: icon.color, align: 'center'
+          fontSize: '18px', fontFamily: FONT_BOARD, color: icon.color, align: 'center'
         }).setOrigin(0.5, 0.5));
       });
     }
@@ -2075,41 +2083,41 @@ class GameScene extends Phaser.Scene {
 
     slot.slotLabel.setVisible(false);
     slot.slotBg.setFillStyle(COLORS.productCardPlaced)
-      .setStrokeStyle(1, COLORS.productAccent);
+      .setStrokeStyle(1, typeColor);
 
     slot.add(this.add.rectangle(0, -SLOT_H / 2 + 6, SLOT_W, 12, typeColor).setOrigin(0.5, 0.5));
     slot.add(this.add.text(0, -SLOT_H / 2 + 6, card.type.toUpperCase(), {
-      fontSize: '7px', fontFamily: 'monospace', color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
+      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5));
 
     slot.add(this.add.text(0, -SLOT_H / 2 + 22, card.name, {
-      fontSize: '8px', fontFamily: 'monospace', color: '#ddccff', fontStyle: 'bold',
+      fontSize: '8px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold',
       align: 'center', wordWrap: { width: SLOT_W - 12, useAdvancedWrap: true }
     }).setOrigin(0.5, 0));
 
-    // Show operation in purple tint (IP context)
     const ipOpText = this.add.text(0, 8, this.operationLabel(card.operation), {
-      fontSize: '22px', fontFamily: 'monospace', color: COLORS.text.purple, fontStyle: 'bold', align: 'center'
+      fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.purple, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
     slot.add(ipOpText);
     slot.opText = ipOpText;
 
     const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
     const valText = this.add.text(0, SLOT_H / 2 - 14, dispVal > 0 ? `$${dispVal}k` : '', {
-      fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.value, align: 'center'
+      fontSize: '9px', fontFamily: FONT_BOARD, color: '#919191', align: 'center'
     }).setOrigin(0.5, 0.5);
     valText.setVisible(dispVal > 0);
     slot.add(valText);
     slot.valText = valText;
 
     const slotIcons = [];
-    if (card.specialEffect || card.bonusTurn) slotIcons.push({ symbol: '★', color: COLORS.text.gold });
+    if (card.specialEffect) slotIcons.push({ symbol: '★', color: COLORS.text.gold });
+    if (card.bonusTurn)     slotIcons.push({ symbol: '+', color: COLORS.text.bonusTurn });
     if (card.triggerEffect)                   slotIcons.push({ symbol: '⚡', color: COLORS.text.cyan });
     if (slotIcons.length > 0) {
       const startX = -((slotIcons.length - 1) * 22) / 2;
       slotIcons.forEach((icon, i) => {
         slot.add(this.add.text(startX + i * 22, 32, icon.symbol, {
-          fontSize: '18px', fontFamily: 'monospace', color: icon.color, align: 'center'
+          fontSize: '18px', fontFamily: FONT_BOARD, color: icon.color, align: 'center'
         }).setOrigin(0.5, 0.5));
       });
     }
@@ -2123,40 +2131,41 @@ class GameScene extends Phaser.Scene {
 
     slot.slotLabel.setVisible(false);
     slot.slotBg.setFillStyle(COLORS.resCardPlaced)
-      .setStrokeStyle(1, COLORS.resAccent);
+      .setStrokeStyle(1, typeColor);
 
     slot.add(this.add.rectangle(0, -SLOT_H / 2 + 6, SLOT_W, 12, typeColor).setOrigin(0.5, 0.5));
     slot.add(this.add.text(0, -SLOT_H / 2 + 6, card.type.toUpperCase(), {
-      fontSize: '7px', fontFamily: 'monospace', color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
+      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5));
 
     slot.add(this.add.text(0, -SLOT_H / 2 + 22, card.name, {
-      fontSize: '8px', fontFamily: 'monospace', color: '#ffddaa', fontStyle: 'bold',
+      fontSize: '8px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold',
       align: 'center', wordWrap: { width: SLOT_W - 12, useAdvancedWrap: true }
     }).setOrigin(0.5, 0));
 
     const resOpText = this.add.text(0, 8, this.operationLabel(card.operation), {
-      fontSize: '22px', fontFamily: 'monospace', color: COLORS.text.orange, fontStyle: 'bold', align: 'center'
+      fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.resSub, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
     slot.add(resOpText);
     slot.opText = resOpText;
 
     const dispVal = (card.baseValue || 0) + (this.state.valueBonuses[card.id] || 0);
     const valText = this.add.text(0, SLOT_H / 2 - 14, dispVal > 0 ? `$${dispVal}k` : '', {
-      fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.value, align: 'center'
+      fontSize: '9px', fontFamily: FONT_BOARD, color: '#919191', align: 'center'
     }).setOrigin(0.5, 0.5);
     valText.setVisible(dispVal > 0);
     slot.add(valText);
     slot.valText = valText;
 
     const slotIcons = [];
-    if (card.specialEffect || card.bonusTurn) slotIcons.push({ symbol: '★', color: COLORS.text.gold });
+    if (card.specialEffect) slotIcons.push({ symbol: '★', color: COLORS.text.gold });
+    if (card.bonusTurn)     slotIcons.push({ symbol: '+', color: COLORS.text.bonusTurn });
     if (card.triggerEffect)                   slotIcons.push({ symbol: '⚡', color: COLORS.text.cyan });
     if (slotIcons.length > 0) {
       const startX = -((slotIcons.length - 1) * 22) / 2;
       slotIcons.forEach((icon, i) => {
         slot.add(this.add.text(startX + i * 22, 32, icon.symbol, {
-          fontSize: '18px', fontFamily: 'monospace', color: icon.color, align: 'center'
+          fontSize: '18px', fontFamily: FONT_BOARD, color: icon.color, align: 'center'
         }).setOrigin(0.5, 0.5));
       });
     }
@@ -2236,7 +2245,7 @@ class GameScene extends Phaser.Scene {
       const eff  = cashOps[id];
       const boosted = Math.round(eff.value * 100) !== Math.round(card.operation.value * 100);
       slot.opText.setText(this.operationLabel(eff));
-      slot.opText.setColor(boosted ? COLORS.text.boost : COLORS.text.positive);
+      slot.opText.setColor(boosted ? COLORS.text.boost : COLORS.text.cashSub);
     });
 
     this.productSlotObjects.forEach((slot, i) => {
@@ -2256,7 +2265,7 @@ class GameScene extends Phaser.Scene {
       const eff  = resOps[id];
       const boosted = Math.round(eff.value * 100) !== Math.round(card.operation.value * 100);
       slot.opText.setText(this.operationLabel(eff));
-      slot.opText.setColor(boosted ? COLORS.text.boost : COLORS.text.orange);
+      slot.opText.setColor(boosted ? COLORS.text.boost : COLORS.text.resSub);
     });
   }
 
@@ -2286,7 +2295,7 @@ class GameScene extends Phaser.Scene {
     const effectiveOps = this._computeActivationOps(this.state.cashRow.filter(Boolean));
 
     this.activateTile.tileBg.setFillStyle(COLORS.activateActive);
-    this.showFloat(this.activateTile.x, this.activateTile.y - 90, `BASE +$${BASE}k`, COLORS.text.positive, 900);
+    this.showFloat(this.activateTile.x, this.activateTile.y - 90, `BASE +$${BASE}k`, COLORS.text.cashSub, 900);
 
     const STEP_DELAY = 700;
 
@@ -2314,7 +2323,7 @@ class GameScene extends Phaser.Scene {
       const diff  = payout - before;
       const label = op.type === 'multiply' ? `×${op.value}  →  $${payout}k` : `+$${diff}k`;
 
-      this.showFloat(slot.x, slot.y - 90, label, COLORS.text.gold, 900);
+      this.showFloat(slot.x, slot.y - 90, label, COLORS.text.cashSub, 900);
 
       const card = this.cardsData.find(c => c.id === cardId);
       if (card.triggerEffect) {
@@ -2476,7 +2485,7 @@ class GameScene extends Phaser.Scene {
     this.activateTile.tileBg.setFillStyle(0x000000, 0);
 
     const flash = this.add.text(740, ROW_CASH_Y, `+$${payout}k`, {
-      fontSize: '52px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold', align: 'center'
+      fontSize: '52px', fontFamily: FONT_BOARD, color: COLORS.text.cashSub, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5).setAlpha(0);
 
     this.tweens.add({
@@ -2575,10 +2584,10 @@ class GameScene extends Phaser.Scene {
 
   finalizeProductActivation(score) {
     this.state.productMultiplier = Math.round((this.state.productMultiplier + score) * 100) / 100;
-    this.productActivateTile.tileBg.setFillStyle(COLORS.productSlotEmpty);
+    this.productActivateTile.tileBg.setFillStyle(0x000000, 0);
 
     const flash = this.add.text(740, ROW_PROD_Y, `SHIP +${score}×`, {
-      fontSize: '52px', fontFamily: 'monospace', color: COLORS.text.purple, fontStyle: 'bold', align: 'center'
+      fontSize: '52px', fontFamily: FONT_BOARD, color: COLORS.text.purple, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5).setAlpha(0);
 
     this.tweens.add({
@@ -2619,7 +2628,7 @@ class GameScene extends Phaser.Scene {
     const effectiveOps = this._computeActivationOps(this.state.resourcesRow.filter(Boolean));
 
     this.hireTile.tileBg.setFillStyle(COLORS.resTileActive);
-    this.showFloat(this.hireTile.x, this.hireTile.y - 90, 'BASE +1 draw', COLORS.text.orange, 900);
+    this.showFloat(this.hireTile.x, this.hireTile.y - 90, 'BASE +1 draw', COLORS.text.resSub, 900);
 
     const STEP_DELAY = 700;
 
@@ -2648,7 +2657,7 @@ class GameScene extends Phaser.Scene {
       const label = op.type === 'multiply'
         ? `×${op.value}  →  ${drawCount} draws`
         : `+${diff} draw`;
-      this.showFloat(slot.x, slot.y - 90, label, COLORS.text.orange, 900);
+      this.showFloat(slot.x, slot.y - 90, label, COLORS.text.resSub, 900);
 
       const card = this.cardsData.find(c => c.id === cardId);
       if (card.triggerEffect) {
@@ -2683,7 +2692,7 @@ class GameScene extends Phaser.Scene {
     this.hireTile.tileBg.setFillStyle(0x000000, 0);
 
     const flash = this.add.text(740, ROW_RES_Y, `DRAW ${count}`, {
-      fontSize: '52px', fontFamily: 'monospace', color: COLORS.text.orange, fontStyle: 'bold', align: 'center'
+      fontSize: '52px', fontFamily: FONT_BOARD, color: COLORS.text.resSub, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5).setAlpha(0);
 
     this.tweens.add({
@@ -2709,19 +2718,20 @@ class GameScene extends Phaser.Scene {
     this.drawModal = modal;
 
     // Overlay
-    modal.add(this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000, 0.75));
+    modal.add(this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000, 0.60));
 
-    // Panel
-    modal.add(this.add.rectangle(cx, cy, PW, PH, 0x0d1b2a).setStrokeStyle(2, COLORS.resAccent));
+    // Panel shadow + panel
+    modal.add(this.add.rectangle(cx - 3, cy + 5, PW, PH, 0x000000, 0.60));
+    modal.add(this.add.rectangle(cx, cy, PW, PH, COLORS.bg));
 
     // Header
     modal.add(this.add.text(cx, cy - PH / 2 + 28, 'CHOOSE A CARD', {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.orange, fontStyle: 'bold'
+      fontSize: '18px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5));
 
     // Draws remaining counter — store ref to update it
     const drawsText = this.add.text(cx, cy - PH / 2 + 52, `${drawsRemaining} draw${drawsRemaining !== 1 ? 's' : ''} remaining`, {
-      fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.secondary
+      fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000'
     }).setOrigin(0.5, 0.5);
     modal.add(drawsText);
     modal.drawsText = drawsText;
@@ -2739,14 +2749,14 @@ class GameScene extends Phaser.Scene {
 
     // DONE / SKIP button
     const doneBtnY = cy + PH / 2 - 26;
-    const doneBg = this.add.rectangle(cx, doneBtnY, 120, 30, 0x1a1a2e)
-      .setStrokeStyle(1, 0x555566).setInteractive({ useHandCursor: true });
+    const doneBg = this.add.rectangle(cx, doneBtnY, 96, 36, COLORS.bg)
+      .setStrokeStyle(1, 0x000000).setInteractive({ useHandCursor: true });
     const doneLabel = this.add.text(cx, doneBtnY, 'DONE / SKIP', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.disabledBtn
+      fontSize: '11px', fontFamily: FONT_BOARD, color: '#000000'
     }).setOrigin(0.5, 0.5);
     modal.add([doneBg, doneLabel]);
-    doneBg.on('pointerover', () => doneBg.setFillStyle(0x333344));
-    doneBg.on('pointerout',  () => doneBg.setFillStyle(0x1a1a2e));
+    doneBg.on('pointerover', () => doneBg.setFillStyle(0xf0e8dc));
+    doneBg.on('pointerout',  () => doneBg.setFillStyle(COLORS.bg));
     doneBg.on('pointerdown', () => this.closeDrawModal());
   }
 
@@ -2756,9 +2766,9 @@ class GameScene extends Phaser.Scene {
     // Stack depth — back cards offset down-right
     for (let i = 3; i >= 1; i--) {
       const g = this.add.graphics({ x: x + i * 4, y: y + i * 4 });
-      g.fillStyle(0x0a1520);
+      g.fillStyle(0xf0debb);
       g.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
-      g.lineStyle(1, 0x223344);
+      g.lineStyle(1, 0xd1d1d1);
       g.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
       modal.add(g);
     }
@@ -2767,31 +2777,31 @@ class GameScene extends Phaser.Scene {
     const topCard = this.add.graphics({ x, y });
     const drawTop = (strokeW, strokeC) => {
       topCard.clear();
-      topCard.fillStyle(0x0d1b2a);
+      topCard.fillStyle(pileEnabled ? 0xfdedcd : 0xf5f5f5);
       topCard.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
       topCard.lineStyle(strokeW, strokeC);
       topCard.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
     };
-    drawTop(2, pileEnabled ? 0x5566bb : COLORS.divider);
+    drawTop(2, pileEnabled ? 0x4f4f4f : 0xd1d1d1);
     topCard.setStrokeStyle = (w, c) => drawTop(w, c);
     modal.add(topCard);
 
     // Inner border for card-back texture
     const innerG = this.add.graphics({ x, y });
-    innerG.lineStyle(1, pileEnabled ? 0x334477 : 0x222233);
+    innerG.lineStyle(1, pileEnabled ? 0x4f4f4f : 0xd1d1d1);
     innerG.strokeRoundedRect(-(CARD_W - 14) / 2, -(CARD_H - 14) / 2, CARD_W - 14, CARD_H - 14, 3);
     modal.add(innerG);
 
     // Question mark
     modal.add(this.add.text(x, y - 14, '?', {
-      fontSize: '38px', fontFamily: 'monospace',
-      color: pileEnabled ? '#445588' : '#222233', align: 'center'
+      fontSize: '38px', fontFamily: FONT_BOARD,
+      color: pileEnabled ? '#4f4f4f' : '#d1d1d1', align: 'center'
     }).setOrigin(0.5, 0.5));
 
     // DRAW BLIND label at bottom of card
     modal.add(this.add.text(x, y + CARD_H / 2 - 18, 'DRAW BLIND', {
-      fontSize: '8px', fontFamily: 'monospace', fontStyle: 'bold',
-      color: pileEnabled ? '#8899cc' : COLORS.text.disabled, align: 'center'
+      fontSize: '8px', fontFamily: FONT_BOARD, fontStyle: 'bold',
+      color: pileEnabled ? '#4f4f4f' : '#d1d1d1', align: 'center'
     }).setOrigin(0.5, 0.5));
 
     if (pileEnabled) {
@@ -2799,8 +2809,8 @@ class GameScene extends Phaser.Scene {
         new Phaser.Geom.Rectangle(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H),
         Phaser.Geom.Rectangle.Contains
       );
-      topCard.on('pointerover', () => topCard.setStrokeStyle(2, 0x99aaee));
-      topCard.on('pointerout',  () => topCard.setStrokeStyle(2, 0x5566bb));
+      topCard.on('pointerover', () => topCard.setStrokeStyle(2, 0x000000));
+      topCard.on('pointerout',  () => topCard.setStrokeStyle(2, 0x4f4f4f));
       topCard.on('pointerdown', () => this.takeBlindCard(modal));
     }
   }
@@ -2809,9 +2819,9 @@ class GameScene extends Phaser.Scene {
     const id = this.state.revealedCards[revealedIndex];
 
     if (!id) {
-      modal.add(this.add.rectangle(x, y, CARD_W + 10, CARD_H + 10, 0x111122).setStrokeStyle(1, 0x333344));
+      modal.add(this.add.rectangle(x, y, CARD_W + 10, CARD_H + 10, 0xebdfce).setStrokeStyle(0));
       modal.add(this.add.text(x, y, 'EMPTY', {
-        fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.disabled
+        fontSize: '9px', fontFamily: FONT_BOARD, color: '#895d27'
       }).setOrigin(0.5, 0.5));
       return;
     }
@@ -2844,18 +2854,18 @@ class GameScene extends Phaser.Scene {
     };
     if (card.specialEffect) {
       addLine(this.add.text(0, 0, `★ ${this.specialEffectLabel(card.specialEffect)}`, {
-        fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.gold,
+        fontSize: '10px', fontFamily: FONT_BOARD, color: COLORS.text.gold,
         align: 'center', wordWrap: { width: 180 }
       }));
     }
     if (card.bonusTurn) {
-      addLine(this.add.text(0, 0, '★ +1 Bonus Turn', {
-        fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.gold, align: 'center'
+      addLine(this.add.text(0, 0, '+ +1 Bonus Turn', {
+        fontSize: '10px', fontFamily: FONT_BOARD, color: COLORS.text.bonusTurn, align: 'center'
       }));
     }
     if (card.triggerEffect) {
       addLine(this.add.text(0, 0, `⚡ ${this.triggerEffectLabel(card.triggerEffect)}`, {
-        fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.cyan,
+        fontSize: '10px', fontFamily: FONT_BOARD, color: COLORS.text.cyan,
         align: 'center', wordWrap: { width: 180 }
       }));
     }
@@ -2872,15 +2882,16 @@ class GameScene extends Phaser.Scene {
     const modal = this.add.container(0, 0).setDepth(50);
     this.drawPileViewerModal = modal;
 
-    modal.add(this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000, 0.75));
-    modal.add(this.add.rectangle(cx, cy, PW, PH, 0x0d1b2a).setStrokeStyle(2, COLORS.resAccent));
+    modal.add(this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000, 0.60));
+    modal.add(this.add.rectangle(cx - 3, cy + 5, PW, PH, 0x000000, 0.60));
+    modal.add(this.add.rectangle(cx, cy, PW, PH, COLORS.bg));
 
     modal.add(this.add.text(cx, cy - PH / 2 + 28, 'AVAILABLE CARDS', {
-      fontSize: '15px', fontFamily: 'monospace', color: COLORS.text.orange, fontStyle: 'bold'
+      fontSize: '15px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5));
 
     modal.add(this.add.text(cx, cy - PH / 2 + 50, 'Activate the Resources row to draw.', {
-      fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.hint, align: 'center'
+      fontSize: '9px', fontFamily: FONT_BOARD, color: '#000000', align: 'center'
     }).setOrigin(0.5, 0.5));
 
     // Same three-column layout as CHOOSE A CARD, but non-interactive
@@ -2896,8 +2907,8 @@ class GameScene extends Phaser.Scene {
       modal.add(this.buildCardVisual(card0, card1X, cardSlotY, false));
       this.addModalCardEffectText(modal, card0, card1X, cardSlotY);
     } else {
-      modal.add(this.add.rectangle(card1X, cardSlotY, CARD_W, CARD_H, 0x111122).setStrokeStyle(1, 0x333344));
-      modal.add(this.add.text(card1X, cardSlotY, 'EMPTY', { fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.disabled }).setOrigin(0.5, 0.5));
+      modal.add(this.add.rectangle(card1X, cardSlotY, CARD_W, CARD_H, 0xf5f5f5).setStrokeStyle(1, 0xd1d1d1));
+      modal.add(this.add.text(card1X, cardSlotY, 'EMPTY', { fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.disabled }).setOrigin(0.5, 0.5));
     }
 
     // Face-up card 2
@@ -2907,35 +2918,35 @@ class GameScene extends Phaser.Scene {
       modal.add(this.buildCardVisual(card1, card2X, cardSlotY, false));
       this.addModalCardEffectText(modal, card1, card2X, cardSlotY);
     } else {
-      modal.add(this.add.rectangle(card2X, cardSlotY, CARD_W, CARD_H, 0x111122).setStrokeStyle(1, 0x333344));
-      modal.add(this.add.text(card2X, cardSlotY, 'EMPTY', { fontSize: '9px', fontFamily: 'monospace', color: COLORS.text.disabled }).setOrigin(0.5, 0.5));
+      modal.add(this.add.rectangle(card2X, cardSlotY, CARD_W, CARD_H, 0xf5f5f5).setStrokeStyle(1, 0xd1d1d1));
+      modal.add(this.add.text(card2X, cardSlotY, 'EMPTY', { fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.disabled }).setOrigin(0.5, 0.5));
     }
 
     // Draw pile (non-interactive, same visual as buildModalDrawPile)
     const pileEnabled = this.state.drawPile.length > 0;
     for (let i = 3; i >= 1; i--) {
-      modal.add(this.add.rectangle(pileX + i * 4, cardSlotY + i * 4, CARD_W, CARD_H, 0x0a1520).setStrokeStyle(1, 0x223344));
+      modal.add(this.add.rectangle(pileX + i * 4, cardSlotY + i * 4, CARD_W, CARD_H, 0xf0debb).setStrokeStyle(1, 0xd1d1d1));
     }
-    modal.add(this.add.rectangle(pileX, cardSlotY, CARD_W, CARD_H, 0x0d1b2a).setStrokeStyle(2, pileEnabled ? 0x5566bb : COLORS.divider));
-    modal.add(this.add.rectangle(pileX, cardSlotY, CARD_W - 14, CARD_H - 14, 0x0d1b2a).setStrokeStyle(1, pileEnabled ? 0x334477 : 0x222233));
+    modal.add(this.add.rectangle(pileX, cardSlotY, CARD_W, CARD_H, pileEnabled ? 0xfdedcd : 0xf5f5f5).setStrokeStyle(2, pileEnabled ? 0x4f4f4f : 0xd1d1d1));
+    modal.add(this.add.rectangle(pileX, cardSlotY, CARD_W - 14, CARD_H - 14, pileEnabled ? 0xfdedcd : 0xf5f5f5).setStrokeStyle(1, pileEnabled ? 0x4f4f4f : 0xd1d1d1));
     modal.add(this.add.text(pileX, cardSlotY - 14, '?', {
-      fontSize: '38px', fontFamily: 'monospace', color: pileEnabled ? '#445588' : '#222233', align: 'center'
+      fontSize: '38px', fontFamily: FONT_BOARD, color: pileEnabled ? '#4f4f4f' : '#d1d1d1', align: 'center'
     }).setOrigin(0.5, 0.5));
     modal.add(this.add.text(pileX, cardSlotY + CARD_H / 2 - 18, `${this.state.drawPile.length} cards`, {
-      fontSize: '8px', fontFamily: 'monospace', fontStyle: 'bold',
-      color: pileEnabled ? '#8899cc' : COLORS.text.disabled, align: 'center'
+      fontSize: '8px', fontFamily: FONT_BOARD, fontStyle: 'bold',
+      color: pileEnabled ? '#4f4f4f' : COLORS.text.disabled, align: 'center'
     }).setOrigin(0.5, 0.5));
 
     // Close button
     const closeY = cy + PH / 2 - 26;
-    const closeBg = this.add.rectangle(cx, closeY, 120, 30, 0x1a1a2e)
-      .setStrokeStyle(1, 0x555566).setInteractive({ useHandCursor: true });
+    const closeBg = this.add.rectangle(cx, closeY, 96, 36, COLORS.bg)
+      .setStrokeStyle(1, 0x000000).setInteractive({ useHandCursor: true });
     modal.add(closeBg);
     modal.add(this.add.text(cx, closeY, 'CLOSE', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.disabledBtn
+      fontSize: '11px', fontFamily: FONT_BOARD, color: '#000000'
     }).setOrigin(0.5, 0.5));
-    closeBg.on('pointerover', () => closeBg.setFillStyle(0x333344));
-    closeBg.on('pointerout',  () => closeBg.setFillStyle(0x1a1a2e));
+    closeBg.on('pointerover', () => closeBg.setFillStyle(0xf0e8dc));
+    closeBg.on('pointerout',  () => closeBg.setFillStyle(COLORS.bg));
     closeBg.on('pointerdown', () => { modal.destroy(); this.drawPileViewerModal = null; });
   }
 
@@ -2996,7 +3007,7 @@ class GameScene extends Phaser.Scene {
 
     // Auto effects — no modal needed
     if (fx.type === 'gain_cash') {
-      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.amount}k`, COLORS.text.positive, 1200);
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.amount}k`, COLORS.text.cyan, 1200);
       return resumeCallback(payout + fx.amount, 0);
     }
 
@@ -3004,7 +3015,7 @@ class GameScene extends Phaser.Scene {
       const count = this._countBoardCardsOfType(fx.targetType);
       const earned = fx.amount * count;
       if (earned > 0) {
-        this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${earned}k (${count}×${fx.targetType})`, COLORS.text.gold, 1200);
+        this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${earned}k (${count}×${fx.targetType})`, COLORS.text.cyan, 1200);
       }
       return resumeCallback(payout + earned, 0);
     }
@@ -3017,7 +3028,7 @@ class GameScene extends Phaser.Scene {
       const matchFn = tc => fx.target === 'Self' ? tc.id === card.id : this._typeMatches(tc, fx.target);
       this._applyBoostValue(matchFn, fx.value);
       this._reRenderAllSlots();
-      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.value}k val`, COLORS.text.cyanLight, 1000);
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.value}k val`, COLORS.text.cyan, 1000);
       return resumeCallback(payout, 0);
     }
 
@@ -3025,7 +3036,7 @@ class GameScene extends Phaser.Scene {
       const matchFn = tc => fx.target === 'Self' ? tc.id === card.id : this._typeMatches(tc, fx.target);
       this._applyPermanentOpBoost(matchFn, fx.value);
       this._reRenderAllSlots();
-      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `${fx.target}: +${fx.value} op`, COLORS.text.cyanLight, 1000);
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `${fx.target}: +${fx.value} op`, COLORS.text.cyan, 1000);
       return resumeCallback(payout, 0);
     }
 
@@ -3033,7 +3044,7 @@ class GameScene extends Phaser.Scene {
       const count = this._countBoardCardsOfType(fx.targetType);
       this.state.cardOpBoosts[card.id] = (this.state.cardOpBoosts[card.id] || 0) + fx.value * count;
       this._reRenderAllSlots();
-      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+${fx.value * count} op (${count}×${fx.targetType})`, COLORS.text.cyanLight, 1000);
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+${fx.value * count} op (${count}×${fx.targetType})`, COLORS.text.cyan, 1000);
       return resumeCallback(payout, 0);
     }
 
@@ -3061,9 +3072,10 @@ class GameScene extends Phaser.Scene {
     this.triggerModal = modal;
 
     modal.add(this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000, 0.60));
-    modal.add(this.add.rectangle(cx, cy, PW, PH, 0x0d1b2a).setStrokeStyle(2, 0x00ffff));
+    modal.add(this.add.rectangle(cx - 3, cy + 5, PW, PH, 0x000000, 0.60));
+    modal.add(this.add.rectangle(cx, cy, PW, PH, COLORS.bg));
     modal.add(this.add.text(cx, cy - PH / 2 + 24, `⚡ ${card.name.toUpperCase()}`, {
-      fontSize: '13px', fontFamily: 'monospace', color: COLORS.text.cyan, fontStyle: 'bold'
+      fontSize: '13px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5));
 
     if (fx.type === 'spend_cash_draw_resource') {
@@ -3079,39 +3091,37 @@ class GameScene extends Phaser.Scene {
   _addModalButtons(modal, cx, btnY, acceptCallback, skipCallback) {
     const hasAccept = acceptCallback !== null;
 
-    const acceptBg = this.add.rectangle(cx - 70, btnY, 110, 36,
-      hasAccept ? 0x1a472a : 0x111122)
-      .setStrokeStyle(1, hasAccept ? 0x40916c : 0x333333);
+    const acceptBg = this.add.rectangle(cx + 70, btnY, 96, 36, hasAccept ? 0x000000 : 0xcccccc);
     if (hasAccept) acceptBg.setInteractive({ useHandCursor: true });
     modal.add(acceptBg);
-    modal.add(this.add.text(cx - 70, btnY, 'ACCEPT', {
-      fontSize: '12px', fontFamily: 'monospace', color: hasAccept ? COLORS.text.positive : '#445544'
+    modal.add(this.add.text(cx + 70, btnY, 'ACCEPT', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: hasAccept ? '#ffffff' : '#999999'
     }).setOrigin(0.5, 0.5));
     if (hasAccept) {
-      acceptBg.on('pointerover', () => acceptBg.setFillStyle(0x2d6a4f));
-      acceptBg.on('pointerout',  () => acceptBg.setFillStyle(0x1a472a));
+      acceptBg.on('pointerover', () => acceptBg.setFillStyle(0x333333));
+      acceptBg.on('pointerout',  () => acceptBg.setFillStyle(0x000000));
       acceptBg.on('pointerdown', acceptCallback);
     }
 
-    const skipBg = this.add.rectangle(cx + 70, btnY, 110, 36, 0x1a1a2e)
-      .setStrokeStyle(1, 0x555566).setInteractive({ useHandCursor: true });
+    const skipBg = this.add.rectangle(cx - 70, btnY, 96, 36, COLORS.bg)
+      .setStrokeStyle(1, 0x000000).setInteractive({ useHandCursor: true });
     modal.add(skipBg);
-    modal.add(this.add.text(cx + 70, btnY, 'SKIP', {
-      fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.disabledBtn
+    modal.add(this.add.text(cx - 70, btnY, 'SKIP', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000'
     }).setOrigin(0.5, 0.5));
-    skipBg.on('pointerover', () => skipBg.setFillStyle(0x333344));
-    skipBg.on('pointerout',  () => skipBg.setFillStyle(0x1a1a2e));
+    skipBg.on('pointerover', () => skipBg.setFillStyle(0xf0e8dc));
+    skipBg.on('pointerout',  () => skipBg.setFillStyle(COLORS.bg));
     skipBg.on('pointerdown', skipCallback);
   }
 
   _renderGainCashModal(modal, cx, cy, PH, payout, fx, resumeCallback) {
     modal.add(this.add.text(cx, cy - 20, `Gain +$${fx.amount}k?`, {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold'
+      fontSize: '18px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5));
 
     modal.add(this.add.text(cx, cy + 14,
       `Running total: $${payout}k  →  $${payout + fx.amount}k`, {
-        fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.secondary
+        fontSize: '11px', fontFamily: FONT_BOARD, color: '#000000'
       }).setOrigin(0.5, 0.5));
 
     this._addModalButtons(modal, cx, cy + PH / 2 - 40,
@@ -3125,17 +3135,17 @@ class GameScene extends Phaser.Scene {
 
     modal.add(this.add.text(cx, cy - 30,
       `Pay $${fx.cost}k to draw ${fx.draws} resource card${fx.draws !== 1 ? 's' : ''}?`, {
-        fontSize: '14px', fontFamily: 'monospace', color: '#ffddaa', fontStyle: 'bold',
+        fontSize: '14px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold',
         align: 'center', wordWrap: { width: 420 }
       }).setOrigin(0.5, 0.5));
 
     modal.add(this.add.text(cx, cy + 8, `Your cash: $${this.state.cash}k`, {
-      fontSize: '12px', fontFamily: 'monospace', color: canAfford ? COLORS.text.positive : COLORS.text.negative
+      fontSize: '12px', fontFamily: FONT_BOARD, color: canAfford ? COLORS.text.cashSub : COLORS.text.negative
     }).setOrigin(0.5, 0.5));
 
     if (!canAfford) {
       modal.add(this.add.text(cx, cy + 28, 'Not enough cash', {
-        fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.negative
+        fontSize: '10px', fontFamily: FONT_BOARD, color: COLORS.text.negative
       }).setOrigin(0.5, 0.5));
     }
 
@@ -3164,17 +3174,17 @@ class GameScene extends Phaser.Scene {
 
     if (csuiteCards.length === 0) {
       modal.add(this.add.text(cx, cy - 10, 'No C-Suite cards on the board', {
-        fontSize: '13px', fontFamily: 'monospace', color: COLORS.text.negative, align: 'center'
+        fontSize: '13px', fontFamily: FONT_BOARD, color: '#000000', align: 'center'
       }).setOrigin(0.5, 0.5));
       // SKIP only — no ACCEPT
-      const skipBg = this.add.rectangle(cx, cy + PH / 2 - 40, 110, 36, 0x1a1a2e)
-        .setStrokeStyle(1, 0x555566).setInteractive({ useHandCursor: true });
+      const skipBg = this.add.rectangle(cx, cy + PH / 2 - 40, 96, 36, COLORS.bg)
+        .setStrokeStyle(1, 0x000000).setInteractive({ useHandCursor: true });
       modal.add(skipBg);
       modal.add(this.add.text(cx, cy + PH / 2 - 40, 'SKIP', {
-        fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.disabledBtn
+        fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000'
       }).setOrigin(0.5, 0.5));
-      skipBg.on('pointerover', () => skipBg.setFillStyle(0x333344));
-      skipBg.on('pointerout',  () => skipBg.setFillStyle(0x1a1a2e));
+      skipBg.on('pointerover', () => skipBg.setFillStyle(0xf0e8dc));
+      skipBg.on('pointerout',  () => skipBg.setFillStyle(COLORS.bg));
       skipBg.on('pointerdown', () => { modal.destroy(); resumeCallback(payout, 0); });
       return;
     }
@@ -3182,7 +3192,7 @@ class GameScene extends Phaser.Scene {
     modal.swapState = { phase: 1, selected: null };
 
     const instrText = this.add.text(cx, cy - PH / 2 + 52, 'Select a C-Suite card to replace', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.secondary, align: 'center'
+      fontSize: '11px', fontFamily: FONT_BOARD, color: '#000000', align: 'center'
     }).setOrigin(0.5, 0.5);
     modal.add(instrText);
     modal.instrText = instrText;
@@ -3193,90 +3203,99 @@ class GameScene extends Phaser.Scene {
 
     csuiteCards.forEach((entry, idx) => {
       const btnY = listStartY + idx * (btnH + 4);
-      const bg = this.add.rectangle(cx, btnY, 340, btnH, 0x2a1a00)
-        .setStrokeStyle(1, 0xe9c46a).setInteractive({ useHandCursor: true });
+      const bg = this.add.rectangle(cx, btnY, 340, btnH, 0xffffff)
+        .setStrokeStyle(1, 0xd1d1d1).setInteractive({ useHandCursor: true });
       const lbl = this.add.text(cx, btnY,
         `[${rowLabel[entry.rowKey]}] Slot ${entry.slotIndex + 1}: ${entry.name}`, {
-          fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.gold
+          fontSize: '11px', fontFamily: FONT_BOARD, color: '#000000'
         }).setOrigin(0.5, 0.5);
       modal.add([bg, lbl]);
       entry.bg = bg;
 
-      bg.on('pointerover', () => { if (modal.swapState.phase === 1) bg.setFillStyle(0x3a2a00); });
+      bg.on('pointerover', () => { if (modal.swapState.phase === 1) bg.setFillStyle(0xf0f0f0); });
       bg.on('pointerout',  () => {
-        if (!modal.swapState.selected || modal.swapState.selected !== entry) bg.setFillStyle(0x2a1a00);
+        if (!modal.swapState.selected || modal.swapState.selected !== entry) bg.setFillStyle(0xffffff);
       });
       bg.on('pointerdown', () => this._handleSwapPhase1(modal, entry, csuiteCards, cx, cy, PH, payout, resumeCallback));
     });
 
     // SKIP button
-    const skipBg = this.add.rectangle(cx, cy + PH / 2 - 40, 110, 36, 0x1a1a2e)
-      .setStrokeStyle(1, 0x555566).setInteractive({ useHandCursor: true });
+    const skipBg = this.add.rectangle(cx, cy + PH / 2 - 40, 96, 36, COLORS.bg)
+      .setStrokeStyle(1, 0x000000).setInteractive({ useHandCursor: true });
     modal.add(skipBg);
     modal.add(this.add.text(cx, cy + PH / 2 - 40, 'SKIP', {
-      fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.disabledBtn
+      fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000'
     }).setOrigin(0.5, 0.5));
-    skipBg.on('pointerover', () => skipBg.setFillStyle(0x333344));
-    skipBg.on('pointerout',  () => skipBg.setFillStyle(0x1a1a2e));
+    skipBg.on('pointerover', () => skipBg.setFillStyle(0xf0e8dc));
+    skipBg.on('pointerout',  () => skipBg.setFillStyle(COLORS.bg));
     skipBg.on('pointerdown', () => { modal.destroy(); resumeCallback(payout, 0); });
   }
 
   _renderSpendCashDrawModal(card, payout, fx, resumeCallback) {
     const canAfford = this.state.cash >= fx.cost;
-    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.55).setDepth(30);
-    const box = this.add.rectangle(740, 450, 460, 220, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
-    const title = this.add.text(740, 370, `Pay $${fx.cost}k → Draw ${fx.draws} card${fx.draws !== 1 ? 's' : ''}?`, {
-      fontSize: '20px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center', wordWrap: { width: 400 }
+    const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
+    const shadow  = this.add.rectangle(637, 365, 460, 220, 0x000000, 0.60).setDepth(30);
+    const box = this.add.rectangle(640, 360, 460, 220, COLORS.bg).setDepth(31);
+    const title = this.add.text(640, 280, `Pay $${fx.cost}k → Draw ${fx.draws} card${fx.draws !== 1 ? 's' : ''}?`, {
+      fontSize: '20px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 400 }
     }).setOrigin(0.5).setDepth(32);
-    const cashLabel = this.add.text(740, 410, `Cash: $${this.state.cash}k`, {
-      fontSize: '16px', fontFamily: 'monospace', color: canAfford ? COLORS.text.positive : COLORS.text.negative
+    const cashLabel = this.add.text(640, 320, `Cash: $${this.state.cash}k`, {
+      fontSize: '16px', fontFamily: FONT_BOARD, color: canAfford ? COLORS.text.cashSub : COLORS.text.negative
     }).setOrigin(0.5).setDepth(32);
 
-    const cleanup = () => { overlay.destroy(); box.destroy(); title.destroy(); cashLabel.destroy(); acceptBtn.destroy(); skipBtn.destroy(); };
+    const cleanup = () => { overlay.destroy(); shadow.destroy(); box.destroy(); title.destroy(); cashLabel.destroy(); acceptBtn.destroy(); skipBtn.destroy(); };
 
-    const acceptBtn = this.add.text(680, 490, 'ACCEPT', {
-      fontSize: '18px', fontFamily: 'monospace', color: canAfford ? COLORS.text.positive : '#888888',
-      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: canAfford });
+    const acceptBtn = this.add.rectangle(700, 400, 96, 36, canAfford ? 0x000000 : 0xcccccc).setDepth(32);
+    const acceptLabel = this.add.text(700, 400, 'ACCEPT', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: canAfford ? '#ffffff' : '#999999'
+    }).setOrigin(0.5).setDepth(33);
     if (canAfford) {
+      acceptBtn.setInteractive({ useHandCursor: true });
+      acceptBtn.on('pointerover', () => acceptBtn.setFillStyle(0x333333));
+      acceptBtn.on('pointerout',  () => acceptBtn.setFillStyle(0x000000));
       acceptBtn.on('pointerdown', () => {
         this.state.cash -= fx.cost;
         this.updateHUD();
-        cleanup();
+        cleanup(); acceptLabel.destroy();
         resumeCallback(payout, fx.draws);
       });
     }
 
-    const skipBtn = this.add.text(800, 490, 'SKIP', {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.negative,
-      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
-    skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
+    const skipBtn = this.add.rectangle(580, 400, 96, 36, COLORS.bg).setStrokeStyle(1, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipLabel = this.add.text(580, 400, 'SKIP', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000'
+    }).setOrigin(0.5).setDepth(33);
+    skipBtn.on('pointerover', () => skipBtn.setFillStyle(0xf0e8dc));
+    skipBtn.on('pointerout',  () => skipBtn.setFillStyle(COLORS.bg));
+    skipBtn.on('pointerdown', () => { cleanup(); acceptLabel.destroy(); skipLabel.destroy(); resumeCallback(payout, 0); });
   }
 
   _renderSpendCashBoostOpModal(card, payout, fx, resumeCallback) {
     const canAfford = this.state.cash >= fx.cost;
     const targetLabel = fx.target === 'Self' ? card.name : (fx.scope === 'all' ? `all ${fx.target}` : fx.target);
-    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.55).setDepth(30);
-    const box = this.add.rectangle(740, 450, 500, 240, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
-    const title = this.add.text(740, 370, `Pay $${fx.cost}k → ${targetLabel}: +${fx.value} op?`, {
-      fontSize: '20px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center', wordWrap: { width: 460 }
+    const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
+    const shadow  = this.add.rectangle(637, 365, 500, 240, 0x000000, 0.60).setDepth(30);
+    const box = this.add.rectangle(640, 360, 500, 240, COLORS.bg).setDepth(31);
+    const title = this.add.text(640, 280, `Pay $${fx.cost}k → ${targetLabel}: +${fx.value} op?`, {
+      fontSize: '20px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 460 }
     }).setOrigin(0.5).setDepth(32);
-    const cashLabel = this.add.text(740, 415, `Cash: $${this.state.cash}k`, {
-      fontSize: '16px', fontFamily: 'monospace', color: canAfford ? COLORS.text.positive : COLORS.text.negative
+    const cashLabel = this.add.text(640, 325, `Cash: $${this.state.cash}k`, {
+      fontSize: '16px', fontFamily: FONT_BOARD, color: canAfford ? COLORS.text.cashSub : COLORS.text.negative
     }).setOrigin(0.5).setDepth(32);
 
-    const cleanup = () => { overlay.destroy(); box.destroy(); title.destroy(); cashLabel.destroy(); acceptBtn.destroy(); skipBtn.destroy(); };
+    const cleanup = () => { overlay.destroy(); shadow.destroy(); box.destroy(); title.destroy(); cashLabel.destroy(); acceptBtn.destroy(); acceptLabel.destroy(); skipBtn.destroy(); skipLabel.destroy(); };
 
-    const acceptBtn = this.add.text(680, 495, 'ACCEPT', {
-      fontSize: '18px', fontFamily: 'monospace', color: canAfford ? COLORS.text.positive : '#888888',
-      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: canAfford });
+    const acceptBtn = this.add.rectangle(700, 405, 96, 36, canAfford ? 0x000000 : 0xcccccc).setDepth(32);
+    const acceptLabel = this.add.text(700, 405, 'ACCEPT', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: canAfford ? '#ffffff' : '#999999'
+    }).setOrigin(0.5).setDepth(33);
     if (canAfford) {
+      acceptBtn.setInteractive({ useHandCursor: true });
+      acceptBtn.on('pointerover', () => acceptBtn.setFillStyle(0x333333));
+      acceptBtn.on('pointerout',  () => acceptBtn.setFillStyle(0x000000));
       acceptBtn.on('pointerdown', () => {
         this.state.cash -= fx.cost;
         this.updateHUD();
-        // Apply permanent op boost
         if (fx.target === 'Self') {
           this.state.cardOpBoosts[card.id] = (this.state.cardOpBoosts[card.id] || 0) + fx.value;
         } else {
@@ -3296,10 +3315,12 @@ class GameScene extends Phaser.Scene {
       });
     }
 
-    const skipBtn = this.add.text(800, 495, 'SKIP', {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.negative,
-      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipBtn = this.add.rectangle(580, 405, 96, 36, COLORS.bg).setStrokeStyle(1, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipLabel = this.add.text(580, 405, 'SKIP', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000'
+    }).setOrigin(0.5).setDepth(33);
+    skipBtn.on('pointerover', () => skipBtn.setFillStyle(0xf0e8dc));
+    skipBtn.on('pointerout',  () => skipBtn.setFillStyle(COLORS.bg));
     skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
   }
 
@@ -3310,31 +3331,34 @@ class GameScene extends Phaser.Scene {
     const PER_PAGE = 5;
     let pageOffset = 0;
 
-    const overlay   = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
-    const box       = this.add.rectangle(740, 450, 700, 380, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
-    const title     = this.add.text(740, 310, `Trade a card from hand → draw ${fx.draws}`, {
-      fontSize: '20px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center'
+    const overlay   = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
+    const shadow    = this.add.rectangle(637, 365, 700, 380, 0x000000, 0.60).setDepth(30);
+    const box       = this.add.rectangle(640, 360, 700, 380, COLORS.bg).setDepth(31);
+    const title     = this.add.text(640, 220, `Trade a card from hand → draw ${fx.draws}`, {
+      fontSize: '20px', fontFamily: FONT_BOARD, color: '#000000', align: 'center'
     }).setOrigin(0.5).setDepth(32);
-    const sub       = this.add.text(740, 345, 'Select a card to discard:', {
-      fontSize: '14px', fontFamily: 'monospace', color: '#aaaaaa'
+    const sub       = this.add.text(640, 255, 'Select a card to discard:', {
+      fontSize: '14px', fontFamily: FONT_BOARD, color: '#000000'
     }).setOrigin(0.5).setDepth(32);
-    const pageLabel = this.add.text(740, 496, '', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.hint
+    const pageLabel = this.add.text(640, 406, '', {
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.hint
     }).setOrigin(0.5).setDepth(32);
-    const leftArrow  = this.add.text(415, 430, '◀', {
-      fontSize: '22px', fontFamily: 'monospace', color: COLORS.text.secondary
+    const leftArrow  = this.add.text(315, 340, '◀', {
+      fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.secondary
     }).setOrigin(0.5).setDepth(33).setInteractive({ useHandCursor: true });
-    const rightArrow = this.add.text(1065, 430, '▶', {
-      fontSize: '22px', fontFamily: 'monospace', color: COLORS.text.secondary
+    const rightArrow = this.add.text(965, 340, '▶', {
+      fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.secondary
     }).setOrigin(0.5).setDepth(33).setInteractive({ useHandCursor: true });
-    const skipBtn   = this.add.text(740, 540, 'SKIP', {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.negative,
-      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipBtn   = this.add.rectangle(640, 450, 96, 36, COLORS.bg).setStrokeStyle(1, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipLabel = this.add.text(640, 450, 'SKIP', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000'
+    }).setOrigin(0.5).setDepth(33);
+    skipBtn.on('pointerover', () => skipBtn.setFillStyle(0xf0e8dc));
+    skipBtn.on('pointerout',  () => skipBtn.setFillStyle(COLORS.bg));
 
     let cardObjs = [];
     const cleanup = () => {
-      [overlay, box, title, sub, pageLabel, leftArrow, rightArrow, skipBtn].forEach(o => o.destroy());
+      [overlay, shadow, box, title, sub, pageLabel, leftArrow, rightArrow, skipBtn, skipLabel].forEach(o => o.destroy());
       cardObjs.forEach(o => o.destroy());
     };
 
@@ -3342,17 +3366,17 @@ class GameScene extends Phaser.Scene {
       cardObjs.forEach(o => o.destroy());
       cardObjs = [];
       const page = hand.slice(pageOffset, pageOffset + PER_PAGE);
-      const startX = 740 - ((page.length - 1) * 110) / 2;
+      const startX = 640 - ((page.length - 1) * 110) / 2;
       page.forEach((cid, i) => {
         const hc = this.cardsData.find(c => c.id === cid);
         const cx = startX + i * 110;
-        const cy = 430;
-        const bg = this.add.rectangle(cx, cy, 100, 130, 0x2a2a3e).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
-        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center', wordWrap: { width: 90 } }).setOrigin(0.5).setDepth(33);
-        const tp = this.add.text(cx, cy + 40, hc.type, { fontSize: '9px', fontFamily: 'monospace', color: '#aaaaaa', align: 'center' }).setOrigin(0.5).setDepth(33);
+        const cy = 340;
+        const bg = this.add.rectangle(cx, cy, 100, 130, 0xffffff).setStrokeStyle(1, 0xd1d1d1).setDepth(32).setInteractive({ useHandCursor: true });
+        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 90 } }).setOrigin(0.5).setDepth(33);
+        const tp = this.add.text(cx, cy + 40, hc.type, { fontSize: '9px', fontFamily: FONT_BOARD, color: '#4f4f4f', align: 'center' }).setOrigin(0.5).setDepth(33);
         cardObjs.push(bg, nm, tp);
-        bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
-        bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+        bg.on('pointerover', () => bg.setStrokeStyle(2, 0x000000));
+        bg.on('pointerout',  () => bg.setStrokeStyle(1, 0xd1d1d1));
         bg.on('pointerdown', () => {
           const idx = this.state.hand.indexOf(cid);
           if (idx !== -1) this.state.hand.splice(idx, 1);
@@ -3382,35 +3406,36 @@ class GameScene extends Phaser.Scene {
     let pageOffset = 0;
     const selected = new Set();
 
-    const overlay    = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
-    const box        = this.add.rectangle(740, 450, 760, 400, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
-    const title      = this.add.text(740, 300, `Discard cards → earn $${fx.amount}k each`, {
-      fontSize: '20px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center'
+    const overlay    = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
+    const shadow     = this.add.rectangle(637, 365, 760, 400, 0x000000, 0.60).setDepth(30);
+    const box        = this.add.rectangle(640, 360, 760, 400, COLORS.bg).setDepth(31);
+    const title      = this.add.text(640, 210, `Discard cards → earn $${fx.amount}k each`, {
+      fontSize: '20px', fontFamily: FONT_BOARD, color: '#000000', align: 'center'
     }).setOrigin(0.5).setDepth(32);
-    const totalLabel = this.add.text(740, 335, 'Earn: $0k', {
-      fontSize: '16px', fontFamily: 'monospace', color: COLORS.text.positive
+    const totalLabel = this.add.text(640, 245, 'Earn: $0k', {
+      fontSize: '16px', fontFamily: FONT_BOARD, color: COLORS.text.cashSub
     }).setOrigin(0.5).setDepth(32);
-    const pageLabel  = this.add.text(740, 496, '', {
-      fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.hint
+    const pageLabel  = this.add.text(640, 406, '', {
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.hint
     }).setOrigin(0.5).setDepth(32);
-    const leftArrow  = this.add.text(380, 430, '◀', {
-      fontSize: '22px', fontFamily: 'monospace', color: COLORS.text.secondary
+    const leftArrow  = this.add.text(280, 340, '◀', {
+      fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.secondary
     }).setOrigin(0.5).setDepth(33).setInteractive({ useHandCursor: true });
-    const rightArrow = this.add.text(1100, 430, '▶', {
-      fontSize: '22px', fontFamily: 'monospace', color: COLORS.text.secondary
+    const rightArrow = this.add.text(1000, 340, '▶', {
+      fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.secondary
     }).setOrigin(0.5).setDepth(33).setInteractive({ useHandCursor: true });
-    const acceptBtn  = this.add.text(680, 545, 'ACCEPT', {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.positive,
-      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
-    const skipBtn    = this.add.text(800, 545, 'SKIP', {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.negative,
-      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
+    const acceptBtn  = this.add.rectangle(700, 455, 96, 36, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+    const acceptLabel = this.add.text(700, 455, 'ACCEPT', { fontSize: '12px', fontFamily: FONT_BOARD, color: '#ffffff' }).setOrigin(0.5).setDepth(33);
+    acceptBtn.on('pointerover', () => acceptBtn.setFillStyle(0x333333));
+    acceptBtn.on('pointerout',  () => acceptBtn.setFillStyle(0x000000));
+    const skipBtn    = this.add.rectangle(580, 455, 96, 36, COLORS.bg).setStrokeStyle(1, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipLabel  = this.add.text(580, 455, 'SKIP', { fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000' }).setOrigin(0.5).setDepth(33);
+    skipBtn.on('pointerover', () => skipBtn.setFillStyle(0xf0e8dc));
+    skipBtn.on('pointerout',  () => skipBtn.setFillStyle(COLORS.bg));
 
     let cardObjs = [];
     const cleanup = () => {
-      [overlay, box, title, totalLabel, pageLabel, leftArrow, rightArrow, acceptBtn, skipBtn].forEach(o => o.destroy());
+      [overlay, shadow, box, title, totalLabel, pageLabel, leftArrow, rightArrow, acceptBtn, acceptLabel, skipBtn, skipLabel].forEach(o => o.destroy());
       cardObjs.forEach(o => o.destroy());
     };
 
@@ -3422,18 +3447,18 @@ class GameScene extends Phaser.Scene {
       cardObjs.forEach(o => o.destroy());
       cardObjs = [];
       const page = hand.slice(pageOffset, pageOffset + PER_PAGE);
-      const startX = 740 - ((page.length - 1) * 120) / 2;
+      const startX = 640 - ((page.length - 1) * 120) / 2;
       page.forEach((cid, i) => {
         const hc = this.cardsData.find(c => c.id === cid);
         const cx = startX + i * 120;
-        const cy = 430;
+        const cy = 340;
         const isSelected = selected.has(cid);
-        const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e).setStrokeStyle(isSelected ? 3 : 1, isSelected ? 0x80ffaa : 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
-        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+        const bg = this.add.rectangle(cx, cy, 110, 130, 0xffffff).setStrokeStyle(isSelected ? 3 : 1, isSelected ? 0x000000 : 0xd1d1d1).setDepth(32).setInteractive({ useHandCursor: true });
+        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
         cardObjs.push(bg, nm);
         bg.on('pointerdown', () => {
           if (selected.has(cid)) selected.delete(cid); else selected.add(cid);
-          bg.setStrokeStyle(selected.has(cid) ? 3 : 1, selected.has(cid) ? 0x80ffaa : 0x666666);
+          bg.setStrokeStyle(selected.has(cid) ? 3 : 1, selected.has(cid) ? 0x000000 : 0xd1d1d1);
           updateTotal();
         });
       });
@@ -3494,28 +3519,27 @@ class GameScene extends Phaser.Scene {
 
     const showPhase2 = (boardSlot) => {
       cleanup();
-      const overlay2 = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
-      const box2 = this.add.rectangle(740, 450, 660, 340, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
-      const t2 = this.add.text(740, 330, `Choose ${fx.handType} from hand to place:`, {
-        fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center'
+      const overlay2 = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
+      const shadow2  = this.add.rectangle(637, 365, 660, 340, 0x000000, 0.60).setDepth(30);
+      const box2 = this.add.rectangle(640, 360, 660, 340, COLORS.bg).setDepth(31);
+      const t2 = this.add.text(640, 240, `Choose ${fx.handType} from hand to place:`, {
+        fontSize: '18px', fontFamily: FONT_BOARD, color: '#000000', align: 'center'
       }).setOrigin(0.5).setDepth(32);
-      const p2objs = [overlay2, box2, t2];
+      const p2objs = [overlay2, shadow2, box2, t2];
 
-      const startX2 = 740 - ((Math.min(handCandidates.length, 5) - 1) * 120) / 2;
+      const startX2 = 640 - ((Math.min(handCandidates.length, 5) - 1) * 120) / 2;
       handCandidates.slice(0, 5).forEach((cid, i) => {
         const hc = this.cardsData.find(c => c.id === cid);
         const cx = startX2 + i * 120;
-        const cy = 440;
-        const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
-        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+        const cy = 350;
+        const bg = this.add.rectangle(cx, cy, 110, 130, 0xffffff).setStrokeStyle(1, 0xd1d1d1).setDepth(32).setInteractive({ useHandCursor: true });
+        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
         p2objs.push(bg, nm);
         bg.on('pointerdown', () => {
-          // Remove from board
           const targetRow = boardSlot.rowName === 'cash' ? this.state.cashRow
                           : boardSlot.rowName === 'product'   ? this.state.productRow
                           : this.state.resourcesRow;
           targetRow[boardSlot.slotIdx] = cid;
-          // Remove from hand
           const handIdx = this.state.hand.indexOf(cid);
           if (handIdx !== -1) this.state.hand.splice(handIdx, 1);
           this.renderHand();
@@ -3523,44 +3547,45 @@ class GameScene extends Phaser.Scene {
           p2objs.forEach(o => o.destroy());
           resumeCallback(payout, 0);
         });
-        bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
-        bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+        bg.on('pointerover', () => bg.setStrokeStyle(2, 0x000000));
+        bg.on('pointerout',  () => bg.setStrokeStyle(1, 0xd1d1d1));
       });
 
-      const skipBtn2 = this.add.text(740, 540, 'SKIP', {
-        fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.negative,
-        backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-      }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
-      skipBtn2.on('pointerdown', () => { p2objs.forEach(o => o.destroy()); skipBtn2.destroy(); resumeCallback(payout, 0); });
-      p2objs.push(skipBtn2);
+      const skipBtn2 = this.add.rectangle(640, 450, 96, 36, COLORS.bg).setStrokeStyle(1, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+      const skipLabel2 = this.add.text(640, 450, 'SKIP', { fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000' }).setOrigin(0.5).setDepth(33);
+      skipBtn2.on('pointerover', () => skipBtn2.setFillStyle(0xf0e8dc));
+      skipBtn2.on('pointerout',  () => skipBtn2.setFillStyle(COLORS.bg));
+      skipBtn2.on('pointerdown', () => { p2objs.forEach(o => o.destroy()); skipBtn2.destroy(); skipLabel2.destroy(); resumeCallback(payout, 0); });
+      p2objs.push(skipBtn2, skipLabel2);
     };
 
-    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
-    const box = this.add.rectangle(740, 450, 660, 340, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
-    const t1 = this.add.text(740, 330, `Choose ${fx.boardType} card on board to swap:`, {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center'
+    const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
+    const shadow  = this.add.rectangle(637, 365, 660, 340, 0x000000, 0.60).setDepth(30);
+    const box = this.add.rectangle(640, 360, 660, 340, COLORS.bg).setDepth(31);
+    const t1 = this.add.text(640, 240, `Choose ${fx.boardType} card on board to swap:`, {
+      fontSize: '18px', fontFamily: FONT_BOARD, color: '#000000', align: 'center'
     }).setOrigin(0.5).setDepth(32);
-    objs.push(overlay, box, t1);
+    objs.push(overlay, shadow, box, t1);
 
-    const startX = 740 - ((Math.min(boardCandidates.length, 5) - 1) * 120) / 2;
+    const startX = 640 - ((Math.min(boardCandidates.length, 5) - 1) * 120) / 2;
     boardCandidates.slice(0, 5).forEach((slot, i) => {
       const bc = this.cardsData.find(c => c.id === slot.cid);
       const cx = startX + i * 120;
-      const cy = 440;
-      const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
-      const nm = this.add.text(cx, cy - 30, bc.name, { fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+      const cy = 350;
+      const bg = this.add.rectangle(cx, cy, 110, 130, 0xffffff).setStrokeStyle(1, 0xd1d1d1).setDepth(32).setInteractive({ useHandCursor: true });
+      const nm = this.add.text(cx, cy - 30, bc.name, { fontSize: '10px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
       objs.push(bg, nm);
       bg.on('pointerdown', () => showPhase2(slot));
-      bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
-      bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+      bg.on('pointerover', () => bg.setStrokeStyle(2, 0x000000));
+      bg.on('pointerout',  () => bg.setStrokeStyle(1, 0xd1d1d1));
     });
 
-    const skipBtn = this.add.text(740, 540, 'SKIP', {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.negative,
-      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
-    skipBtn.on('pointerdown', () => { cleanup(); skipBtn.destroy(); resumeCallback(payout, 0); });
-    objs.push(skipBtn);
+    const skipBtn = this.add.rectangle(640, 450, 96, 36, COLORS.bg).setStrokeStyle(1, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipLabel = this.add.text(640, 450, 'SKIP', { fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000' }).setOrigin(0.5).setDepth(33);
+    skipBtn.on('pointerover', () => skipBtn.setFillStyle(0xf0e8dc));
+    skipBtn.on('pointerout',  () => skipBtn.setFillStyle(COLORS.bg));
+    skipBtn.on('pointerdown', () => { cleanup(); skipBtn.destroy(); skipLabel.destroy(); resumeCallback(payout, 0); });
+    objs.push(skipBtn, skipLabel);
   }
 
   _renderSpendCashSwapModal(card, payout, fx, resumeCallback) {
@@ -3599,25 +3624,25 @@ class GameScene extends Phaser.Scene {
 
     const showPhase2 = (boardSlot) => {
       cleanup();
-      const overlay2 = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
-      const box2 = this.add.rectangle(740, 450, 660, 340, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
-      const t2 = this.add.text(740, 330, `Choose ${fx.handType} from hand to place:`, {
-        fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center'
+      const overlay2 = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
+      const shadow2  = this.add.rectangle(637, 365, 660, 340, 0x000000, 0.60).setDepth(30);
+      const box2 = this.add.rectangle(640, 360, 660, 340, COLORS.bg).setDepth(31);
+      const t2 = this.add.text(640, 240, `Choose ${fx.handType} from hand to place:`, {
+        fontSize: '18px', fontFamily: FONT_BOARD, color: '#000000', align: 'center'
       }).setOrigin(0.5).setDepth(32);
-      const p2objs = [overlay2, box2, t2];
+      const p2objs = [overlay2, shadow2, box2, t2];
 
-      const startX2 = 740 - ((Math.min(handCandidates.length, 5) - 1) * 120) / 2;
+      const startX2 = 640 - ((Math.min(handCandidates.length, 5) - 1) * 120) / 2;
       handCandidates.slice(0, 5).forEach((cid, i) => {
         const hc = this.cardsData.find(c => c.id === cid);
         const cx = startX2 + i * 120;
-        const cy = 440;
-        const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
-        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+        const cy = 350;
+        const bg = this.add.rectangle(cx, cy, 110, 130, 0xffffff).setStrokeStyle(1, 0xd1d1d1).setDepth(32).setInteractive({ useHandCursor: true });
+        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
         p2objs.push(bg, nm);
         bg.on('pointerdown', () => {
           this.state.cash -= fx.cost;
           this.updateHUD();
-          // Place hand card in board slot
           const targetRow = boardSlot.rowName === 'cash' ? this.state.cashRow
                           : boardSlot.rowName === 'product'   ? this.state.productRow
                           : this.state.resourcesRow;
@@ -3629,44 +3654,45 @@ class GameScene extends Phaser.Scene {
           p2objs.forEach(o => o.destroy());
           resumeCallback(payout, 0);
         });
-        bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
-        bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+        bg.on('pointerover', () => bg.setStrokeStyle(2, 0x000000));
+        bg.on('pointerout',  () => bg.setStrokeStyle(1, 0xd1d1d1));
       });
 
-      const skipBtn2 = this.add.text(740, 540, 'SKIP', {
-        fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.negative,
-        backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-      }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
-      skipBtn2.on('pointerdown', () => { p2objs.forEach(o => o.destroy()); skipBtn2.destroy(); resumeCallback(payout, 0); });
-      p2objs.push(skipBtn2);
+      const skipBtn2 = this.add.rectangle(640, 450, 96, 36, COLORS.bg).setStrokeStyle(1, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+      const skipLabel2 = this.add.text(640, 450, 'SKIP', { fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000' }).setOrigin(0.5).setDepth(33);
+      skipBtn2.on('pointerover', () => skipBtn2.setFillStyle(0xf0e8dc));
+      skipBtn2.on('pointerout',  () => skipBtn2.setFillStyle(COLORS.bg));
+      skipBtn2.on('pointerdown', () => { p2objs.forEach(o => o.destroy()); skipBtn2.destroy(); skipLabel2.destroy(); resumeCallback(payout, 0); });
+      p2objs.push(skipBtn2, skipLabel2);
     };
 
-    const overlay = this.add.rectangle(740, 450, 1480, 900, 0x000000, 0.6).setDepth(30);
-    const box = this.add.rectangle(740, 450, 660, 340, 0x1a1a2e, 1).setStrokeStyle(2, 0x4ecdc4).setDepth(31);
-    const t1 = this.add.text(740, 310, `Pay $${fx.cost}k → choose any board card to swap:`, {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center', wordWrap: { width: 600 }
+    const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
+    const shadow  = this.add.rectangle(637, 365, 660, 340, 0x000000, 0.60).setDepth(30);
+    const box = this.add.rectangle(640, 360, 660, 340, COLORS.bg).setDepth(31);
+    const t1 = this.add.text(640, 220, `Pay $${fx.cost}k → choose any board card to swap:`, {
+      fontSize: '18px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 600 }
     }).setOrigin(0.5).setDepth(32);
-    objs.push(overlay, box, t1);
+    objs.push(overlay, shadow, box, t1);
 
-    const startX = 740 - ((Math.min(boardCandidates.length, 5) - 1) * 120) / 2;
+    const startX = 640 - ((Math.min(boardCandidates.length, 5) - 1) * 120) / 2;
     boardCandidates.slice(0, 5).forEach((slot, i) => {
       const bc = this.cardsData.find(c => c.id === slot.cid);
       const cx = startX + i * 120;
-      const cy = 440;
-      const bg = this.add.rectangle(cx, cy, 110, 130, 0x2a2a3e, 1).setStrokeStyle(1, 0x666666).setDepth(32).setInteractive({ useHandCursor: true });
-      const nm = this.add.text(cx, cy - 30, bc.name, { fontSize: '10px', fontFamily: 'monospace', color: COLORS.text.primary, align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+      const cy = 350;
+      const bg = this.add.rectangle(cx, cy, 110, 130, 0xffffff).setStrokeStyle(1, 0xd1d1d1).setDepth(32).setInteractive({ useHandCursor: true });
+      const nm = this.add.text(cx, cy - 30, bc.name, { fontSize: '10px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
       objs.push(bg, nm);
       bg.on('pointerdown', () => showPhase2(slot));
-      bg.on('pointerover', () => bg.setStrokeStyle(2, 0x4ecdc4));
-      bg.on('pointerout',  () => bg.setStrokeStyle(1, 0x666666));
+      bg.on('pointerover', () => bg.setStrokeStyle(2, 0x000000));
+      bg.on('pointerout',  () => bg.setStrokeStyle(1, 0xd1d1d1));
     });
 
-    const skipBtn = this.add.text(740, 540, 'SKIP', {
-      fontSize: '18px', fontFamily: 'monospace', color: COLORS.text.negative,
-      backgroundColor: '#1a1a2e', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(32).setInteractive({ useHandCursor: true });
-    skipBtn.on('pointerdown', () => { cleanup(); skipBtn.destroy(); resumeCallback(payout, 0); });
-    objs.push(skipBtn);
+    const skipBtn = this.add.rectangle(640, 450, 96, 36, COLORS.bg).setStrokeStyle(1, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipLabel = this.add.text(640, 450, 'SKIP', { fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000' }).setOrigin(0.5).setDepth(33);
+    skipBtn.on('pointerover', () => skipBtn.setFillStyle(0xf0e8dc));
+    skipBtn.on('pointerout',  () => skipBtn.setFillStyle(COLORS.bg));
+    skipBtn.on('pointerdown', () => { cleanup(); skipBtn.destroy(); skipLabel.destroy(); resumeCallback(payout, 0); });
+    objs.push(skipBtn, skipLabel);
   }
 
   _handleSwapPhase1(modal, csuiteEntry, allCsuite, cx, cy, _PH, payout, resumeCallback) {
@@ -3675,8 +3701,8 @@ class GameScene extends Phaser.Scene {
     modal.swapState.selected = csuiteEntry;
 
     // Highlight selected C-Suite button
-    allCsuite.forEach(e => e.bg.setFillStyle(0x2a1a00));
-    csuiteEntry.bg.setFillStyle(0x5a3a00).setStrokeStyle(2, 0xffd32a);
+    allCsuite.forEach(e => e.bg.setFillStyle(0xffffff));
+    csuiteEntry.bg.setFillStyle(0xf0f0f0).setStrokeStyle(2, 0x000000);
 
     modal.instrText.setText('Now select a card from your hand to place here');
 
@@ -3692,7 +3718,7 @@ class GameScene extends Phaser.Scene {
       const bg = this.add.rectangle(cx + 0, btnY, 340, btnH, 0x001a2a)
         .setStrokeStyle(1, 0x4488aa).setInteractive({ useHandCursor: true });
       const lbl = this.add.text(cx, btnY, `${handCard.name}  ($${handCard.cost * 100}k)`, {
-        fontSize: '11px', fontFamily: 'monospace', color: '#aaccff'
+        fontSize: '11px', fontFamily: FONT_BOARD, color: '#aaccff'
       }).setOrigin(0.5, 0.5);
       modal.add([bg, lbl]);
 
@@ -3748,16 +3774,13 @@ class GameScene extends Phaser.Scene {
     const COLORS_slotEmpty  = rowType === 'product'   ? COLORS.productSlotEmpty
                             : rowType === 'resources' ? COLORS.resSlotEmpty
                             : COLORS.slotEmpty;
-    const COLORS_slotBorder = rowType === 'product'   ? COLORS.productSlotBorder
-                            : rowType === 'resources' ? COLORS.resSlotBorder
-                            : COLORS.slotBorder;
 
     // Destroy all children added after the initial [slotBg, slotLabel]
     const excess = slot.list.slice(2);
     excess.forEach(child => child.destroy());
 
     // Reset slot visual state
-    slot.slotBg.setFillStyle(COLORS_slotEmpty).setStrokeStyle(1, COLORS_slotBorder);
+    slot.slotBg.setFillStyle(COLORS_slotEmpty).setStrokeStyle(0);
     slot.slotLabel.setVisible(true);
     slot.opText = null;
     slot.cardId = null;
@@ -3857,13 +3880,13 @@ class GameScene extends Phaser.Scene {
     const completed = Math.min(state.turn - 1, state.maxTurns);
     this.turnBoxes.forEach(({ box, check }, i) => {
       if (i < completed) {
-        box.setFillStyle(COLORS.turnDone).setStrokeStyle(1, 0x40916c);
+        box.setFillStyle(0xffffff).setStrokeStyle(1, 0x4f4f4f);
         check.setVisible(true);
       } else if (i === completed && completed < state.maxTurns) {
-        box.setFillStyle(COLORS.turnCurrent).setStrokeStyle(2, 0x80ffaa);
+        box.setFillStyle(0xffffff).setStrokeStyle(1, 0x000000);
         check.setVisible(false);
       } else {
-        box.setFillStyle(0x1a1a2e).setStrokeStyle(1, COLORS.divider);
+        box.setFillStyle(0xffffff).setStrokeStyle(0);
         check.setVisible(false);
       }
     });
@@ -3890,7 +3913,7 @@ class GameScene extends Phaser.Scene {
     const notice = this.add.text(
       this.cameras.main.width / 2, 120,
       text,
-      { fontSize: '22px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold' }
+      { fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.positive, fontStyle: 'bold' }
     ).setOrigin(0.5).setDepth(100);
 
     this.tweens.add({
@@ -3906,10 +3929,12 @@ class GameScene extends Phaser.Scene {
   showFreePlayBanner(rowType) {
     if (this.freePlayBanner) this.freePlayBanner.destroy();
     const rowLabel = rowType === 'product' ? 'PRODUCT' : rowType === 'resources' ? 'RESOURCES' : 'CASH';
+    const rowY     = rowType === 'product' ? ROW_PROD_Y : rowType === 'resources' ? ROW_RES_Y : ROW_CASH_Y;
+    const slot4X = ROW_SLOT_X + 3 * (SLOT_W + 8);
     this.freePlayBanner = this.add.text(
-      this.cameras.main.width / 2, 120,
+      slot4X, rowY,
       `PLAY ANOTHER CARD TO ${rowLabel} ROW`,
-      { fontSize: '16px', fontFamily: 'monospace', color: COLORS.text.positive, fontStyle: 'bold' }
+      { fontSize: '16px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold' }
     ).setOrigin(0.5).setDepth(100);
   }
 
@@ -3922,7 +3947,7 @@ class GameScene extends Phaser.Scene {
 
   showFloat(x, y, text, color = COLORS.text.primary, duration = 800) {
     const t = this.add.text(x, y, text, {
-      fontSize: '13px', fontFamily: 'monospace', color, fontStyle: 'bold', align: 'center'
+      fontSize: '13px', fontFamily: FONT_BOARD, color, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
     this.tweens.add({
       targets: t, y: y - 35, alpha: 0, duration, ease: 'Power2',
@@ -4185,6 +4210,7 @@ const config = {
 Promise.all([
   document.fonts.load('48px "Londrina Shadow"'),
   document.fonts.load('16px "Cabin"'),
+  document.fonts.load('16px "Roboto Condensed"'),
 ]).then(() => {
   const game = new Phaser.Game(config);
 
