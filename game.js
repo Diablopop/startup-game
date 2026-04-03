@@ -1062,43 +1062,45 @@ class GameScene extends Phaser.Scene {
 
   // ── Layout ────────────────────────────────────────────────
   buildLayout() {
-    const H = this.scale.height;
-
-    // Left panel
-    this.add.rectangle(137, H / 2, 240, H, 0x000000).setAlpha(0.6).setOrigin(0.5, 0.5);
-    this.add.rectangle(140, H / 2, 240, H, COLORS.panel).setOrigin(0.5, 0.5);
+    // Left panel — top aligns with product row slots, bottom aligns with hand cards
+    const panelTop = ROW_PROD_Y - SLOT_H / 2;
+    const panelBot = 623 + CARD_H / 2;
+    const panelH   = panelBot - panelTop;
+    const panelCY  = (panelTop + panelBot) / 2;
+    this.add.rectangle(137, panelCY + 6, 240, panelH, 0x000000).setAlpha(0.6).setOrigin(0.5, 0.5);
+    this.add.rectangle(140, panelCY, 240, panelH, COLORS.panel).setOrigin(0.5, 0.5);
 
     // Round / turn
     this.hudRound = this.add.text(140, 50, '', {
-      fontSize: '13px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
+      fontSize: '18px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    this.hudTurnsLabel = this.add.text(140, 68, 'TURNS', {
+    this.hudTurnsLabel = this.add.text(140, 84, 'TURNS', {
       fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
-    this.buildTurnBoxes(86);
+    this.buildTurnBoxes(102);
 
     // Divider after round/turn block
-    this.add.rectangle(140, 104, 180, 1, COLORS.divider).setOrigin(0.5, 0.5);
+    this.add.rectangle(140, 120, 180, 1, COLORS.divider).setOrigin(0.5, 0.5);
 
     // Team Value (sum of all card baseValues on board)
-    this.add.text(140, 120, 'TEAM VALUE', {
+    this.add.text(140, 136, 'TEAM VALUE', {
       fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    this.hudTeamValue = this.add.text(140, 144, '$0k', {
+    this.hudTeamValue = this.add.text(140, 160, '$0k', {
       fontSize: '24px', fontFamily: FONT_BOARD, color: COLORS.text.value, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Divider
-    this.add.rectangle(140, 168, 180, 1, COLORS.divider).setOrigin(0.5, 0.5);
+    this.add.rectangle(140, 184, 180, 1, COLORS.divider).setOrigin(0.5, 0.5);
 
     // Product multiplier
-    this.add.text(140, 182, 'PRODUCT MULT', {
+    this.add.text(140, 198, 'PRODUCT MULT', {
       fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
 
-    this.hudProductMultiplier = this.add.text(140, 206, '0×', {
+    this.hudProductMultiplier = this.add.text(140, 222, '0×', {
       fontSize: '28px', fontFamily: FONT_BOARD, color: COLORS.text.purple, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
@@ -1129,7 +1131,7 @@ class GameScene extends Phaser.Scene {
       .setStrokeStyle(1, 0x895d27).setInteractive({ useHandCursor: true });
     this.add.text(140, GAME_H - 78, '👁 PREVIEW', {
       fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.resSub, align: 'center'
-    }).setOrigin(0.5, 1);
+    }).setOrigin(0.5, 0.5);
     eyeBg.on('pointerover', () => eyeBg.setFillStyle(0xf0debb));
     eyeBg.on('pointerout',  () => eyeBg.setFillStyle(COLORS.panel));
     eyeBg.on('pointerdown', () => this.showDrawPileViewer());
