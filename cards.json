@@ -388,8 +388,8 @@
                         }
                   },
                   "triggerEffect": {
-                        "type": "gain_cash_per_discard",
-                        "amount": 100
+                        "type": "gain_self_value_per_discard",
+                        "amount": 25
                   }
             },
             {

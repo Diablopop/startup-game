@@ -39,6 +39,105 @@ const TURNS_PER_ROUND     = [7, 7, 6, 5];
 const BASE_CASH_PER_ROUND = [25, 50, 75, 100];
 const MAX_COST_PER_ROUND  = [1, 2, Infinity, Infinity];
 
+// Value bonus per card when Round 4 goal is met (in $k)
+const GOAL_R4_VALUE_BONUS = 50;
+
+// ── Bonus Goals ────────────────────────────────────────────
+// Each round has a pool of goals; one is randomly selected at round start.
+// check() receives a snapshot object; progressText() returns live progress or null.
+const ROUND_GOALS = [
+  // Round 1
+  [
+    {
+      id: 'r1_play4', desc: 'Play 4 cards',
+      check: s => s.cardsPlacedThisRound >= 4,
+      progressText: s => `${s.cardsPlacedThisRound} / 4`,
+      rewardType: 'csuite',
+    },
+    {
+      id: 'r1_val200', desc: 'Reach $200k valuation',
+      check: s => s.finalValuation >= 200,
+      progressText: null,   // valuation computed at end only
+      rewardType: 'csuite',
+    },
+    {
+      id: 'r1_3types', desc: 'Play 3 different card types',
+      check: s => s.typesPlacedCount >= 3,
+      progressText: s => `${s.typesPlacedCount} / 3`,
+      rewardType: 'csuite',
+    },
+  ],
+  // Round 2
+  [
+    {
+      id: 'r2_10hand', desc: 'Collect 10 cards in hand',
+      check: s => s.peakHandSize >= 10,
+      progressText: s => `${s.peakHandSize} / 10`,
+      rewardType: 'csuite',
+    },
+    {
+      id: 'r2_600cash', desc: 'Bank $600k cash',
+      check: s => s.peakCash >= 600,
+      progressText: s => `${fmtVal(s.peakCash)} / $600k`,
+      rewardType: 'csuite',
+    },
+    {
+      id: 'r2_val500', desc: 'Reach $500k valuation',
+      check: s => s.finalValuation >= 500,
+      progressText: null,
+      rewardType: 'csuite',
+    },
+    {
+      id: 'r2_4same', desc: 'Play 4 cards of the same type',
+      check: s => s.maxSameTypePlaced >= 4,
+      progressText: s => `${s.maxSameTypePlaced} / 4`,
+      rewardType: 'csuite',
+    },
+  ],
+  // Round 3
+  [
+    {
+      id: 'r3_ship3', desc: 'Ship a product 3 times',
+      check: s => s.timesShippedThisRound >= 3,
+      progressText: s => `${s.timesShippedThisRound} / 3`,
+      rewardType: 'csuite',
+    },
+    {
+      id: 'r3_val2m', desc: 'Reach $2M valuation',
+      check: s => s.finalValuation >= 2000,
+      progressText: null,
+      rewardType: 'csuite',
+    },
+    {
+      id: 'r3_fill1', desc: 'Fill a row with 5 cards',
+      check: s => s.fullRowCount >= 1,
+      progressText: s => `${s.fullRowCount} / 1`,
+      rewardType: 'csuite',
+    },
+  ],
+  // Round 4
+  [
+    {
+      id: 'r4_ship4', desc: 'Ship a product 4 times',
+      check: s => s.timesShippedThisRound >= 4,
+      progressText: s => `${s.timesShippedThisRound} / 4`,
+      rewardType: 'value_bonus',
+    },
+    {
+      id: 'r4_val900m', desc: 'Reach $900M valuation',
+      check: s => s.finalValuation >= 900000,
+      progressText: null,
+      rewardType: 'value_bonus',
+    },
+    {
+      id: 'r4_fill2', desc: 'Fill 2 rows with 5 cards',
+      check: s => s.fullRowCount >= 2,
+      progressText: s => `${s.fullRowCount} / 2`,
+      rewardType: 'value_bonus',
+    },
+  ],
+];
+
 const COLORS = {
   // ── Board structure ──────────────────────────────────────────
   bg:             0xfffbf3,
@@ -95,9 +194,14 @@ const COLORS = {
     'Engineering':           0xc4e538,
     'Sales':                 0xff6b81,
     'Investor':              0xffd32a,
-    'C-Suite':               0xe9c46a,
+    'C-Suite':               0x4C4C4C,
     'Boardmember':           0xfd84ff,
     'Services/Tech':         0x00d2d3,
+  },
+
+  // Per-type overrides for the label text on the type bar (defaults to text.onType)
+  typeTextColors: {
+    'C-Suite': '#ffffff',
   },
 
   // ── Text palette ─────────────────────────────────────────────
@@ -539,7 +643,7 @@ class TutorialScene extends Phaser.Scene {
 
     // Type label
     const typeLabel = this.add.text(0, -cH / 2 + 6 * S, exCard.type.toUpperCase(), {
-      fontSize: `${7 * S}px`, fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
+      fontSize: `${7 * S}px`, fontFamily: FONT_BOARD, color: COLORS.typeTextColors[exCard.type] || COLORS.text.onType, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     // Name
@@ -788,6 +892,28 @@ class RoundTitleScene extends Phaser.Scene {
       fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary
     }).setOrigin(0.5);
 
+    // ── Select bonus goal for this round ────────────────────
+    const goalPool = ROUND_GOALS[(round || 1) - 1] || [];
+    const selectedGoal = goalPool.length > 0
+      ? goalPool[Math.floor(Math.random() * goalPool.length)]
+      : null;
+
+    if (selectedGoal) {
+      // Goal display
+      this.add.text(cx, cy + 10, 'BONUS GOAL', {
+        fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.primary, align: 'center'
+      }).setOrigin(0.5);
+
+      this.add.text(cx, cy + 32, `"${selectedGoal.desc}"`, {
+        fontSize: '18px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'italic', align: 'center'
+      }).setOrigin(0.5);
+
+      const rewardLabel = selectedGoal.rewardType === 'csuite' ? 'Reward: C-Suite card' : `Reward: +$${GOAL_R4_VALUE_BONUS}k to every card`;
+      this.add.text(cx, cy + 55, rewardLabel, {
+        fontSize: '12px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
+      }).setOrigin(0.5);
+    }
+
     // ── Deal animation (round 1 only) ───────────────────────
     if (dealCards && !carryOver) {
       // Build filtered deck for round 1
@@ -817,17 +943,18 @@ class RoundTitleScene extends Phaser.Scene {
         totalBonusTurns: 0,
         freePlay: false,
         freePlayRow: null,
+        goalValueBonusApplied: false,
       };
 
       // "Dealing your opening hand..."
-      this.add.text(cx, cy + 20, 'Dealing your opening hand...', {
+      this.add.text(cx, cy + 80, 'Dealing your opening hand...', {
         fontSize: '14px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'italic'
       }).setOrigin(0.5);
 
       // Card placeholders
       const cardSpacing = CARD_W + 20;
       const startX = cx - (cardSpacing * 1.5);
-      const cardY = cy + 130;
+      const cardY = cy + 175;
 
       const placeholders = [];
       for (let i = 0; i < 4; i++) {
@@ -863,7 +990,7 @@ class RoundTitleScene extends Phaser.Scene {
         barGfx.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 12, { tl: 5, tr: 5, bl: 0, br: 0 });
 
         const typeLabel = this.add.text(0, -CARD_H / 2 + 6, card.type.toUpperCase(), {
-          fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold'
+          fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.typeTextColors[card.type] || COLORS.text.onType, fontStyle: 'bold'
         }).setOrigin(0.5);
 
         const nameText = this.add.text(0, -CARD_H / 2 + 42, card.name, {
@@ -941,14 +1068,22 @@ class RoundTitleScene extends Phaser.Scene {
       // After all cards revealed, iris-close then iris-open on GameScene
       const totalDelay = 800 + 3 * 600 + 300 + 1000; // last card flip + pause
       this.time.delayedCall(totalDelay, () => {
-        irisTransition(this, 'GameScene', { preBuiltState: this.preBuiltState });
+        irisTransition(this, 'GameScene', { preBuiltState: this.preBuiltState, currentGoal: selectedGoal });
       });
 
     } else {
-      // ── Rounds 2+ (no card deal) ──────────────────────────
-      // Iris-close then iris-open on GameScene
-      this.time.delayedCall(2000, () => {
-        irisTransition(this, 'GameScene', { carryOver });
+      // ── Rounds 2+ (no card deal) — READY button ──────────
+      const btnY = cy + (selectedGoal ? 110 : 60);
+      const readyBtn = this.add.rectangle(cx, btnY, 160, 48, COLORS.sceneBtnPrimary)
+        .setInteractive({ useHandCursor: true });
+      this.add.text(cx, btnY, 'READY', {
+        fontSize: '14px', fontFamily: FONT_UI, color: '#000000', fontStyle: 'bold'
+      }).setOrigin(0.5, 0.5);
+
+      readyBtn.on('pointerover', () => readyBtn.setFillStyle(COLORS.sceneBtnPrimaryHov));
+      readyBtn.on('pointerout',  () => readyBtn.setFillStyle(COLORS.sceneBtnPrimary));
+      readyBtn.on('pointerdown', () => {
+        irisTransition(this, 'GameScene', { carryOver, currentGoal: selectedGoal });
       });
     }
   }
@@ -964,6 +1099,7 @@ class GameScene extends Phaser.Scene {
     // Read startup data from settings.data — Phaser sets this on every scene.start()
     const preBuilt = this.scene.settings.data?.preBuiltState || null;
     const carryOver = this.scene.settings.data?.carryOver || null;
+    const incomingGoal = this.scene.settings.data?.currentGoal || null;
 
     // Wipe settings.data immediately so a subsequent restart with no data doesn't reuse it.
     this.scene.settings.data = {};
@@ -994,6 +1130,7 @@ class GameScene extends Phaser.Scene {
         totalBonusTurns: carryOver.totalBonusTurns ?? 0,
         freePlay: false,
         freePlayRow: null,
+        goalValueBonusApplied: false,
       };
 
       // Inject newly eligible cards into the draw pile when cost threshold increases
@@ -1010,9 +1147,29 @@ class GameScene extends Phaser.Scene {
         ]);
         const newCards = this.cardsData
           .filter(c => c.cost > prevMaxCost && c.cost <= currMaxCost && !inGame.has(c.id))
+          .filter(c => round <= 3 ? c.type !== 'C-Suite' : true)   // C-Suites withheld until Round 4
           .map(c => c.id);
         this.state.drawPile.push(...newCards);
         this.state.drawPile.sort(() => Math.random() - 0.5);
+      }
+
+      // Round 4: inject C-Suite cards that were withheld from earlier rounds
+      if (round === 4) {
+        const inGame = new Set([
+          ...this.state.hand,
+          ...this.state.cashRow.filter(Boolean),
+          ...this.state.productRow.filter(Boolean),
+          ...this.state.resourcesRow.filter(Boolean),
+          ...this.state.drawPile,
+          ...this.state.revealedCards,
+        ]);
+        const csuiteCards = this.cardsData
+          .filter(c => c.type === 'C-Suite' && !inGame.has(c.id))
+          .map(c => c.id);
+        if (csuiteCards.length > 0) {
+          this.state.drawPile.push(...csuiteCards);
+          this.state.drawPile.sort(() => Math.random() - 0.5);
+        }
       }
     } else {
       // Fresh game — shuffle cost-eligible deck, deal 4 to hand, 2 face-up, rest to draw pile
@@ -1037,8 +1194,19 @@ class GameScene extends Phaser.Scene {
         totalBonusTurns: 0,
         freePlay: false,
         freePlayRow: null,
+        goalValueBonusApplied: false,
       };
     }
+
+    // ── Goal tracking (reset each round) ──────────────────────
+    this.state.currentGoal          = incomingGoal;
+    this.state.goalMet              = false;
+    this.state.cardsPlacedThisRound = 0;
+    this.state.typesPlacedThisRound = new Set();
+    this.state.typePlacedCounts     = new Map();
+    this.state.timesShippedThisRound = 0;
+    this.state.peakHandSize         = this.state.hand.length;
+    this.state.peakCash             = this.state.cash;
 
     this.cardObjects     = {};
     this.slotObjects         = [];
@@ -1157,6 +1325,9 @@ class GameScene extends Phaser.Scene {
     const arrowY     = 623;
     this.arrowLeft  = this.buildArrow(windowStartX - 22, arrowY, '◀');
     this.arrowRight = this.buildArrow(windowStartX + windowW + 22, arrowY, '▶');
+
+    // ── Goal panel (right of rows) ──────────��─────────────────
+    this.buildGoalPanel();
   }
 
   buildArrow(x, y, symbol) {
@@ -1177,6 +1348,58 @@ class GameScene extends Phaser.Scene {
     });
 
     return btn;
+  }
+
+  buildGoalPanel() {
+    const goal = this.state.currentGoal;
+    // Initialize refs even if no goal, so updateGoalPanel doesn't error
+    this.goalPanelBg   = null;
+    this.goalCheckbox  = null;
+    this.goalCheckText = null;
+
+    if (!goal) return;
+
+    // Position: right of the last slot column, top aligned with the HUD turn label
+    const panelX = GAME_W - 110;
+    const panelY = 130;
+    const panelW = 180;
+    const panelH = 120;
+
+    // "BONUS GOAL" header
+    this.add.text(panelX, panelY - panelH / 2 + 14, 'BONUS GOAL', {
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
+    }).setOrigin(0.5, 0.5);
+
+    // Checkbox + description row
+    const checkY = panelY - 28;
+    const checkSize = 16;
+
+    // Checkbox — centered on the first line of the description text
+    const cbCenterY = checkY + checkSize / 2;
+    const cbBg = this.add.rectangle(panelX - panelW / 2 + 20, cbCenterY, checkSize, checkSize, 0xffffff)
+      .setStrokeStyle(1, 0x4f4f4f).setOrigin(0.5, 0.5);
+    this.goalCheckbox = cbBg;
+
+    // Checkmark (hidden until goal met)
+    this.goalCheckText = this.add.text(panelX - panelW / 2 + 20, cbCenterY, '', {
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5);
+
+    if (this.state.goalMet) {
+      this.goalCheckText.setText('✓');
+    }
+
+    // Goal description — top of text aligned at checkY; wraps downward
+    const descText = this.add.text(panelX - panelW / 2 + 36, checkY, goal.desc, {
+      fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.secondary,
+      wordWrap: { width: panelW - 48 }
+    }).setOrigin(0, 0);
+
+    // Reward label — below the full description block
+    const rewardStr = goal.rewardType === 'csuite' ? 'Reward: C-Suite card' : 'Reward: Value bonus';
+    this.add.text(panelX - panelW / 2 + 36, checkY + descText.height + 8, rewardStr, {
+      fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.secondary
+    }).setOrigin(0, 0);
   }
 
   buildTurnBoxes(y) {
@@ -1628,7 +1851,7 @@ class GameScene extends Phaser.Scene {
     bar.fillStyle(typeColor);
     bar.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 12, { tl: 5, tr: 5, bl: 0, br: 0 });
     const typeLabel = this.add.text(0, -CARD_H / 2 + 6, card.type.toUpperCase(), {
-      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
+      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.typeTextColors[card.type] || COLORS.text.onType, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
 
     const nameText = this.add.text(0, -CARD_H / 2 + 42, card.name, {
@@ -1724,7 +1947,8 @@ class GameScene extends Phaser.Scene {
     if (!fx) return '';
     if (fx.type === 'gain_cash')               return `+$${fx.amount}k on trigger`;
     if (fx.type === 'gain_cash_per_type')      return `+$${fx.amount}k per ${fx.targetType}`;
-    if (fx.type === 'gain_cash_per_discard')   return `+$${fx.amount}k per discard`;
+    if (fx.type === 'gain_cash_per_discard')        return `+$${fx.amount}k per discard`;
+    if (fx.type === 'gain_self_value_per_discard')  return `+$${fx.amount}k self value per discard`;
     if (fx.type === 'draw')                    return `Draw ${fx.count} card${fx.count !== 1 ? 's' : ''}`;
     if (fx.type === 'spend_cash_draw_resource')return `Pay $${fx.cost}k → draw ${fx.draws}`;
     if (fx.type === 'spend_cash_draw')         return `Pay $${fx.cost}k → draw ${fx.draws}`;
@@ -1983,12 +2207,18 @@ class GameScene extends Phaser.Scene {
     state.hand = state.hand.filter(id => id !== cardId);
     this.handOffset = Math.min(this.handOffset, Math.max(0, state.hand.length - CAROUSEL_VISIBLE));
 
+    // Goal tracking: card placement
+    state.cardsPlacedThisRound++;
+    state.typesPlacedThisRound.add(card.type);
+    state.typePlacedCounts.set(card.type, (state.typePlacedCounts.get(card.type) || 0) + 1);
+
     this._reRenderSlot(rowType, targetSlotIndex);
 
     this.refreshBoardOpLabels();
     this.refreshBoardValueLabels();
     this.renderHand();
     this.updateHUD();
+    this.checkGoalProgress();
 
     // Consume free play flag if this placement is using it
     if (state.freePlay) {
@@ -2045,7 +2275,7 @@ class GameScene extends Phaser.Scene {
 
     slot.add(this.add.rectangle(0, -SLOT_H / 2 + 6, SLOT_W, 12, typeColor).setOrigin(0.5, 0.5));
     slot.add(this.add.text(0, -SLOT_H / 2 + 6, card.type.toUpperCase(), {
-      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
+      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.typeTextColors[card.type] || COLORS.text.onType, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5));
 
     slot.add(this.add.text(0, -SLOT_H / 2 + 22, card.name, {
@@ -2093,7 +2323,7 @@ class GameScene extends Phaser.Scene {
 
     slot.add(this.add.rectangle(0, -SLOT_H / 2 + 6, SLOT_W, 12, typeColor).setOrigin(0.5, 0.5));
     slot.add(this.add.text(0, -SLOT_H / 2 + 6, card.type.toUpperCase(), {
-      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
+      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.typeTextColors[card.type] || COLORS.text.onType, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5));
 
     slot.add(this.add.text(0, -SLOT_H / 2 + 22, card.name, {
@@ -2141,7 +2371,7 @@ class GameScene extends Phaser.Scene {
 
     slot.add(this.add.rectangle(0, -SLOT_H / 2 + 6, SLOT_W, 12, typeColor).setOrigin(0.5, 0.5));
     slot.add(this.add.text(0, -SLOT_H / 2 + 6, card.type.toUpperCase(), {
-      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.text.onType, fontStyle: 'bold', align: 'center'
+      fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.typeTextColors[card.type] || COLORS.text.onType, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5));
 
     slot.add(this.add.text(0, -SLOT_H / 2 + 22, card.name, {
@@ -2506,6 +2736,7 @@ class GameScene extends Phaser.Scene {
 
     this.updateHUD();
     this.renderHand();
+    this.checkGoalProgress();
 
     if (this.pendingDrawCount > 0) {
       const draws = this.pendingDrawCount;
@@ -2590,6 +2821,7 @@ class GameScene extends Phaser.Scene {
 
   finalizeProductActivation(score) {
     this.state.productMultiplier = Math.round((this.state.productMultiplier + score) * 100) / 100;
+    this.state.timesShippedThisRound++;
     this.productActivateTile.tileBg.setFillStyle(0x000000, 0);
 
     const flash = this.add.text(740, ROW_PROD_Y, `SHIP +${score}×`, {
@@ -2607,6 +2839,7 @@ class GameScene extends Phaser.Scene {
     });
 
     this.updateHUD();
+    this.checkGoalProgress();
 
     if (this.pendingDrawCount > 0) {
       const draws = this.pendingDrawCount;
@@ -2669,11 +2902,12 @@ class GameScene extends Phaser.Scene {
       if (card.triggerEffect) {
         card._slotX = slot.x;
         card._slotY = slot.y;
-        if (card.triggerEffect.type === 'gain_cash') {
-          // Pass current cash as payout so the modal shows correct cash values.
-          // On resolve, write updated cash back to state; drawCount is unchanged.
+        const CASH_TRIGGER_TYPES = ['gain_cash', 'gain_cash_per_type', 'gain_cash_per_discard'];
+        if (CASH_TRIGGER_TYPES.includes(card.triggerEffect.type)) {
+          // Cash-earning triggers: pass state.cash as payout, write delta back on resolve.
+          const cashBefore = this.state.cash;
           this.showTriggerModal(card, this.state.cash, (updatedCash) => {
-            this.state.cash = updatedCash;
+            this.state.cash += (updatedCash - cashBefore);
             this.updateHUD();
             this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
           });
@@ -3000,6 +3234,7 @@ class GameScene extends Phaser.Scene {
     this.state.phase = 'playing';
     this.renderHand();
     this.updateHUD();
+    this.checkGoalProgress();
     this.advanceTurn();
   }
 
@@ -3069,6 +3304,9 @@ class GameScene extends Phaser.Scene {
     }
     if (fx.type === 'gain_cash_per_discard') {
       return this._renderGainCashPerDiscardModal(card, payout, fx, resumeCallback);
+    }
+    if (fx.type === 'gain_self_value_per_discard') {
+      return this._renderGainSelfValuePerDiscardModal(card, payout, fx, resumeCallback);
     }
     if (fx.type === 'swap_card') {
       return this._renderSwapCardModal(card, payout, fx, resumeCallback);
@@ -3491,6 +3729,99 @@ class GameScene extends Phaser.Scene {
     renderPage();
   }
 
+  _renderGainSelfValuePerDiscardModal(card, payout, fx, resumeCallback) {
+    const hand = this.state.hand;
+    if (hand.length === 0) { return resumeCallback(payout, 0); }
+
+    const PER_PAGE = 5;
+    let pageOffset = 0;
+    const selected = new Set();
+
+    const overlay    = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
+    const shadow     = this.add.rectangle(637, 365, 760, 400, 0x000000, 0.60).setDepth(30);
+    const box        = this.add.rectangle(640, 360, 760, 400, COLORS.bg).setDepth(31);
+    const title      = this.add.text(640, 210, `Discard cards → earn +$${fx.amount}k to your value each`, {
+      fontSize: '20px', fontFamily: FONT_BOARD, color: '#000000', align: 'center'
+    }).setOrigin(0.5).setDepth(32);
+    const totalLabel = this.add.text(640, 245, 'Value gained: $0k', {
+      fontSize: '16px', fontFamily: FONT_BOARD, color: COLORS.text.cashSub
+    }).setOrigin(0.5).setDepth(32);
+    const pageLabel  = this.add.text(640, 406, '', {
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.hint
+    }).setOrigin(0.5).setDepth(32);
+    const leftArrow  = this.add.text(280, 340, '◀', {
+      fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.secondary
+    }).setOrigin(0.5).setDepth(33).setInteractive({ useHandCursor: true });
+    const rightArrow = this.add.text(1000, 340, '▶', {
+      fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.secondary
+    }).setOrigin(0.5).setDepth(33).setInteractive({ useHandCursor: true });
+    const acceptBtn   = this.add.rectangle(700, 455, 96, 36, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+    const acceptLabel = this.add.text(700, 455, 'ACCEPT', { fontSize: '12px', fontFamily: FONT_BOARD, color: '#ffffff' }).setOrigin(0.5).setDepth(33);
+    acceptBtn.on('pointerover', () => acceptBtn.setFillStyle(COLORS.buttonHoverDark));
+    acceptBtn.on('pointerout',  () => acceptBtn.setFillStyle(0x000000));
+    const skipBtn   = this.add.rectangle(580, 455, 96, 36, COLORS.bg).setStrokeStyle(1, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipLabel = this.add.text(580, 455, 'SKIP', { fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000' }).setOrigin(0.5).setDepth(33);
+    skipBtn.on('pointerover', () => skipBtn.setFillStyle(COLORS.buttonHover));
+    skipBtn.on('pointerout',  () => skipBtn.setFillStyle(COLORS.bg));
+
+    let cardObjs = [];
+    const cleanup = () => {
+      [overlay, shadow, box, title, totalLabel, pageLabel, leftArrow, rightArrow, acceptBtn, acceptLabel, skipBtn, skipLabel].forEach(o => o.destroy());
+      cardObjs.forEach(o => o.destroy());
+    };
+
+    const updateTotal = () => {
+      totalLabel.setText(`Value gained: $${selected.size * fx.amount}k`);
+    };
+
+    const renderPage = () => {
+      cardObjs.forEach(o => o.destroy());
+      cardObjs = [];
+      const page = hand.slice(pageOffset, pageOffset + PER_PAGE);
+      const startX = 640 - ((page.length - 1) * 120) / 2;
+      page.forEach((cid, i) => {
+        const hc = this.cardsData.find(c => c.id === cid);
+        const cx = startX + i * 120;
+        const cy = 340;
+        const isSelected = selected.has(cid);
+        const bg = this.add.rectangle(cx, cy, 110, 130, 0xffffff).setStrokeStyle(isSelected ? 3 : 1, isSelected ? 0x000000 : 0xd1d1d1).setDepth(32).setInteractive({ useHandCursor: true });
+        const nm = this.add.text(cx, cy - 30, hc.name, { fontSize: '10px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 100 } }).setOrigin(0.5).setDepth(33);
+        cardObjs.push(bg, nm);
+        bg.on('pointerdown', () => {
+          if (selected.has(cid)) selected.delete(cid); else selected.add(cid);
+          bg.setStrokeStyle(selected.has(cid) ? 3 : 1, selected.has(cid) ? 0x000000 : 0xd1d1d1);
+          updateTotal();
+        });
+      });
+      const hasMore = hand.length > PER_PAGE;
+      pageLabel.setText(hasMore ? `${pageOffset + 1}–${Math.min(pageOffset + PER_PAGE, hand.length)} of ${hand.length}` : '');
+      leftArrow.setAlpha(pageOffset > 0 ? 1 : 0.2);
+      rightArrow.setAlpha(pageOffset + PER_PAGE < hand.length ? 1 : 0.2);
+    };
+
+    leftArrow.on('pointerdown',  () => { if (pageOffset > 0) { pageOffset -= PER_PAGE; renderPage(); } });
+    rightArrow.on('pointerdown', () => { if (pageOffset + PER_PAGE < hand.length) { pageOffset += PER_PAGE; renderPage(); } });
+    acceptBtn.on('pointerdown', () => {
+      const gained = selected.size * fx.amount;
+      selected.forEach(cid => {
+        const idx = this.state.hand.indexOf(cid);
+        if (idx !== -1) this.state.hand.splice(idx, 1);
+      });
+      // Add value bonus to this card (self)
+      if (gained > 0) {
+        this.state.valueBonuses[card.id] = (this.state.valueBonuses[card.id] || 0) + gained;
+        this._reRenderAllSlots();
+        this.showFloat(card._slotX || GAME_W - 110, card._slotY || ROW_CASH_Y, `+$${gained}k val`, COLORS.text.gold, 1200);
+      }
+      this.renderHand();
+      cleanup();
+      resumeCallback(payout, 0);
+    });
+    skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
+
+    renderPage();
+  }
+
   _renderSwapCardModal(card, payout, fx, resumeCallback) {
     // Phase 1: select board card of boardType to remove
     // Phase 2: select hand card of handType to place in that slot
@@ -3845,10 +4176,57 @@ class GameScene extends Phaser.Scene {
       return { name: card.name, base: card.baseValue, bonus, total: card.baseValue + bonus, row };
     });
 
-    const baseTotal       = breakdown.reduce((s, c) => s + c.total, 0);
+    let baseTotal         = breakdown.reduce((s, c) => s + c.total, 0);
     const productMultiplier = this.state.productMultiplier;
-    const finalTotal      = Math.round(baseTotal * productMultiplier);
+    let finalTotal        = Math.round(baseTotal * productMultiplier);
     const isEndGame       = this.state.round === TURNS_PER_ROUND.length;
+
+    // ── Goal evaluation ──────────────────────────────────────
+    const goal    = this.state.currentGoal;
+    let goalMet   = this.state.goalMet;  // may already be true from mid-round check
+    let goalRewardCard = null;
+    let goalValueBonus = 0;
+
+    if (goal && !goalMet) {
+      const snapshot = this.buildGoalSnapshot(finalTotal);
+      goalMet = goal.check(snapshot);
+    }
+
+    if (goal && goalMet) {
+      if (goal.rewardType === 'csuite') {
+        // Pick a random C-Suite whose role is not already on the board
+        const boardIds = new Set(allIds);
+        const boardRoles = new Set();
+        boardIds.forEach(id => {
+          const c = this.cardsData.find(c => c.id === id);
+          if (c && c.role) boardRoles.add(c.role);
+        });
+        const available = this.cardsData.filter(c =>
+          c.type === 'C-Suite' && !boardRoles.has(c.role)
+        );
+        if (available.length > 0) {
+          goalRewardCard = available[Math.floor(Math.random() * available.length)];
+        }
+      } else if (goal.rewardType === 'value_bonus') {
+        if (this.state.goalValueBonusApplied) {
+          // Bonus already applied to state.valueBonuses mid-round — baseTotal already includes it.
+          // No lump-sum addition needed; no separate GOAL BONUS line in ValuationScene.
+        } else {
+          // r4_val900m path: valuation-only goal, bonus not yet applied.
+          // Apply to valueBonuses for per-card display consistency, and add lump sum to baseTotal.
+          goalValueBonus = GOAL_R4_VALUE_BONUS * allIds.length;
+          allIds.forEach(id => {
+            this.state.valueBonuses[id] = (this.state.valueBonuses[id] || 0) + GOAL_R4_VALUE_BONUS;
+          });
+          baseTotal += goalValueBonus;
+          finalTotal = Math.round(baseTotal * productMultiplier);
+        }
+      }
+    }
+
+    // Build carryOver hand (include C-Suite reward if earned)
+    const carryHand = [...this.state.hand];
+    if (goalRewardCard) carryHand.push(goalRewardCard.id);
 
     irisTransition(this, 'ValuationScene', {
       breakdown,
@@ -3858,10 +4236,15 @@ class GameScene extends Phaser.Scene {
       finalCash: this.state.cash,
       round:     this.state.round,
       isEndGame,
+      // Goal result data
+      goal,
+      goalMet,
+      goalRewardCard,
+      goalValueBonus,
       carryOver: isEndGame ? null : {
         round:          this.state.round,
         cash:           this.state.cash,
-        hand:           [...this.state.hand],
+        hand:           carryHand,
         cashRow:        [...this.state.cashRow],
         productRow:     [...this.state.productRow],
         resourcesRow:   [...this.state.resourcesRow],
@@ -3899,6 +4282,10 @@ class GameScene extends Phaser.Scene {
     this.hudCash.setText(fmtVal(state.cash));
     if (this.cashSubtitle) this.cashSubtitle.setText(`Base: $${BASE_CASH_PER_ROUND[state.round - 1]}k`);
 
+    // Goal tracking: peak values
+    if (state.cash > state.peakCash) state.peakCash = state.cash;
+    if (state.hand.length > state.peakHandSize) state.peakHandSize = state.hand.length;
+
     this.hudProductMultiplier.setText(`${state.productMultiplier}×`);
 
     if (this.hudDrawPile) this.hudDrawPile.setText(`${state.drawPile.length} cards`);
@@ -3914,12 +4301,88 @@ class GameScene extends Phaser.Scene {
     if (this.hudTeamValue) this.hudTeamValue.setText(fmtVal(teamVal));
   }
 
+  // ── Goal tracking ────────────────────────────────────────
+  buildGoalSnapshot(finalValuation) {
+    const s = this.state;
+
+    // Count cards currently on the board by type (all rounds)
+    const boardIds = [...s.cashRow, ...s.productRow, ...s.resourcesRow].filter(id => id !== null);
+    const boardTypeCounts = new Map();
+    for (const id of boardIds) {
+      const card = this.cardsData.find(c => c.id === id);
+      if (card) boardTypeCounts.set(card.type, (boardTypeCounts.get(card.type) || 0) + 1);
+    }
+    const maxSameTypeOnBoard = boardTypeCounts.size > 0 ? Math.max(...boardTypeCounts.values()) : 0;
+
+    return {
+      cardsPlacedThisRound: s.cardsPlacedThisRound,
+      typesPlacedCount:     s.typesPlacedThisRound.size,
+      maxSameTypePlaced:    maxSameTypeOnBoard,
+      timesShippedThisRound: s.timesShippedThisRound,
+      peakHandSize:         s.peakHandSize,
+      peakCash:             s.peakCash,
+      finalValuation:       finalValuation ?? 0,
+      fullRowCount:         [s.cashRow, s.productRow, s.resourcesRow]
+                              .filter(row => row.every(slot => slot !== null)).length,
+    };
+  }
+
+  checkGoalProgress() {
+    const goal = this.state.currentGoal;
+    if (!goal || this.state.goalMet) return;
+
+    // Skip valuation-based goals (can only evaluate at end of round)
+    if (!goal.progressText) return;
+
+    const snapshot = this.buildGoalSnapshot(0);
+    if (goal.check(snapshot)) {
+      this.state.goalMet = true;
+      this.onGoalAchieved();
+    }
+
+    // Update progress display
+    this.updateGoalPanel();
+  }
+
+  onGoalAchieved() {
+    if (!this.goalCheckbox) return;
+
+    // Show checkmark
+    this.goalCheckText.setText('✓');
+
+    // Float text
+    const panelX = GAME_W - 110;
+    const panelY = 70;
+    this.showFloat(panelX, panelY, 'GOAL MET!', COLORS.text.positive);
+
+    // For value_bonus goals, apply the per-card bonus immediately to the board
+    const goal = this.state.currentGoal;
+    if (goal && goal.rewardType === 'value_bonus') {
+      this.time.delayedCall(600, () => this._applyGoalValueBonus());
+    }
+  }
+
+  _applyGoalValueBonus() {
+    const allIds = [...this.state.cashRow, ...this.state.productRow, ...this.state.resourcesRow].filter(Boolean);
+    allIds.forEach(id => {
+      this.state.valueBonuses[id] = (this.state.valueBonuses[id] || 0) + GOAL_R4_VALUE_BONUS;
+    });
+    this.state.goalValueBonusApplied = true;
+    this._reRenderAllSlots();
+    this.updateHUD();
+    this.showFloat(GAME_W - 110, 70, `+$${GOAL_R4_VALUE_BONUS}k to every card!`, COLORS.text.gold, 2000);
+  }
+
+  updateGoalPanel() {
+    // Progress text removed — checkbox is the only progress indicator
+  }
+
   // ── Utility ───────────────────────────────────────────────
   showBonusTurnNotice(text) {
     const notice = this.add.text(
       this.cameras.main.width / 2, 120,
       text,
-      { fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.positive, fontStyle: 'bold' }
+      { fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.bonusTurn, fontStyle: 'bold' }
     ).setOrigin(0.5).setDepth(100);
 
     this.tweens.add({
@@ -3984,7 +4447,8 @@ class ValuationScene extends Phaser.Scene {
 
   create() {
     const { breakdown, baseTotal, productMultiplier, finalTotal,
-            finalCash, round, isEndGame, carryOver } = this.payload;
+            finalCash, round, isEndGame, carryOver,
+            goal, goalMet, goalRewardCard, goalValueBonus } = this.payload;
     const cx = GAME_W / 2;
 
     this.cameras.main.setBackgroundColor(COLORS.sceneBg);
@@ -4120,10 +4584,31 @@ class ValuationScene extends Phaser.Scene {
     this.add.text(cx - 230, y, 'BASE TOTAL', {
       fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.primary
     }).setOrigin(0, 0.5);
-    this.add.text(cx + 230, y, fmtVal(baseTotal), {
+    // Show base total without goal bonus first, then goal bonus line if applicable
+    const baseTotalBeforeGoal = goalValueBonus ? baseTotal - goalValueBonus : baseTotal;
+    this.add.text(cx + 230, y, fmtVal(baseTotalBeforeGoal), {
       fontSize: '15px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'right'
     }).setOrigin(1, 0.5);
-    y += 26;
+    y += 22;
+
+    // Goal value bonus line (Round 4 reward)
+    if (goalValueBonus > 0) {
+      this.add.text(cx - 230, y, `GOAL BONUS (+$${GOAL_R4_VALUE_BONUS}k × ${breakdown.length} cards)`, {
+        fontSize: '11px', fontFamily: FONT_UI, color: COLORS.text.positive
+      }).setOrigin(0, 0.5);
+      this.add.text(cx + 230, y, `+${fmtVal(goalValueBonus)}`, {
+        fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.positive, align: 'right'
+      }).setOrigin(1, 0.5);
+      y += 18;
+
+      // Updated base total
+      this.add.text(cx + 230, y, fmtVal(baseTotal), {
+        fontSize: '15px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'right', fontStyle: 'bold'
+      }).setOrigin(1, 0.5);
+      y += 22;
+    } else {
+      y += 4;
+    }
 
     // ── Product Multiplier ────────────────────────────────────
     this.add.text(cx, y, 'PRODUCT MULTIPLIER', {
@@ -4134,40 +4619,71 @@ class ValuationScene extends Phaser.Scene {
     this.add.text(cx, y, `${productMultiplier}×`, {
       fontSize: '20px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center', fontStyle: 'bold'
     }).setOrigin(0.5, 0.5);
-    y += 30;
+    y += 26;
 
     // ── Final valuation ───────────────────────────────────────
     this.add.rectangle(cx, y, 560, 2, 0xffffff).setOrigin(0.5, 0.5);
-    y += 20;
+    y += 16;
 
     const calcStr = `${fmtVal(baseTotal)}  ×  ${productMultiplier}×  =`;
     this.add.text(cx, y, calcStr, {
       fontSize: '14px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
     }).setOrigin(0.5, 0.5);
-    y += 42;
+    y += 34;
 
     this.add.text(cx, y, fmtVal(finalTotal), {
       fontSize: '36px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
-    y += 42;
+    y += 30;
 
     // Result message
     this.add.text(cx, y, this.resultMessage(finalTotal, isEndGame), {
       fontSize: '12px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center',
       wordWrap: { width: 620 }
     }).setOrigin(0.5, 0.5);
+    y += 20;
+
+    // ── Goal results ─────────────────────────────────────────
+    if (goal) {
+      this.add.rectangle(cx, y, 400, 1, 0xffffff).setAlpha(0.3).setOrigin(0.5, 0.5);
+      y += 14;
+
+      const statusIcon = goalMet ? '✓' : '✗';
+      const statusColor = goalMet ? COLORS.text.positive : '#aa6666';
+      const statusLabel = goalMet ? 'ACHIEVED' : 'NOT MET';
+
+      this.add.text(cx, y, `BONUS GOAL: "${goal.desc}"`, {
+        fontSize: '12px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
+      }).setOrigin(0.5, 0.5);
+      y += 18;
+
+      this.add.text(cx, y, `${statusIcon}  ${statusLabel}`, {
+        fontSize: '14px', fontFamily: FONT_UI, color: statusColor, fontStyle: 'bold', align: 'center'
+      }).setOrigin(0.5, 0.5);
+      y += 16;
+
+      if (goalMet && goalRewardCard) {
+        this.add.text(cx, y, `You earned: ${goalRewardCard.name}`, {
+          fontSize: '12px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'italic', align: 'center'
+        }).setOrigin(0.5, 0.5);
+      } else if (goalMet && goalValueBonus > 0) {
+        this.add.text(cx, y, `+$${GOAL_R4_VALUE_BONUS}k value added to every card!`, {
+          fontSize: '12px', fontFamily: FONT_UI, color: COLORS.text.positive, fontStyle: 'italic', align: 'center'
+        }).setOrigin(0.5, 0.5);
+      }
+    }
 
     // ── Button ────────────────────────────────────────────────
-    const btnY   = GAME_H - 60;
+    const btnY   = GAME_H - 50;
 
-    this.add.text(cx, btnY - 40, `Cash remaining: ${fmtVal(finalCash)}`, {
+    this.add.text(cx, btnY - 30, `Cash remaining: ${fmtVal(finalCash)}`, {
       fontSize: '11px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
     }).setOrigin(0.5, 0.5);
     const btnW   = isEndGame ? 200 : 280;
     const btnLbl = isEndGame ? 'PLAY AGAIN'
                  : `CONTINUE TO ROUND ${round + 1}`;
 
-    const btn = this.add.rectangle(cx, btnY, btnW, 48, COLORS.sceneBtnPrimary)
+    const btn = this.add.rectangle(cx, btnY, btnW, 44, COLORS.sceneBtnPrimary)
       .setInteractive();
     this.add.text(cx, btnY, btnLbl, {
       fontSize: '14px', fontFamily: FONT_UI, color: '#000000', fontStyle: 'bold'
