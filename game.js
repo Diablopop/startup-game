@@ -124,9 +124,9 @@ const ROUND_GOALS = [
       rewardType: 'value_bonus',
     },
     {
-      id: 'r4_val900m', desc: 'Reach $900M valuation',
-      check: s => s.finalValuation >= 900000,
-      progressText: null,
+      id: 'r4_2csuite', desc: 'Play 2 C-Suite cards',
+      check: s => s.csuiteCountOnBoard >= 2,
+      progressText: s => `${s.csuiteCountOnBoard} / 2`,
       rewardType: 'value_bonus',
     },
     {
@@ -857,7 +857,6 @@ class RoundTitleScene extends Phaser.Scene {
     this.children.removeAll(true);
 
     const cx = GAME_W / 2;
-    const cy = GAME_H / 2;
     const cardsData = this.cache.json.get('cards').cards;
 
     // Count cards available this round
@@ -872,23 +871,25 @@ class RoundTitleScene extends Phaser.Scene {
 
     // ── Layout ──────────────────────────────────────────────
     // "ROUND X"
-    this.add.text(cx, cy - 120, ` ROUND ${round || 1} `, {
+    this.add.text(cx, 270, ` ROUND ${round || 1} `, {
       fontSize: '72px', fontFamily: '"Londrina Solid", sans-serif', color: COLORS.text.primary, padding: { right: 16 },
       shadow: { offsetX: -3, offsetY: 3, blur: 0, color: '#000000', fill: true },
     }).setOrigin(0.5);
 
-    // Turn count
-    this.add.text(cx, cy - 55, `${totalTurns} Turns${bonusLabel}`, {
-      fontSize: '20px', fontFamily: FONT_UI, color: COLORS.text.primary
+    // Deck label
+    const deckLabel = maxCost !== Infinity
+      ? (maxCost <= 1
+        ? `Garage deck \u2014 ${totalCards} cards, up to $100k`
+        : `Seed deck \u2014 ${totalCards} cards, up to $${maxCost * 100}k`)
+      : (round >= 4
+        ? `Full deck \u2014 all cards unlocked`
+        : `All cards except C-Suite cards unlocked`);
+    this.add.text(cx, 322, deckLabel, {
+      fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary
     }).setOrigin(0.5);
 
-    // Deck label
-    const deckLabel = maxCost === Infinity
-      ? `Full deck \u2014 all ${totalCards} cards unlocked`
-      : maxCost <= 1
-        ? `Garage deck \u2014 ${totalCards} cards, up to $100k`
-        : `Seed deck \u2014 ${totalCards} cards, up to $${maxCost * 100}k`;
-    this.add.text(cx, cy - 25, deckLabel, {
+    // Turn count
+    this.add.text(cx, 344, `${totalTurns} Turns${bonusLabel}`, {
       fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary
     }).setOrigin(0.5);
 
@@ -900,16 +901,16 @@ class RoundTitleScene extends Phaser.Scene {
 
     if (selectedGoal) {
       // Goal display
-      this.add.text(cx, cy + 10, 'BONUS GOAL', {
+      this.add.text(cx, 416, 'STRETCH GOAL', {
         fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.primary, align: 'center'
       }).setOrigin(0.5);
 
-      this.add.text(cx, cy + 32, `"${selectedGoal.desc}"`, {
-        fontSize: '18px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'italic', align: 'center'
+      this.add.text(cx, 437, selectedGoal.desc, {
+        fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
       }).setOrigin(0.5);
 
       const rewardLabel = selectedGoal.rewardType === 'csuite' ? 'Reward: C-Suite card' : `Reward: +$${GOAL_R4_VALUE_BONUS}k to every card`;
-      this.add.text(cx, cy + 55, rewardLabel, {
+      this.add.text(cx, 460, rewardLabel, {
         fontSize: '12px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
       }).setOrigin(0.5);
     }
@@ -947,14 +948,17 @@ class RoundTitleScene extends Phaser.Scene {
       };
 
       // "Dealing your opening hand..."
-      this.add.text(cx, cy + 80, 'Dealing your opening hand...', {
-        fontSize: '14px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'italic'
-      }).setOrigin(0.5);
+      this.add.text(322, 610, 'Dealing your\nopening hand\u2026', {
+        fontSize: '14px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'italic', align: 'left'
+      }).setOrigin(0, 0.5);
 
-      // Card placeholders
-      const cardSpacing = CARD_W + 20;
-      const startX = cx - (cardSpacing * 1.5);
-      const cardY = cy + 175;
+      // Card placeholders — positioned to match the hand carousel in GameScene
+      const cardSpacing = CARD_W + 8;
+      const windowW     = CAROUSEL_VISIBLE * (CARD_W + 8) - 8;
+      const carouselStartX = (GAME_W - windowW) / 2 + 33;
+      const cardsTotalW = 4 * cardSpacing - 8;
+      const startX = carouselStartX + (windowW - cardsTotalW) / 2 + CARD_W / 2;
+      const cardY = 623;
 
       const placeholders = [];
       for (let i = 0; i < 4; i++) {
@@ -1066,23 +1070,14 @@ class RoundTitleScene extends Phaser.Scene {
       }
 
       // After all cards revealed, iris-close then iris-open on GameScene
-      const totalDelay = 800 + 3 * 600 + 300 + 1000; // last card flip + pause
+      const totalDelay = 800 + 3 * 600 + 300 + 1500; // last card flip + pause
       this.time.delayedCall(totalDelay, () => {
         irisTransition(this, 'GameScene', { preBuiltState: this.preBuiltState, currentGoal: selectedGoal });
       });
 
     } else {
-      // ── Rounds 2+ (no card deal) — READY button ──────────
-      const btnY = cy + (selectedGoal ? 110 : 60);
-      const readyBtn = this.add.rectangle(cx, btnY, 160, 48, COLORS.sceneBtnPrimary)
-        .setInteractive({ useHandCursor: true });
-      this.add.text(cx, btnY, 'READY', {
-        fontSize: '14px', fontFamily: FONT_UI, color: '#000000', fontStyle: 'bold'
-      }).setOrigin(0.5, 0.5);
-
-      readyBtn.on('pointerover', () => readyBtn.setFillStyle(COLORS.sceneBtnPrimaryHov));
-      readyBtn.on('pointerout',  () => readyBtn.setFillStyle(COLORS.sceneBtnPrimary));
-      readyBtn.on('pointerdown', () => {
+      // ── Rounds 2+ (no card deal) — auto-advance after delay ──────────
+      this.time.delayedCall(4000, () => {
         irisTransition(this, 'GameScene', { carryOver, currentGoal: selectedGoal });
       });
     }
@@ -1365,8 +1360,8 @@ class GameScene extends Phaser.Scene {
     const panelW = 180;
     const panelH = 120;
 
-    // "BONUS GOAL" header
-    this.add.text(panelX, panelY - panelH / 2 + 14, 'BONUS GOAL', {
+    // "STRETCH GOAL" header
+    this.add.text(panelX, panelY - panelH / 2 + 14, 'STRETCH GOAL', {
       fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
     }).setOrigin(0.5, 0.5);
 
@@ -2101,18 +2096,18 @@ class GameScene extends Phaser.Scene {
       this.hideCardInfoPopup();
     });
 
-    this.input.on('dragstart', (pointer, obj) => {
+    this.input.on('dragstart', (_pointer, obj) => {
       if (this.state.phase !== 'playing') return;
       if (this._holdTimer) { this._holdTimer.remove(); this._holdTimer = null; }
       this.dragOrigin = { x: obj.x, y: obj.y };
       this.children.bringToTop(obj);
     });
 
-    this.input.on('drag', (pointer, obj, dragX, dragY) => {
+    this.input.on('drag', (_pointer, obj, dragX, dragY) => {
       obj.setPosition(dragX, dragY);
     });
 
-    this.input.on('dragend', (pointer, obj, dropped) => {
+    this.input.on('dragend', (_pointer, obj, dropped) => {
       if (!dropped) {
         this.tweens.add({
           targets: obj, x: this.dragOrigin.x, y: this.dragOrigin.y,
@@ -2122,14 +2117,14 @@ class GameScene extends Phaser.Scene {
       this.dragOrigin = null;
     });
 
-    this.input.on('drop', (pointer, obj, zone) => {
+    this.input.on('drop', (_pointer, obj, zone) => {
       if (zone.slotIndex === undefined) return;
       this.tryPlaceCard(obj.cardId, zone.slotIndex, zone.rowType || 'cash');
     });
   }
 
   // ── Card Placement ────────────────────────────────────────
-  tryPlaceCard(cardId, slotIndex, rowType) {
+  tryPlaceCard(cardId, _slotIndex, rowType) {
     const { state } = this;
     if (state.phase !== 'playing') return;
 
@@ -3475,7 +3470,7 @@ class GameScene extends Phaser.Scene {
     skipBg.on('pointerdown', () => { modal.destroy(); resumeCallback(payout, 0); });
   }
 
-  _renderSpendCashDrawModal(card, payout, fx, resumeCallback) {
+  _renderSpendCashDrawModal(_card, payout, fx, resumeCallback) {
     const canAfford = this.state.cash >= fx.cost;
     const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
     const shadow  = this.add.rectangle(637, 365, 460, 220, 0x000000, 0.60).setDepth(30);
@@ -3568,7 +3563,7 @@ class GameScene extends Phaser.Scene {
     skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
   }
 
-  _renderTradeDrawModal(card, payout, fx, resumeCallback) {
+  _renderTradeDrawModal(_card, payout, fx, resumeCallback) {
     const hand = this.state.hand;
     if (hand.length === 0) { return resumeCallback(payout, 0); }
 
@@ -3642,7 +3637,7 @@ class GameScene extends Phaser.Scene {
     renderPage();
   }
 
-  _renderGainCashPerDiscardModal(card, payout, fx, resumeCallback) {
+  _renderGainCashPerDiscardModal(_card, payout, fx, resumeCallback) {
     const hand = this.state.hand;
     if (hand.length === 0) { return resumeCallback(payout, 0); }
 
@@ -3822,7 +3817,7 @@ class GameScene extends Phaser.Scene {
     renderPage();
   }
 
-  _renderSwapCardModal(card, payout, fx, resumeCallback) {
+  _renderSwapCardModal(_card, payout, fx, resumeCallback) {
     // Phase 1: select board card of boardType to remove
     // Phase 2: select hand card of handType to place in that slot
     const allRows = [
@@ -3925,7 +3920,7 @@ class GameScene extends Phaser.Scene {
     objs.push(skipBtn, skipLabel);
   }
 
-  _renderSpendCashSwapModal(card, payout, fx, resumeCallback) {
+  _renderSpendCashSwapModal(_card, payout, fx, resumeCallback) {
     const canAfford = this.state.cash >= fx.cost;
     const handCandidates = this.state.hand.filter(cid => {
       const hc = this.cardsData.find(c => c.id === cid);
@@ -4314,6 +4309,8 @@ class GameScene extends Phaser.Scene {
     }
     const maxSameTypeOnBoard = boardTypeCounts.size > 0 ? Math.max(...boardTypeCounts.values()) : 0;
 
+    const csuiteCountOnBoard = boardTypeCounts.get('C-Suite') || 0;
+
     return {
       cardsPlacedThisRound: s.cardsPlacedThisRound,
       typesPlacedCount:     s.typesPlacedThisRound.size,
@@ -4324,6 +4321,7 @@ class GameScene extends Phaser.Scene {
       finalValuation:       finalValuation ?? 0,
       fullRowCount:         [s.cashRow, s.productRow, s.resourcesRow]
                               .filter(row => row.every(slot => slot !== null)).length,
+      csuiteCountOnBoard,
     };
   }
 
@@ -4447,7 +4445,7 @@ class ValuationScene extends Phaser.Scene {
 
   create() {
     const { breakdown, baseTotal, productMultiplier, finalTotal,
-            finalCash, round, isEndGame, carryOver,
+            round, isEndGame, carryOver,
             goal, goalMet, goalRewardCard, goalValueBonus } = this.payload;
     const cx = GAME_W / 2;
 
@@ -4455,7 +4453,7 @@ class ValuationScene extends Phaser.Scene {
     this.add.rectangle(cx, GAME_H / 2, GAME_W, GAME_H, COLORS.sceneBg);
 
     // Header
-    this.add.text(cx, 60, ' VALUATION ', {
+    this.add.text(cx, 60, isEndGame ? ' FINAL VALUATION ' : ' VALUATION ', {
       fontSize: '72px', fontFamily: '"Londrina Solid", sans-serif', color: COLORS.text.primary, align: 'center', padding: { right: 16 },
       shadow: { offsetX: -3, offsetY: 3, blur: 0, color: '#000000', fill: true },
     }).setOrigin(0.5, 0.5);
@@ -4556,7 +4554,7 @@ class ValuationScene extends Phaser.Scene {
       // Drag to scroll
       this.input.setDraggable(hitZone);
       hitZone.on('drag', (_pointer, _dragX, _dragY, _dropped) => {});
-      this.input.on('drag', (_pointer, gameObject, _dragX, dragY) => {
+      this.input.on('drag', (_pointer, gameObject, _dragX, _dragY) => {
         if (gameObject !== hitZone) return;
       });
       let lastDragY = 0;
@@ -4593,17 +4591,11 @@ class ValuationScene extends Phaser.Scene {
 
     // Goal value bonus line (Round 4 reward)
     if (goalValueBonus > 0) {
-      this.add.text(cx - 230, y, `GOAL BONUS (+$${GOAL_R4_VALUE_BONUS}k × ${breakdown.length} cards)`, {
-        fontSize: '11px', fontFamily: FONT_UI, color: COLORS.text.positive
+      this.add.text(cx - 230, y, `STRETCH GOAL BONUS (+$${GOAL_R4_VALUE_BONUS}k × ${breakdown.length} cards)`, {
+        fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.positive
       }).setOrigin(0, 0.5);
       this.add.text(cx + 230, y, `+${fmtVal(goalValueBonus)}`, {
-        fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.positive, align: 'right'
-      }).setOrigin(1, 0.5);
-      y += 18;
-
-      // Updated base total
-      this.add.text(cx + 230, y, fmtVal(baseTotal), {
-        fontSize: '15px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'right', fontStyle: 'bold'
+        fontSize: '15px', fontFamily: FONT_UI, color: COLORS.text.positive, align: 'right'
       }).setOrigin(1, 0.5);
       y += 22;
     } else {
@@ -4611,74 +4603,69 @@ class ValuationScene extends Phaser.Scene {
     }
 
     // ── Product Multiplier ────────────────────────────────────
-    this.add.text(cx, y, 'PRODUCT MULTIPLIER', {
-      fontSize: '11px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
-    }).setOrigin(0.5, 0.5);
+    this.add.text(cx - 230, y, 'PRODUCT MULTIPLIER', {
+      fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.primary
+    }).setOrigin(0, 0.5);
+    this.add.text(cx + 230, y, `×   ${productMultiplier}`, {
+      fontSize: '15px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'right'
+    }).setOrigin(1, 0.5);
     y += 22;
-
-    this.add.text(cx, y, `${productMultiplier}×`, {
-      fontSize: '20px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center', fontStyle: 'bold'
-    }).setOrigin(0.5, 0.5);
-    y += 26;
 
     // ── Final valuation ───────────────────────────────────────
     this.add.rectangle(cx, y, 560, 2, 0xffffff).setOrigin(0.5, 0.5);
-    y += 16;
+    y += 30;
 
-    const calcStr = `${fmtVal(baseTotal)}  ×  ${productMultiplier}×  =`;
-    this.add.text(cx, y, calcStr, {
-      fontSize: '14px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
-    }).setOrigin(0.5, 0.5);
-    y += 34;
-
-    this.add.text(cx, y, fmtVal(finalTotal), {
-      fontSize: '36px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'bold', align: 'center'
-    }).setOrigin(0.5, 0.5);
+    this.add.text(cx - 230, y, isEndGame ? 'FINAL VALUATION' : `ROUND ${round} VALUATION`, {
+      fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.primary
+    }).setOrigin(0, 0.5);
+    this.add.text(cx + 230, y, fmtVal(finalTotal), {
+      fontSize: '36px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'bold', align: 'right'
+    }).setOrigin(1, 0.5);
     y += 30;
 
     // Result message
-    this.add.text(cx, y, this.resultMessage(finalTotal, isEndGame), {
-      fontSize: '12px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center',
+    this.add.text(cx, GAME_H - 114, this.resultMessage(finalTotal, isEndGame), {
+      fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center',
       wordWrap: { width: 620 }
     }).setOrigin(0.5, 0.5);
-    y += 20;
 
     // ── Goal results ─────────────────────────────────────────
     if (goal) {
-      this.add.rectangle(cx, y, 400, 1, 0xffffff).setAlpha(0.3).setOrigin(0.5, 0.5);
-      y += 14;
+      y += 20;
 
-      const statusIcon = goalMet ? '✓' : '✗';
-      const statusColor = goalMet ? COLORS.text.positive : '#aa6666';
-      const statusLabel = goalMet ? 'ACHIEVED' : 'NOT MET';
-
-      this.add.text(cx, y, `BONUS GOAL: "${goal.desc}"`, {
-        fontSize: '12px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
+      const headingColor = goalMet ? '#75FFA3' : '#DD7B7B';
+      const headingLabel = goalMet ? 'STRETCH GOAL HIT!' : 'STRETCH GOAL MISSED';
+      this.add.text(cx, y, headingLabel, {
+        fontSize: '11px', fontFamily: FONT_BOARD, color: headingColor, align: 'center'
       }).setOrigin(0.5, 0.5);
-      y += 18;
+      y += 21;
 
-      this.add.text(cx, y, `${statusIcon}  ${statusLabel}`, {
-        fontSize: '14px', fontFamily: FONT_UI, color: statusColor, fontStyle: 'bold', align: 'center'
+      const descText = this.add.text(cx, y, goal.desc, {
+        fontSize: '18px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
       }).setOrigin(0.5, 0.5);
-      y += 16;
-
-      if (goalMet && goalRewardCard) {
-        this.add.text(cx, y, `You earned: ${goalRewardCard.name}`, {
-          fontSize: '12px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'italic', align: 'center'
-        }).setOrigin(0.5, 0.5);
-      } else if (goalMet && goalValueBonus > 0) {
-        this.add.text(cx, y, `+$${GOAL_R4_VALUE_BONUS}k value added to every card!`, {
-          fontSize: '12px', fontFamily: FONT_UI, color: COLORS.text.positive, fontStyle: 'italic', align: 'center'
-        }).setOrigin(0.5, 0.5);
+      if (!goalMet) {
+        const lineW = descText.width;
+        this.add.rectangle(cx, y, lineW, 2, 0xffffff).setOrigin(0.5, 0.5);
       }
+      y += 25;
+
+      const rewardColor = goalMet ? '#75FFA3' : '#DD7B7B';
+      let rewardText;
+      if (!goalMet) {
+        rewardText = 'No reward';
+      } else if (goalRewardCard) {
+        rewardText = `Reward: ${goalRewardCard.name}`;
+      } else {
+        rewardText = `Reward: +$${GOAL_R4_VALUE_BONUS}k to every card`;
+      }
+      this.add.text(cx, y, rewardText, {
+        fontSize: '12px', fontFamily: FONT_UI, color: rewardColor, align: 'center'
+      }).setOrigin(0.5, 0.5);
     }
 
     // ── Button ────────────────────────────────────────────────
-    const btnY   = GAME_H - 50;
+    const btnY   = GAME_H - 64;
 
-    this.add.text(cx, btnY - 30, `Cash remaining: ${fmtVal(finalCash)}`, {
-      fontSize: '11px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
-    }).setOrigin(0.5, 0.5);
     const btnW   = isEndGame ? 200 : 280;
     const btnLbl = isEndGame ? 'PLAY AGAIN'
                  : `CONTINUE TO ROUND ${round + 1}`;
