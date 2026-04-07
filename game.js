@@ -246,9 +246,72 @@ function fadeToScene(scene, targetKey, data = {}, duration = 400) {
 
 // Iris transition using a persistent overlay scene that survives scene switches.
 // Call irisTransition(scene, target, data) — it handles close + open seamlessly.
-function irisTransition(scene, targetKey, data = {}, closeDuration = 400, openDuration = 500) {
+// floatingCardData: optional array of { card, x, y } — cards rebuilt in IrisOverlay so they
+// appear to float above the iris wipe and persist until the new scene is fully visible.
+function irisTransition(scene, targetKey, data = {}, closeDuration = 400, openDuration = 500, floatingCardData = null) {
   const overlay = scene.scene.get('IrisOverlay');
-  overlay.runTransition(targetKey, data, closeDuration, openDuration, scene);
+  overlay.runTransition(targetKey, data, closeDuration, openDuration, scene, floatingCardData);
+}
+
+// Build a card face visual — used by RoundTitleScene deal animation and IrisOverlayScene
+// floating card effect. Mirrors the full card render in RoundTitleScene exactly.
+function buildDealCardVisual(scene, card, x, y) {
+  const typeColor = COLORS.typeColors[card.type] || COLORS.typeColorDefault;
+  const container = scene.add.container(x, y);
+
+  const faceGfx = scene.add.graphics();
+  faceGfx.fillStyle(COLORS.cardBg);
+  faceGfx.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+  faceGfx.lineStyle(1, typeColor);
+  faceGfx.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 5);
+
+  const barGfx = scene.add.graphics();
+  barGfx.fillStyle(typeColor);
+  barGfx.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 12, { tl: 5, tr: 5, bl: 0, br: 0 });
+
+  const typeLabel = scene.add.text(0, -CARD_H / 2 + 6, card.type.toUpperCase(), {
+    fontSize: '7px', fontFamily: FONT_BOARD, color: COLORS.typeTextColors[card.type] || COLORS.text.onType, fontStyle: 'bold'
+  }).setOrigin(0.5);
+
+  const nameText = scene.add.text(0, -CARD_H / 2 + 42, card.name, {
+    fontSize: '11px', fontFamily: FONT_CARD_NAME, color: '#000000', fontStyle: 'bold',
+    align: 'center', wordWrap: { width: CARD_W - 10 }
+  }).setOrigin(0.5);
+
+  const divider = scene.add.rectangle(0, -CARD_H / 2 + 72, CARD_W - 16, 1, COLORS.cardDivider).setOrigin(0.5);
+
+  const opText = scene.add.text(0, -CARD_H / 2 + 82, operationLabel(card.operation), {
+    fontSize: '20px', fontFamily: FONT_BOARD, color: COLORS.text.cardOp, fontStyle: 'bold'
+  }).setOrigin(0.5, 0);
+
+  container.add([faceGfx, barGfx, typeLabel, nameText, divider, opText]);
+
+  const icons = [];
+  if (card.specialEffect) icons.push({ symbol: '\u2605', color: COLORS.text.gold });
+  if (card.bonusTurn)     icons.push({ symbol: '+',     color: COLORS.text.bonusTurn });
+  if (card.triggerEffect) icons.push({ symbol: '\u26a1', color: COLORS.text.cyan });
+  if (icons.length > 0) {
+    const iconY = -CARD_H / 2 + 118;
+    const spacing = 20;
+    const totalW = (icons.length - 1) * spacing;
+    icons.forEach((ic, j) => {
+      container.add(scene.add.text(-totalW / 2 + j * spacing, iconY, ic.symbol, {
+        fontSize: '16px', fontFamily: FONT_BOARD, color: ic.color
+      }).setOrigin(0.5));
+    });
+  }
+
+  const canAfford = card.cost * 100 <= 75;
+  container.add(scene.add.text(-CARD_W / 2 + 6, CARD_H / 2 - 16, `$${card.cost * 100}k`, {
+    fontSize: '11px', fontFamily: FONT_BOARD, color: canAfford ? COLORS.text.cashSub : COLORS.text.negLight
+  }).setOrigin(0, 0.5));
+
+  const valStr = card.baseValue > 0 ? `$${card.baseValue}k` : '\u2014';
+  container.add(scene.add.text(CARD_W / 2 - 6, CARD_H / 2 - 16, valStr, {
+    fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.cardValue
+  }).setOrigin(1, 0.5));
+
+  return container;
 }
 
 // ============================================================
@@ -318,10 +381,21 @@ class IrisOverlayScene extends Phaser.Scene {
     }
   }
 
-  runTransition(targetKey, data, closeDuration, openDuration, callingScene) {
+  runTransition(targetKey, data, closeDuration, openDuration, callingScene, floatingCardData = null) {
     const maxR = Math.sqrt((GAME_W / 2) ** 2 + (GAME_H / 2) ** 2);
     this.scene.bringToTop();
     this.overlay.setVisible(true);
+
+    // Build floating card copies above the iris mask (depth 10000 > overlay's 9999)
+    // so they appear to survive the wipe while everything else closes around them.
+    let floatingContainers = [];
+    if (floatingCardData) {
+      floatingCardData.forEach(({ card, x, y }) => {
+        const c = buildDealCardVisual(this, card, x, y);
+        c.setDepth(10000);
+        floatingContainers.push(c);
+      });
+    }
 
     const progress = { r: maxR };
 
@@ -351,6 +425,9 @@ class IrisOverlayScene extends Phaser.Scene {
             onComplete: () => {
               this.overlay.clear();
               this.overlay.setVisible(false);
+              // Hard-cut: GameScene hand cards are now visible at identical positions
+              floatingContainers.forEach(c => c.destroy());
+              floatingContainers = [];
             }
           });
         });
@@ -1069,10 +1146,16 @@ class RoundTitleScene extends Phaser.Scene {
         });
       }
 
-      // After all cards revealed, iris-close then iris-open on GameScene
+      // After all cards revealed, iris-close then iris-open on GameScene.
+      // Pass floating card data so IrisOverlay keeps the cards visible above the wipe.
       const totalDelay = 800 + 3 * 600 + 300 + 1500; // last card flip + pause
       this.time.delayedCall(totalDelay, () => {
-        irisTransition(this, 'GameScene', { preBuiltState: this.preBuiltState, currentGoal: selectedGoal });
+        const floatingCardData = hand.map((id, i) => ({
+          card: cardsData.find(c => c.id === id),
+          x:    startX + i * cardSpacing,
+          y:    cardY,
+        }));
+        irisTransition(this, 'GameScene', { preBuiltState: this.preBuiltState, currentGoal: selectedGoal }, 400, 500, floatingCardData);
       });
 
     } else {
@@ -2067,6 +2150,8 @@ class GameScene extends Phaser.Scene {
     }
 
     this.cardInfoPopup = popup;
+    popup._popupH = PH;
+    popup._cardH  = cardH;
   }
 
   hideCardInfoPopup() {
@@ -2105,6 +2190,16 @@ class GameScene extends Phaser.Scene {
 
     this.input.on('drag', (_pointer, obj, dragX, dragY) => {
       obj.setPosition(dragX, dragY);
+      if (this.cardInfoPopup) {
+        const PW = 240;
+        const PH = this.cardInfoPopup._popupH;
+        const cH = this.cardInfoPopup._cardH;
+        const gap = 8;
+        let py = dragY - cH / 2 - gap - PH / 2;
+        if (py - PH / 2 < 4) py = dragY + cH / 2 + gap + PH / 2;
+        const px = Math.max(PW / 2 + 5, Math.min(GAME_W - PW / 2 - 5, dragX));
+        this.cardInfoPopup.setPosition(px, py);
+      }
     });
 
     this.input.on('dragend', (_pointer, obj, dropped) => {
