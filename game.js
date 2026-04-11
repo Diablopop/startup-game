@@ -956,11 +956,11 @@ class RoundTitleScene extends Phaser.Scene {
     // Deck label
     const deckLabel = maxCost !== Infinity
       ? (maxCost <= 1
-        ? `Garage deck \u2014 ${totalCards} cards, up to $100k`
-        : `Seed deck \u2014 ${totalCards} cards, up to $${maxCost * 100}k`)
+        ? `Garage Deck \u2014 ${totalCards} cards, up to $100k`
+        : `Seed Deck \u2014 ${totalCards} cards, up to $${maxCost * 100}k`)
       : (round >= 4
-        ? `Full deck \u2014 all cards unlocked`
-        : `All cards except C-Suite cards unlocked`);
+        ? `IPO Deck \u2014 ${cardsData.length} cards, all cards unlocked`
+        : `Growth Deck \u2014 ${cardsData.filter(c => c.type !== 'C-Suite').length} cards, C-Suite excluded`);
     this.add.text(cx, 322, deckLabel, {
       fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary
     }).setOrigin(0.5);
@@ -1021,6 +1021,7 @@ class RoundTitleScene extends Phaser.Scene {
         totalBonusTurns: 0,
         freePlay: false,
         freePlayRow: null,
+        freePlacement: false,
         goalValueBonusApplied: false,
       };
 
@@ -1208,6 +1209,7 @@ class GameScene extends Phaser.Scene {
         totalBonusTurns: carryOver.totalBonusTurns ?? 0,
         freePlay: false,
         freePlayRow: null,
+        freePlacement: false,
         goalValueBonusApplied: false,
       };
 
@@ -1272,6 +1274,7 @@ class GameScene extends Phaser.Scene {
         totalBonusTurns: 0,
         freePlay: false,
         freePlayRow: null,
+        freePlacement: false,
         goalValueBonusApplied: false,
       };
     }
@@ -2003,6 +2006,7 @@ class GameScene extends Phaser.Scene {
   specialEffectLabel(fx) {
     const labelOne = (f) => {
       if (f.type === 'immediate_play') return 'Play another card now';
+      if (f.type === 'free_placement') return 'Next card is free';
       if (f.type !== 'modify_type') return '';
       const target = f.targetRole || f.targetType || '?';
       const parts = [];
@@ -2223,8 +2227,8 @@ class GameScene extends Phaser.Scene {
     const { state } = this;
     if (state.phase !== 'playing') return;
 
-    // Enforce row restriction during free play
-    if (state.freePlay && rowType !== state.freePlayRow) {
+    // Enforce row restriction during free play (null freePlayRow = any row allowed)
+    if (state.freePlay && state.freePlayRow !== null && rowType !== state.freePlayRow) {
       this.snapBack(cardId);
       this.showFloat(this.cameras.main.width / 2, 200, 'PLAY TO SAME ROW', COLORS.text.negative);
       return;
@@ -2232,6 +2236,7 @@ class GameScene extends Phaser.Scene {
 
     const card = this.cardsData.find(c => c.id === cardId);
     const effectiveCost = this.getEffectiveCost(card);
+    const finalCost = state.freePlacement ? 0 : effectiveCost;
 
     const rowArray = rowType === 'product'   ? state.productRow
                    : rowType === 'resources' ? state.resourcesRow
@@ -2285,14 +2290,14 @@ class GameScene extends Phaser.Scene {
       return;
     }
 
-    if (state.cash < effectiveCost) {
-      this.showFloat(slot.x, slot.y - 90, `NEED $${effectiveCost}k`, COLORS.text.negative);
+    if (state.cash < finalCost) {
+      this.showFloat(slot.x, slot.y - 90, `NEED $${finalCost}k`, COLORS.text.negative);
       this.snapBack(cardId);
       return;
     }
 
     // Commit
-    state.cash -= effectiveCost;
+    state.cash -= finalCost;
     rowArray[targetSlotIndex] = cardId;
     state.hand = state.hand.filter(id => id !== cardId);
     this.handOffset = Math.min(this.handOffset, Math.max(0, state.hand.length - CAROUSEL_VISIBLE));
@@ -2310,15 +2315,33 @@ class GameScene extends Phaser.Scene {
     this.updateHUD();
     this.checkGoalProgress();
 
-    // Consume free play flag if this placement is using it
+    // Consume free play / free placement flags if this placement is using them
     if (state.freePlay) {
       state.freePlay = false;
       state.freePlayRow = null;
       this.clearFreePlayBanner();
     }
+    if (state.freePlacement) {
+      state.freePlacement = false;
+    }
 
     // immediate_play: grant a free card placement to the same row (skip advanceTurn this turn)
+    // free_placement: grant a free (no-cost) card placement to any row (skip advanceTurn this turn)
     const fx = card.specialEffect && !Array.isArray(card.specialEffect) ? card.specialEffect : null;
+    if (fx && fx.type === 'free_placement') {
+      state.freePlay = true;
+      state.freePlayRow = null;  // null = any row allowed
+      state.freePlacement = true;
+      this.showFreePlayBanner(null);
+      if (card.bonusTurn) {
+        state.totalBonusTurns++;
+        state.maxTurns++;
+        this.rebuildTurnBoxes();
+        this.updateHUD();
+        this.showBonusTurnNotice('+1 TURN');
+      }
+      return; // skip advanceTurn — player gets a free card
+    }
     if (fx && fx.type === 'immediate_play') {
       state.freePlay = true;
       state.freePlayRow = rowType;
@@ -2610,6 +2633,7 @@ class GameScene extends Phaser.Scene {
   onActivateClicked() {
     if (this.state.phase !== 'playing') return;
     if (this.state.freePlay) { this.state.freePlay = false; this.state.freePlayRow = null; this.clearFreePlayBanner(); }
+    this.state.freePlacement = false;
     this.state.phase = 'activating';
     this.runActivationSequence();
   }
@@ -2844,6 +2868,7 @@ class GameScene extends Phaser.Scene {
   onActivateProductClicked() {
     if (this.state.phase !== 'playing') return;
     if (this.state.freePlay) { this.state.freePlay = false; this.state.freePlayRow = null; this.clearFreePlayBanner(); }
+    this.state.freePlacement = false;
     this.state.phase = 'activating';
     this.runProductActivationSequence();
   }
@@ -2946,6 +2971,7 @@ class GameScene extends Phaser.Scene {
   onHireClicked() {
     if (this.state.phase !== 'playing') return;
     if (this.state.freePlay) { this.state.freePlay = false; this.state.freePlayRow = null; this.clearFreePlayBanner(); }
+    this.state.freePlacement = false;
     this.state.phase = 'drawing';
     this.runResActivationSequence();
   }
@@ -3336,6 +3362,13 @@ class GameScene extends Phaser.Scene {
     const PW = 480;
     const PH = 220;
 
+    // Support array of trigger effects (auto-resolved only; no modal-based effects in arrays)
+    if (Array.isArray(fx)) {
+      let updatedPayout = payout;
+      fx.forEach(effect => { updatedPayout = this._resolveAutoTriggerEffect(card, effect, updatedPayout); });
+      return resumeCallback(updatedPayout, 0);
+    }
+
     // Auto effects — no modal needed
     if (fx.type === 'gain_cash') {
       this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.amount}k`, COLORS.text.cyan, 1200);
@@ -3385,6 +3418,9 @@ class GameScene extends Phaser.Scene {
     }
     if (fx.type === 'spend_cash_boost_op') {
       return this._renderSpendCashBoostOpModal(card, payout, fx, resumeCallback);
+    }
+    if (fx.type === 'spend_cash_boost_value') {
+      return this._renderSpendCashBoostValueModal(card, payout, fx, resumeCallback);
     }
     if (fx.type === 'spend_cash_swap') {
       return this._renderSpendCashSwapModal(card, payout, fx, resumeCallback);
@@ -3656,6 +3692,77 @@ class GameScene extends Phaser.Scene {
     skipBtn.on('pointerover', () => skipBtn.setFillStyle(COLORS.buttonHover));
     skipBtn.on('pointerout',  () => skipBtn.setFillStyle(COLORS.bg));
     skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
+  }
+
+  _renderSpendCashBoostValueModal(card, payout, fx, resumeCallback) {
+    const canAfford = this.state.cash >= fx.cost;
+    const targetLabel = fx.target === 'Self' ? card.name : `all ${fx.target}`;
+    const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.60).setDepth(30);
+    const shadow  = this.add.rectangle(637, 365, 500, 240, 0x000000, 0.60).setDepth(30);
+    const box = this.add.rectangle(640, 360, 500, 240, COLORS.bg).setDepth(31);
+    const title = this.add.text(640, 280, `Pay $${fx.cost}k → ${targetLabel}: +$${fx.value}k value?`, {
+      fontSize: '20px', fontFamily: FONT_BOARD, color: '#000000', align: 'center', wordWrap: { width: 460 }
+    }).setOrigin(0.5).setDepth(32);
+    const cashLabel = this.add.text(640, 325, `Cash: $${this.state.cash}k`, {
+      fontSize: '16px', fontFamily: FONT_BOARD, color: canAfford ? COLORS.text.cashSub : COLORS.text.negative
+    }).setOrigin(0.5).setDepth(32);
+
+    const cleanup = () => { overlay.destroy(); shadow.destroy(); box.destroy(); title.destroy(); cashLabel.destroy(); acceptBtn.destroy(); acceptLabel.destroy(); skipBtn.destroy(); skipLabel.destroy(); };
+
+    const acceptBtn = this.add.rectangle(700, 405, 96, 36, canAfford ? 0x000000 : COLORS.buttonDisabled).setDepth(32);
+    const acceptLabel = this.add.text(700, 405, 'ACCEPT', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: canAfford ? '#ffffff' : '#999999'
+    }).setOrigin(0.5).setDepth(33);
+    if (canAfford) {
+      acceptBtn.setInteractive({ useHandCursor: true });
+      acceptBtn.on('pointerover', () => acceptBtn.setFillStyle(COLORS.buttonHoverDark));
+      acceptBtn.on('pointerout',  () => acceptBtn.setFillStyle(0x000000));
+      acceptBtn.on('pointerdown', () => {
+        this.state.cash -= fx.cost;
+        this.updateHUD();
+        const matchFn = tc => fx.target === 'Self' ? tc.id === card.id : this._typeMatches(tc, fx.target);
+        this._applyBoostValue(matchFn, fx.value);
+        this._reRenderAllSlots();
+        cleanup();
+        resumeCallback(payout, 0);
+      });
+    }
+
+    const skipBtn = this.add.rectangle(580, 405, 96, 36, COLORS.bg).setStrokeStyle(1, 0x000000).setDepth(32).setInteractive({ useHandCursor: true });
+    const skipLabel = this.add.text(580, 405, 'SKIP', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000'
+    }).setOrigin(0.5).setDepth(33);
+    skipBtn.on('pointerover', () => skipBtn.setFillStyle(COLORS.buttonHover));
+    skipBtn.on('pointerout',  () => skipBtn.setFillStyle(COLORS.bg));
+    skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
+  }
+
+  _resolveAutoTriggerEffect(card, fx, payout) {
+    if (fx.type === 'gain_cash') {
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.amount}k`, COLORS.text.cyan, 1200);
+      return payout + fx.amount;
+    }
+    if (fx.type === 'gain_cash_per_type') {
+      const count = this._countBoardCardsOfType(fx.targetType);
+      const earned = fx.amount * count;
+      if (earned > 0) this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${earned}k`, COLORS.text.cyan, 1200);
+      return payout + earned;
+    }
+    if (fx.type === 'boost_value') {
+      const matchFn = tc => fx.target === 'Self' ? tc.id === card.id : this._typeMatches(tc, fx.target);
+      this._applyBoostValue(matchFn, fx.value);
+      this._reRenderAllSlots();
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.value}k val (${fx.target})`, COLORS.text.cyan, 1000);
+      return payout;
+    }
+    if (fx.type === 'boost_op') {
+      const matchFn = tc => fx.target === 'Self' ? tc.id === card.id : this._typeMatches(tc, fx.target);
+      this._applyPermanentOpBoost(matchFn, fx.value);
+      this._reRenderAllSlots();
+      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `${fx.target}: +${fx.value} op`, COLORS.text.cyan, 1000);
+      return payout;
+    }
+    return payout;
   }
 
   _renderTradeDrawModal(_card, payout, fx, resumeCallback) {
@@ -4284,10 +4391,15 @@ class GameScene extends Phaser.Scene {
 
     if (goal && goalMet) {
       if (goal.rewardType === 'csuite') {
-        // Pick a random C-Suite whose role is not already on the board
+        // Pick a random C-Suite whose role is not already on the board or in hand
         const boardIds = new Set(allIds);
         const boardRoles = new Set();
         boardIds.forEach(id => {
+          const c = this.cardsData.find(c => c.id === id);
+          if (c && c.role) boardRoles.add(c.role);
+        });
+        // Also exclude roles already held in hand (prior rewards not yet placed)
+        this.state.hand.forEach(id => {
           const c = this.cardsData.find(c => c.id === id);
           if (c && c.role) boardRoles.add(c.role);
         });
@@ -4346,6 +4458,7 @@ class GameScene extends Phaser.Scene {
         totalBonusTurns: this.state.totalBonusTurns ?? 0,
         freePlay: false,
         freePlayRow: null,
+        freePlacement: false,
       },
     });
   }
@@ -4490,12 +4603,14 @@ class GameScene extends Phaser.Scene {
 
   showFreePlayBanner(rowType) {
     if (this.freePlayBanner) this.freePlayBanner.destroy();
-    const rowLabel = rowType === 'product' ? 'PRODUCT' : rowType === 'resources' ? 'RESOURCES' : 'CASH';
-    const rowY     = rowType === 'product' ? ROW_PROD_Y : rowType === 'resources' ? ROW_RES_Y : ROW_CASH_Y;
+    const bannerText = rowType === null
+      ? 'NEXT CARD IS FREE — PLAY ANYWHERE'
+      : `PLAY ANOTHER CARD TO ${rowType === 'product' ? 'PRODUCT' : rowType === 'resources' ? 'RESOURCES' : 'CASH'} ROW`;
+    const bannerY = rowType === 'product' ? ROW_PROD_Y : rowType === 'resources' ? ROW_RES_Y : ROW_CASH_Y;
     const slot4X = ROW_SLOT_X + 3 * (SLOT_W + 8);
     this.freePlayBanner = this.add.text(
-      slot4X, rowY,
-      `PLAY ANOTHER CARD TO ${rowLabel} ROW`,
+      slot4X, bannerY,
+      bannerText,
       { fontSize: '16px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold' }
     ).setOrigin(0.5).setDepth(100);
   }
