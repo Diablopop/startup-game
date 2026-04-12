@@ -547,7 +547,7 @@
         {
           "type": "modify_type",
           "targetType": "C-Suite",
-          "operationBonus": { "type": "add", "value": -0.5 }
+          "operationBonus": { "type": "add", "value": -1.0 }
         },
         {
           "type": "modify_type",

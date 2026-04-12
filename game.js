@@ -138,6 +138,121 @@ const ROUND_GOALS = [
   ],
 ];
 
+// ── Market Forces ────────────────────────────────────────────
+// 13 forces — 3 are revealed per game (between rounds 1-2, 2-3, 3-4).
+// sentiment: 'positive' | 'negative' | 'neutral' — used for board card color coding
+const MARKET_FORCES = [
+  // ── Activation multipliers ───────────────────────────────
+  {
+    id: 'stimulus_checks',
+    name: 'Stimulus Checks',
+    description: "The world is in economic crisis, but at least there's free money.",
+    effectText: 'Base cash activation ×1.5',
+    type: 'activation_multiplier', target: 'cash', value: 1.5,
+    sentiment: 'positive',
+  },
+  {
+    id: 'crypto_bubble',
+    name: 'Crypto Bubble',
+    description: 'All the smart money is in unregulated, unusable, non-fiat, Ponzi-scheme-driven meme coins.',
+    effectText: 'Base cash activation ×0.75',
+    type: 'activation_multiplier', target: 'cash', value: 0.75,
+    sentiment: 'negative',
+  },
+  {
+    id: 'real_customer_reviews',
+    name: 'Real Customer Reviews',
+    description: 'Customers love you. Just ask Mike Hunt and Sharon McCrotch.',
+    effectText: 'Base product activation ×1.5',
+    type: 'activation_multiplier', target: 'product', value: 1.5,
+    sentiment: 'positive',
+  },
+  {
+    id: 'source_code_stolen',
+    name: 'Source Code Stolen',
+    description: 'Your mission is so important, another startup decided to give it a try.',
+    effectText: 'Base product activation ×0.75',
+    type: 'activation_multiplier', target: 'product', value: 0.75,
+    sentiment: 'negative',
+  },
+  {
+    id: 'job_apocalypse',
+    name: 'Job Apocalypse',
+    description: "700 applicants for 1 open role? That's salary negotiating power.",
+    effectText: 'Base resources activation ×1.5',
+    type: 'activation_multiplier', target: 'resources', value: 1.5,
+    sentiment: 'positive',
+  },
+  {
+    id: 'glassdoor_torching',
+    name: 'Glassdoor Torching',
+    description: 'Apparently our employees value sleep, family, and pay more than our mission to change the world.',
+    effectText: 'Base resources activation ×0.75',
+    type: 'activation_multiplier', target: 'resources', value: 0.75,
+    sentiment: 'negative',
+  },
+  // ── Op boosts ────────────────────────────────────────────
+  {
+    id: 'bank_bailout',
+    name: 'Bank Bailout',
+    description: "More proof the Fed will always have investors' backs.",
+    effectText: 'All Investor cards get +1 op',
+    type: 'op_boost', target: 'Investor', value: 1,
+    sentiment: 'positive',
+  },
+  {
+    id: 'data_center_boom',
+    name: 'Data Center Boom',
+    description: 'Unlike electricity in rural communities, AI tokens are getting cheaper.',
+    effectText: 'All Engineering cards get +1 op',
+    type: 'op_boost', target: 'Engineering', value: 1,
+    sentiment: 'positive',
+  },
+  {
+    id: 'office_redesign',
+    name: 'Office Redesign',
+    description: 'Open floor plans boost collaboration, so leaders say from their private offices.',
+    effectText: 'All Prod/Design cards get +1 op',
+    type: 'op_boost', target: 'Prod/Design', value: 1,
+    sentiment: 'positive',
+  },
+  {
+    id: 'celeb_collab',
+    name: 'Celeb Collab',
+    description: "Having a 'Chief Vibes Officer' isn't just a sponsorship deal — it's a movement.",
+    effectText: 'All Sales cards get +1 op',
+    type: 'op_boost', target: 'Sales', value: 1,
+    sentiment: 'positive',
+  },
+  // ── Value modifier ───────────────────────────────────────
+  {
+    id: 'leaked_exec_email',
+    name: 'Leaked Executive Email',
+    description: 'Those sexist, racist comments were never intended to hurt people.',
+    effectText: 'All C-Suite cards permanently lose $150k base value',
+    type: 'value_modifier', target: 'C-Suite', value: -150,
+    sentiment: 'negative',
+  },
+  // ── One-time effect ──────────────────────────────────────
+  {
+    id: 'lawsuit_settlement',
+    name: 'Lawsuit Settlement',
+    description: "You admit no wrongdoing, and you're willing to pay for that.",
+    effectText: 'Lose all cash immediately on reveal',
+    type: 'one_time', target: null, value: 0,
+    sentiment: 'negative',
+  },
+  // ── Null effect ──────────────────────────────────────────
+  {
+    id: 'big_tech_hearing',
+    name: 'Big Tech Congressional Hearing',
+    description: 'Public outrage is growing, and representatives in Washington are going to do something about it.',
+    effectText: 'Literally nothing changes.',
+    type: 'null_effect', target: null, value: 0,
+    sentiment: 'neutral',
+  },
+];
+
 const COLORS = {
   // ── Board structure ──────────────────────────────────────────
   bg:             0xfffbf3,
@@ -1023,6 +1138,8 @@ class RoundTitleScene extends Phaser.Scene {
         freePlayRow: null,
         freePlacement: false,
         goalValueBonusApplied: false,
+        marketForces:    [],
+        marketForceDeck: [],
       };
 
       // "Dealing your opening hand..."
@@ -1211,6 +1328,8 @@ class GameScene extends Phaser.Scene {
         freePlayRow: null,
         freePlacement: false,
         goalValueBonusApplied: false,
+        marketForces:    [...(carryOver.marketForces    || [])],
+        marketForceDeck: [...(carryOver.marketForceDeck || [])],
       };
 
       // Inject newly eligible cards into the draw pile when cost threshold increases
@@ -1276,6 +1395,8 @@ class GameScene extends Phaser.Scene {
         freePlayRow: null,
         freePlacement: false,
         goalValueBonusApplied: false,
+        marketForces:    [],
+        marketForceDeck: [],
       };
     }
 
@@ -1407,8 +1528,9 @@ class GameScene extends Phaser.Scene {
     this.arrowLeft  = this.buildArrow(windowStartX - 22, arrowY, '◀');
     this.arrowRight = this.buildArrow(windowStartX + windowW + 22, arrowY, '▶');
 
-    // ── Goal panel (right of rows) ──────────��─────────────────
+    // ── Goal panel + market force display (right of rows) ──────
     this.buildGoalPanel();
+    this.buildMarketForceDisplay();
   }
 
   buildArrow(x, y, symbol) {
@@ -1481,6 +1603,139 @@ class GameScene extends Phaser.Scene {
     this.add.text(panelX - panelW / 2 + 36, checkY + descText.height + 8, rewardStr, {
       fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.secondary
     }).setOrigin(0, 0);
+  }
+
+  buildMarketForceDisplay() {
+    const forces = this.state.marketForces || [];
+    if (forces.length === 0) return;
+
+    const panelX   = GAME_W - 110;   // same center-x as goal panel
+    const CARD_W_F = 170;
+    const CARD_H_F = 60;
+    const GAP      = 8;
+    const START_Y  = 215;            // just below goal panel bottom edge (~190)
+
+    forces.forEach((force, i) => {
+      const cardY = START_Y + i * (CARD_H_F + GAP) + CARD_H_F / 2;
+
+      const sentimentFill   = force.sentiment === 'positive' ? 0xd4edda
+                            : force.sentiment === 'negative' ? 0xf8d7da
+                            : 0xe2e3e5;
+      const sentimentStroke = force.sentiment === 'positive' ? 0x2a7a3b
+                            : force.sentiment === 'negative' ? 0x8b1a1a
+                            : 0x6c757d;
+      const sentimentHex    = force.sentiment === 'positive' ? '#2a7a3b'
+                            : force.sentiment === 'negative' ? '#8b1a1a'
+                            : '#555577';
+
+      const bg = this.add.graphics();
+      bg.fillStyle(sentimentFill);
+      bg.fillRoundedRect(panelX - CARD_W_F / 2, cardY - CARD_H_F / 2, CARD_W_F, CARD_H_F, 6);
+      bg.lineStyle(1.5, sentimentStroke);
+      bg.strokeRoundedRect(panelX - CARD_W_F / 2, cardY - CARD_H_F / 2, CARD_W_F, CARD_H_F, 6);
+
+      const arrow = force.sentiment === 'positive' ? '▲' : force.sentiment === 'negative' ? '▼' : '—';
+      this.add.text(panelX - CARD_W_F / 2 + 14, cardY, arrow, {
+        fontSize: '14px', fontFamily: FONT_BOARD, color: sentimentHex, fontStyle: 'bold'
+      }).setOrigin(0.5, 0.5);
+
+      this.add.text(panelX - CARD_W_F / 2 + 28, cardY - 10, force.name, {
+        fontSize: '10px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold',
+        wordWrap: { width: CARD_W_F - 36 }
+      }).setOrigin(0, 0.5);
+
+      this.add.text(panelX - CARD_W_F / 2 + 28, cardY + 10, force.effectText, {
+        fontSize: '9px', fontFamily: FONT_UI, color: sentimentHex,
+        wordWrap: { width: CARD_W_F - 36 }
+      }).setOrigin(0, 0.5);
+
+      // Long-press popup (to the left since card is on right edge)
+      const hitArea = this.add.rectangle(panelX, cardY, CARD_W_F, CARD_H_F, 0x000000, 0)
+        .setInteractive();
+
+      hitArea.on('pointerdown', (pointer) => {
+        this._holdOriginX = pointer.x;
+        this._holdOriginY = pointer.y;
+        this._holdTimer = this.time.delayedCall(300, () => {
+          this._holdTimer = null;
+          this._showForceInfoPopup(force, panelX, cardY, CARD_W_F);
+        });
+      });
+      hitArea.on('pointermove', (pointer) => {
+        if (this._holdTimer) {
+          const dx = pointer.x - this._holdOriginX;
+          const dy = pointer.y - this._holdOriginY;
+          if (Math.sqrt(dx * dx + dy * dy) > 5) {
+            this._holdTimer.remove();
+            this._holdTimer = null;
+          }
+        }
+      });
+      hitArea.on('pointerup',  () => {
+        if (this._holdTimer) { this._holdTimer.remove(); this._holdTimer = null; }
+        this.hideCardInfoPopup();
+      });
+    });
+  }
+
+  _showForceInfoPopup(force, cardCenterX, cardCenterY, cardW) {
+    this.hideCardInfoPopup();
+
+    const PW  = 240;
+    const PAD = 14;
+
+    const sentimentHex = force.sentiment === 'positive' ? '#2a7a3b'
+                       : force.sentiment === 'negative' ? '#8b1a1a'
+                       : '#555577';
+    const sentimentColor = force.sentiment === 'positive' ? 0x2a7a3b
+                         : force.sentiment === 'negative' ? 0x8b1a1a
+                         : 0x6c757d;
+
+    const nameText = this.add.text(0, 0, force.name, {
+      fontSize: '17px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold',
+      align: 'center', wordWrap: { width: PW - PAD * 2 }
+    }).setOrigin(0.5, 0);
+
+    const descText = this.add.text(0, 0, force.description, {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, fontStyle: 'italic',
+      align: 'center', wordWrap: { width: PW - PAD * 2 }
+    }).setOrigin(0.5, 0);
+
+    const effectText = this.add.text(0, 0, force.effectText, {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: sentimentHex,
+      fontStyle: 'bold', align: 'center', wordWrap: { width: PW - PAD * 2 }
+    }).setOrigin(0.5, 0);
+
+    const TOP_PAD = 14, BOTTOM_PAD = 14, DIV_H = 1;
+    const GAP_NAME = 10, GAP_DIV = 8, GAP_SEC = 8;
+    const contentH = nameText.height + GAP_NAME + DIV_H + GAP_DIV + descText.height + GAP_SEC + DIV_H + GAP_DIV + effectText.height;
+    const PH = TOP_PAD + contentH + BOTTOM_PAD;
+
+    // Position popup to the left of the force card
+    const popupCenterX = cardCenterX - cardW / 2 - 8 - PW / 2;
+    const popupCenterY = Math.max(PH / 2 + 4, Math.min(GAME_H - PH / 2 - 4, cardCenterY));
+
+    const popup = this.add.container(popupCenterX, popupCenterY).setDepth(200);
+    popup.add(this.add.rectangle(-3, 6, PW, PH, 0x000000).setAlpha(0.6));
+    popup.add(this.add.rectangle(0, 0, PW, PH, 0xffffff).setStrokeStyle(2, sentimentColor));
+
+    let y = -PH / 2 + TOP_PAD;
+
+    nameText.setPosition(0, y); popup.add(nameText);
+    y += nameText.height + GAP_NAME;
+
+    popup.add(this.add.rectangle(0, y, PW - 20, DIV_H, COLORS.popupDivider).setOrigin(0.5, 0));
+    y += DIV_H + GAP_DIV;
+
+    descText.setPosition(0, y); popup.add(descText);
+    y += descText.height + GAP_SEC;
+
+    popup.add(this.add.rectangle(0, y, PW - 20, DIV_H, COLORS.popupDivider).setOrigin(0.5, 0));
+    y += DIV_H + GAP_DIV;
+
+    effectText.setPosition(0, y); popup.add(effectText);
+
+    this.cardInfoPopup = popup;
   }
 
   buildTurnBoxes(y) {
@@ -2006,7 +2261,7 @@ class GameScene extends Phaser.Scene {
   specialEffectLabel(fx) {
     const labelOne = (f) => {
       if (f.type === 'immediate_play') return 'Play another card now';
-      if (f.type === 'free_placement') return 'Next card is free';
+      if (f.type === 'free_placement') return 'Play another card now for free';
       if (f.type !== 'modify_type') return '';
       const target = f.targetRole || f.targetType || '?';
       const parts = [];
@@ -2027,6 +2282,7 @@ class GameScene extends Phaser.Scene {
 
   triggerEffectLabel(fx) {
     if (!fx) return '';
+    if (Array.isArray(fx)) return fx.map(f => this.triggerEffectLabel(f)).filter(Boolean).join(', ');
     if (fx.type === 'gain_cash')               return `+$${fx.amount}k on trigger`;
     if (fx.type === 'gain_cash_per_type')      return `+$${fx.amount}k per ${fx.targetType}`;
     if (fx.type === 'gain_cash_per_discard')        return `+$${fx.amount}k per discard`;
@@ -2301,6 +2557,15 @@ class GameScene extends Phaser.Scene {
     rowArray[targetSlotIndex] = cardId;
     state.hand = state.hand.filter(id => id !== cardId);
     this.handOffset = Math.min(this.handOffset, Math.max(0, state.hand.length - CAROUSEL_VISIBLE));
+
+    // Apply value_modifier market force to newly placed C-Suite cards
+    if (card.type === 'C-Suite') {
+      (state.marketForces || []).forEach(force => {
+        if (force.type === 'value_modifier' && force.target === 'C-Suite') {
+          state.valueBonuses[cardId] = (state.valueBonuses[cardId] || 0) + force.value;
+        }
+      });
+    }
 
     // Goal tracking: card placement
     state.cardsPlacedThisRound++;
@@ -2639,7 +2904,11 @@ class GameScene extends Phaser.Scene {
   }
 
   runActivationSequence() {
-    const BASE = BASE_CASH_PER_ROUND[this.state.round - 1] ?? 100;
+    const BASE_RAW = BASE_CASH_PER_ROUND[this.state.round - 1] ?? 100;
+    const cashMult = (this.state.marketForces || [])
+      .filter(f => f.type === 'activation_multiplier' && f.target === 'cash')
+      .reduce((acc, f) => acc * f.value, 1);
+    const BASE = Math.round(BASE_RAW * cashMult);
     let payout = BASE;
 
     const effectiveOps = this._computeActivationOps(this.state.cashRow.filter(Boolean));
@@ -2791,6 +3060,17 @@ class GameScene extends Phaser.Scene {
       }
     });
 
+    // Apply market force op boosts — apply to all matching card types universally
+    (this.state.marketForces || []).forEach(force => {
+      if (force.type !== 'op_boost') return;
+      targetIds.forEach(id => {
+        const card = this.cardsData.find(c => c.id === id);
+        if (card && this._typeMatches(card, force.target)) {
+          ops[id].value += force.value;
+        }
+      });
+    });
+
     return ops;
   }
 
@@ -2874,13 +3154,16 @@ class GameScene extends Phaser.Scene {
   }
 
   runProductActivationSequence() {
-    const BASE = 1;
+    const prodMult = (this.state.marketForces || [])
+      .filter(f => f.type === 'activation_multiplier' && f.target === 'product')
+      .reduce((acc, f) => acc * f.value, 1);
+    const BASE = Math.round(prodMult * 100) / 100;
     let score = BASE;
 
     const effectiveOps = this._computeActivationOps(this.state.productRow.filter(Boolean));
 
     this.productActivateTile.tileBg.setFillStyle(COLORS.productTileHover);
-    this.showFloat(this.productActivateTile.x, this.productActivateTile.y - 90, 'BASE ×1', COLORS.text.purple, 900);
+    this.showFloat(this.productActivateTile.x, this.productActivateTile.y - 90, `BASE ×${BASE}`, COLORS.text.purple, 900);
 
     const STEP_DELAY = 700;
 
@@ -2977,13 +3260,17 @@ class GameScene extends Phaser.Scene {
   }
 
   runResActivationSequence() {
-    const BASE = 1;
+    const resMult = (this.state.marketForces || [])
+      .filter(f => f.type === 'activation_multiplier' && f.target === 'resources')
+      .reduce((acc, f) => acc * f.value, 1);
+    // Buff rounds up, debuff rounds down; minimum 1
+    const BASE = resMult >= 1 ? Math.ceil(resMult) : Math.max(1, Math.floor(resMult));
     let drawCount = BASE;
 
     const effectiveOps = this._computeActivationOps(this.state.resourcesRow.filter(Boolean));
 
     this.hireTile.tileBg.setFillStyle(COLORS.resTileActive);
-    this.showFloat(this.hireTile.x, this.hireTile.y - 90, 'BASE +1 draw', COLORS.text.resSub, 900);
+    this.showFloat(this.hireTile.x, this.hireTile.y - 90, `BASE +${BASE} draw`, COLORS.text.resSub, 900);
 
     const STEP_DELAY = 700;
 
@@ -3365,7 +3652,13 @@ class GameScene extends Phaser.Scene {
     // Support array of trigger effects (auto-resolved only; no modal-based effects in arrays)
     if (Array.isArray(fx)) {
       let updatedPayout = payout;
-      fx.forEach(effect => { updatedPayout = this._resolveAutoTriggerEffect(card, effect, updatedPayout); });
+      const floatParts = [];
+      fx.forEach(effect => {
+        updatedPayout = this._resolveAutoTriggerEffect(card, effect, updatedPayout, true);
+        floatParts.push(this._autoTriggerFloatLabel(card, effect));
+      });
+      const combined = floatParts.filter(Boolean).join('\n');
+      if (combined) this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, combined, COLORS.text.cyan, 1200);
       return resumeCallback(updatedPayout, 0);
     }
 
@@ -3737,29 +4030,40 @@ class GameScene extends Phaser.Scene {
     skipBtn.on('pointerdown', () => { cleanup(); resumeCallback(payout, 0); });
   }
 
-  _resolveAutoTriggerEffect(card, fx, payout) {
+  _autoTriggerFloatLabel(_card, fx) {
+    if (fx.type === 'gain_cash')          return `+$${fx.amount}k`;
+    if (fx.type === 'gain_cash_per_type') {
+      const earned = fx.amount * this._countBoardCardsOfType(fx.targetType);
+      return earned > 0 ? `+$${earned}k` : null;
+    }
+    if (fx.type === 'boost_value') return `+$${fx.value}k val (${fx.target})`;
+    if (fx.type === 'boost_op')    return `${fx.target}: +${fx.value} op`;
+    return null;
+  }
+
+  _resolveAutoTriggerEffect(card, fx, payout, silent = false) {
     if (fx.type === 'gain_cash') {
-      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.amount}k`, COLORS.text.cyan, 1200);
+      if (!silent) this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.amount}k`, COLORS.text.cyan, 1200);
       return payout + fx.amount;
     }
     if (fx.type === 'gain_cash_per_type') {
       const count = this._countBoardCardsOfType(fx.targetType);
       const earned = fx.amount * count;
-      if (earned > 0) this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${earned}k`, COLORS.text.cyan, 1200);
+      if (!silent && earned > 0) this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${earned}k`, COLORS.text.cyan, 1200);
       return payout + earned;
     }
     if (fx.type === 'boost_value') {
       const matchFn = tc => fx.target === 'Self' ? tc.id === card.id : this._typeMatches(tc, fx.target);
       this._applyBoostValue(matchFn, fx.value);
       this._reRenderAllSlots();
-      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.value}k val (${fx.target})`, COLORS.text.cyan, 1000);
+      if (!silent) this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `+$${fx.value}k val (${fx.target})`, COLORS.text.cyan, 1000);
       return payout;
     }
     if (fx.type === 'boost_op') {
       const matchFn = tc => fx.target === 'Self' ? tc.id === card.id : this._typeMatches(tc, fx.target);
       this._applyPermanentOpBoost(matchFn, fx.value);
       this._reRenderAllSlots();
-      this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `${fx.target}: +${fx.value} op`, COLORS.text.cyan, 1000);
+      if (!silent) this.showFloat(card._slotX || 740, card._slotY || ROW_CASH_Y, `${fx.target}: +${fx.value} op`, COLORS.text.cyan, 1000);
       return payout;
     }
     return payout;
@@ -4459,6 +4763,8 @@ class GameScene extends Phaser.Scene {
         freePlay: false,
         freePlayRow: null,
         freePlacement: false,
+        marketForces:    [...(this.state.marketForces    || [])],
+        marketForceDeck: [...(this.state.marketForceDeck || [])],
       },
     });
   }
@@ -4630,6 +4936,294 @@ class GameScene extends Phaser.Scene {
       targets: t, y: y - 35, alpha: 0, duration, ease: 'Power2',
       onComplete: () => t.destroy()
     });
+  }
+}
+
+// ============================================================
+// MARKET FORCE SCENE
+// ============================================================
+class MarketForceScene extends Phaser.Scene {
+  constructor() { super({ key: 'MarketForceScene' }); }
+
+  create() {
+    const { round, carryOver } = this.scene.settings.data || {};
+    this.scene.settings.data = {};
+
+    this.cameras.main.fadeIn(400, 0, 0, 0);
+    this.cameras.main.setBackgroundColor(COLORS.sceneBg);
+    this.children.removeAll(true);
+
+    const cx = GAME_W / 2;
+
+    // ── Build deck and draw 3 ────────────────────────────────
+    let deck = (carryOver.marketForceDeck && carryOver.marketForceDeck.length >= 3)
+      ? [...carryOver.marketForceDeck]
+      : MARKET_FORCES.map(f => f.id);
+    deck = deck.sort(() => Math.random() - 0.5);
+    const drawn  = deck.slice(0, 3);
+    const remaining = deck.slice(3);
+
+    this._drawn     = drawn;
+    this._remaining = remaining;
+    this._carryOver = carryOver;
+    this._round     = round;
+    this._selected  = null;
+
+    // ── Header ───────────────────────────────────────────────
+    this.add.text(cx, 60, ' MARKET FORCES ', {
+      fontSize: '64px', fontFamily: '"Londrina Solid", sans-serif',
+      color: COLORS.text.primary, align: 'center', padding: { right: 16 },
+      shadow: { offsetX: -3, offsetY: 3, blur: 0, color: '#000000', fill: true },
+    }).setOrigin(0.5);
+
+    // ── Force card dimensions ────────────────────────────────
+    const FORCE_W = 160;
+    const FORCE_H = 200;
+    const SPACING = 40;
+    const CARD_Y  = 310;
+
+    this.add.text(cx, CARD_Y - FORCE_H / 2 - 20, 'Pick a card to change the economy of the game.', {
+      fontSize: '14px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
+    }).setOrigin(0.5, 1);
+
+    // ── Info panel (hidden until selection) ─────────────────
+    this._infoName = this.add.text(cx, 456, '', {
+      fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.primary,
+      fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5).setAlpha(0);
+
+    this._infoDesc = this.add.text(cx, 490, '', {
+      fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.primary,
+      fontStyle: 'italic', align: 'center', wordWrap: { width: 480 }
+    }).setOrigin(0.5).setAlpha(0);
+
+    this._infoEffect = this.add.text(cx, 530, '', {
+      fontSize: '14px', fontFamily: FONT_BOARD,
+      color: COLORS.text.cardOp, align: 'center'
+    }).setOrigin(0.5).setAlpha(0);
+
+    // ── CTA button ──────────────────────────────────────────
+    const btnW   = 280;
+    const btnY   = GAME_H - 64;
+    const btnLbl = `CONTINUE TO ROUND ${round + 1}`;
+
+    this._btn = this.add.rectangle(cx, btnY, btnW, 44, COLORS.buttonDisabled).setInteractive();
+    this._btnLabel = this.add.text(cx, btnY, btnLbl, {
+      fontSize: '14px', fontFamily: FONT_UI, color: '#888888', fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    this._btn.on('pointerdown', () => {
+      if (this._selected === null) return;
+      this._advance();
+    });
+    this._btn.on('pointerover', () => {
+      if (this._selected) this._btn.setFillStyle(COLORS.sceneBtnPrimaryHov);
+    });
+    this._btn.on('pointerout', () => {
+      if (this._selected) this._btn.setFillStyle(COLORS.sceneBtnPrimary);
+    });
+
+    // ── Draw 3 face-down cards ───────────────────────────────
+    const totalW = 3 * FORCE_W + 2 * SPACING;
+    const startX = cx - totalW / 2 + FORCE_W / 2;
+
+    this._cardContainers = [];
+
+    for (let i = 0; i < 3; i++) {
+      const x = startX + i * (FORCE_W + SPACING);
+      const container = this._buildFaceDownCard(x, CARD_Y, FORCE_W, FORCE_H);
+      this._cardContainers.push(container);
+
+      // Hit area
+      const hitArea = this.add.rectangle(x, CARD_Y, FORCE_W, FORCE_H, 0x000000, 0)
+        .setInteractive()
+        .setDepth(10);
+
+      ((idx) => {
+        hitArea.on('pointerover', () => {
+          if (this._selected !== null) return;
+          this.tweens.add({ targets: container, y: CARD_Y - 8, duration: 120, ease: 'Quad.easeOut' });
+        });
+        hitArea.on('pointerout', () => {
+          if (this._selected !== null) return;
+          this.tweens.add({ targets: container, y: CARD_Y, duration: 120, ease: 'Quad.easeOut' });
+        });
+        hitArea.on('pointerdown', () => {
+          if (this._selected !== null) return;
+          this._selectCard(idx, CARD_Y, FORCE_W, FORCE_H);
+          hitArea.destroy();
+        });
+      })(i);
+    }
+  }
+
+  _buildFaceDownCard(x, y, w, h) {
+    const container = this.add.container(x, y);
+
+    const bg = this.add.graphics();
+    bg.fillStyle(COLORS.cardBackFill);
+    bg.fillRoundedRect(-w / 2, -h / 2, w, h, 8);
+    bg.lineStyle(2, 0x1a6e74);
+    bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 8);
+
+    const qMark = this.add.text(0, 0, '?', {
+      fontSize: '64px', fontFamily: FONT_BOARD, color: '#1a6e74', fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    container.add([bg, qMark]);
+    return container;
+  }
+
+  _buildFaceUpCard(force, w, h) {
+    const sentimentColor = force.sentiment === 'positive' ? 0x2a7a3b
+                         : force.sentiment === 'negative' ? 0x8b1a1a
+                         : 0x3a3a5c;
+    const sentimentHex   = force.sentiment === 'positive' ? '#2a7a3b'
+                         : force.sentiment === 'negative' ? '#8b1a1a'
+                         : '#3a3a5c';
+
+    const container = this.add.container(0, 0);
+
+    const bg = this.add.graphics();
+    bg.fillStyle(0xffffff);
+    bg.fillRoundedRect(-w / 2, -h / 2, w, h, 8);
+    bg.lineStyle(3, sentimentColor);
+    bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 8);
+
+    const headerBg = this.add.graphics();
+    headerBg.fillStyle(sentimentColor);
+    headerBg.fillRoundedRect(-w / 2, -h / 2, w, 28, { tl: 8, tr: 8, bl: 0, br: 0 });
+
+    const typeLabel = this.add.text(0, -h / 2 + 14, 'MARKET FORCE', {
+      fontSize: '9px', fontFamily: FONT_BOARD, color: '#ffffff', fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    const nameText = this.add.text(0, -h / 2 + 50, force.name, {
+      fontSize: '13px', fontFamily: FONT_CARD_NAME, color: '#000000', fontStyle: 'bold',
+      align: 'center', wordWrap: { width: w - 16 }
+    }).setOrigin(0.5);
+
+    const divider = this.add.rectangle(0, -h / 2 + 86, w - 20, 1, 0xd1d1d1);
+
+    const arrow = force.sentiment === 'positive' ? '▲'
+                : force.sentiment === 'negative' ? '▼' : '—';
+    const arrowColor = force.sentiment === 'positive' ? '#2a7a3b'
+                     : force.sentiment === 'negative' ? '#8b1a1a' : '#555577';
+    const arrowText = this.add.text(0, -h / 2 + 108, arrow, {
+      fontSize: '28px', fontFamily: FONT_BOARD, color: arrowColor, fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    const effectText = this.add.text(0, -h / 2 + 148, force.effectText, {
+      fontSize: '11px', fontFamily: FONT_UI, color: sentimentHex,
+      fontStyle: 'bold', align: 'center', wordWrap: { width: w - 16 }
+    }).setOrigin(0.5);
+
+    container.add([bg, headerBg, typeLabel, nameText, divider, arrowText, effectText]);
+    return container;
+  }
+
+  _selectCard(idx, cardY, FORCE_W, FORCE_H) {
+    this._selected = idx;
+    const force = MARKET_FORCES.find(f => f.id === this._drawn[idx]);
+    const container = this._cardContainers[idx];
+
+    // Return container to baseline y before flip
+    this.tweens.killTweensOf(container);
+    container.y = cardY;
+
+    // Flip animation: scale x to 0 (close), swap visuals, scale x to 1 (open)
+    this.tweens.add({
+      targets: container, scaleX: 0, duration: 150, ease: 'Quad.easeIn',
+      onComplete: () => {
+        // Swap to face-up card
+        container.removeAll(true);
+        const faceUp = this._buildFaceUpCard(force, FORCE_W, FORCE_H);
+        faceUp.list.forEach(child => container.add(child));
+
+        this.tweens.add({
+          targets: container, scaleX: 1, duration: 150, ease: 'Quad.easeOut',
+        });
+      }
+    });
+
+    // Fade out unchosen cards
+    this._cardContainers.forEach((c, i) => {
+      if (i === idx) return;
+      this.tweens.add({ targets: c, alpha: 0, duration: 300, delay: 200 });
+    });
+
+    // Show info panel
+    this._infoName.setText(force.name);
+    this._infoDesc.setText(force.description);
+
+    const effectColor = force.sentiment === 'positive' ? COLORS.text.positive
+                      : force.sentiment === 'negative' ? COLORS.text.negative
+                      : COLORS.text.muted;
+    this._infoEffect.setText(force.effectText).setColor(effectColor);
+
+    this.tweens.add({ targets: [this._infoName, this._infoDesc, this._infoEffect], alpha: 1, duration: 300, delay: 250 });
+
+    // Enable CTA
+    this.time.delayedCall(400, () => {
+      this._btn.setFillStyle(COLORS.sceneBtnPrimary);
+      this._btnLabel.setColor('#000000');
+    });
+
+    // Apply one-time effect immediately (Lawsuit Settlement)
+    if (force.type === 'one_time') {
+      this.time.delayedCall(500, () => {
+        this._carryOver = { ...this._carryOver, cash: 0 };
+        this._showCashWipeFloat();
+      });
+    }
+
+    // Apply value_modifier: reduce C-Suite cards on board by $150k via valueBonuses
+    if (force.type === 'value_modifier' && force.target === 'C-Suite') {
+      const allBoardIds = [
+        ...this._carryOver.cashRow.filter(Boolean),
+        ...this._carryOver.productRow.filter(Boolean),
+        ...this._carryOver.resourcesRow.filter(Boolean),
+      ];
+      const valueBonuses = { ...(this._carryOver.valueBonuses || {}) };
+      const cardsData = this.cache.json.get('cards').cards;
+      allBoardIds.forEach(id => {
+        const card = cardsData.find(c => c.id === id);
+        if (card && card.type === 'C-Suite') {
+          valueBonuses[id] = (valueBonuses[id] || 0) + force.value; // force.value = -150
+        }
+      });
+      this._carryOver = { ...this._carryOver, valueBonuses };
+    }
+  }
+
+  _showCashWipeFloat() {
+    const cx = GAME_W / 2;
+    const flash = this.add.text(cx, 390, 'ALL CASH SEIZED', {
+      fontSize: '36px', fontFamily: FONT_BOARD, color: COLORS.text.negative,
+      fontStyle: 'bold', align: 'center'
+    }).setOrigin(0.5).setAlpha(0);
+
+    this.tweens.add({
+      targets: flash, alpha: 1, duration: 300,
+      onComplete: () => {
+        this.tweens.add({ targets: flash, alpha: 0, y: flash.y - 40, duration: 1200, delay: 800, onComplete: () => flash.destroy() });
+      }
+    });
+  }
+
+  _advance() {
+    const chosenId = this._drawn[this._selected];
+    const chosenForce = MARKET_FORCES.find(f => f.id === chosenId);
+    const unchosen = this._drawn.filter((_, i) => i !== this._selected);
+    const newDeck = [...this._remaining, ...unchosen];
+
+    const updatedCarryOver = {
+      ...this._carryOver,
+      marketForces:    [...(this._carryOver.marketForces || []), chosenForce],
+      marketForceDeck: newDeck,
+    };
+
+    fadeToScene(this, 'RoundTitleScene', { round: this._round + 1, carryOver: updatedCarryOver, dealCards: false });
   }
 }
 
@@ -4876,9 +5470,8 @@ class ValuationScene extends Phaser.Scene {
     // ── Button ────────────────────────────────────────────────
     const btnY   = GAME_H - 64;
 
-    const btnW   = isEndGame ? 200 : 280;
-    const btnLbl = isEndGame ? 'PLAY AGAIN'
-                 : `CONTINUE TO ROUND ${round + 1}`;
+    const btnW   = isEndGame ? 200 : 160;
+    const btnLbl = isEndGame ? 'PLAY AGAIN' : 'NEXT';
 
     const btn = this.add.rectangle(cx, btnY, btnW, 44, COLORS.sceneBtnPrimary)
       .setInteractive();
@@ -4892,7 +5485,8 @@ class ValuationScene extends Phaser.Scene {
       if (isEndGame) {
         fadeToScene(this, 'WelcomeScene', {});
       } else {
-        fadeToScene(this, 'RoundTitleScene', { round: round + 1, carryOver, dealCards: false });
+        // Rounds 1-3: go to MarketForceScene; carryOver flows through there to RoundTitleScene
+        fadeToScene(this, 'MarketForceScene', { round, carryOver });
       }
     });
   }
@@ -4918,7 +5512,7 @@ const config = {
   width:           GAME_W,
   height:          GAME_H,
   backgroundColor: COLORS.bg,
-  scene:           [BootScene, IrisOverlayScene, WelcomeScene, TutorialScene, RoundTitleScene, GameScene, ValuationScene],
+  scene:           [BootScene, IrisOverlayScene, WelcomeScene, TutorialScene, RoundTitleScene, GameScene, MarketForceScene, ValuationScene],
   parent:          document.body,
   roundPixels: true,
   scale: {
