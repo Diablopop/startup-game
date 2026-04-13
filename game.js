@@ -638,6 +638,14 @@ class WelcomeScene extends Phaser.Scene {
     tutBtn.on('pointerout',  () => tutBtn.setFillStyle(COLORS.sceneBg));
     tutBtn.on('pointerdown', () => this.scene.start('TutorialScene'));
 
+    // HIGH SCORES link (tertiary — text-only with chevron, no box)
+    const hsLink = this.add.text(cx, cy + 144, 'HIGH SCORES \u203A', {
+      fontSize: '18px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
+    hsLink.on('pointerover', () => hsLink.setColor('#e0e0e0'));
+    hsLink.on('pointerout',  () => hsLink.setColor(COLORS.text.primary));
+    hsLink.on('pointerdown', () => fadeToScene(this, 'HighScoresScene', {}));
+
     // Disclaimer
     this.add.text(cx, GAME_H - 56,
       'Prototype build — expect rough edges and placeholder art.', {
@@ -5471,7 +5479,7 @@ class ValuationScene extends Phaser.Scene {
     const btnY   = GAME_H - 64;
 
     const btnW   = isEndGame ? 200 : 160;
-    const btnLbl = isEndGame ? 'PLAY AGAIN' : 'NEXT';
+    const btnLbl = isEndGame ? 'HIGH SCORES' : 'NEXT';
 
     const btn = this.add.rectangle(cx, btnY, btnW, 44, COLORS.sceneBtnPrimary)
       .setInteractive();
@@ -5483,7 +5491,8 @@ class ValuationScene extends Phaser.Scene {
     btn.on('pointerout',  () => btn.setFillStyle(COLORS.sceneBtnPrimary));
     btn.on('pointerdown', () => {
       if (isEndGame) {
-        fadeToScene(this, 'WelcomeScene', {});
+        const { index } = saveHighScore(finalTotal);
+        fadeToScene(this, 'HighScoresScene', { justScoredIndex: index });
       } else {
         // Rounds 1-3: go to MarketForceScene; carryOver flows through there to RoundTitleScene
         fadeToScene(this, 'MarketForceScene', { round, carryOver });
@@ -5505,6 +5514,138 @@ class ValuationScene extends Phaser.Scene {
 }
 
 // ============================================================
+// HIGH SCORES SCENE
+// ============================================================
+function loadHighScores() {
+  try {
+    const raw = localStorage.getItem('startup_highscores');
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (_) { return []; }
+}
+
+function saveHighScore(score) {
+  const scores = loadHighScores();
+  const entry = { score, date: new Date().toISOString() };
+  scores.push(entry);
+  scores.sort((a, b) => b.score - a.score);
+  if (scores.length > 10) scores.length = 10;
+  const index = scores.indexOf(entry);
+  try { localStorage.setItem('startup_highscores', JSON.stringify(scores)); } catch (_) {}
+  return { scores, index };
+}
+
+function formatScoreDate(isoString) {
+  return new Date(isoString).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit'
+  });
+}
+
+class HighScoresScene extends Phaser.Scene {
+  constructor() { super({ key: 'HighScoresScene' }); }
+
+  init(data) { this.sceneData = data || {}; }
+
+  create() {
+    const cx = GAME_W / 2;
+    const highlightIdx = this.sceneData.justScoredIndex;
+
+    // Background
+    this.cameras.main.setBackgroundColor(COLORS.sceneBg);
+    this.add.rectangle(cx, GAME_H / 2, GAME_W, GAME_H, COLORS.sceneBg);
+    this.cameras.main.fadeIn(400, 0, 0, 0);
+
+    // Title
+    this.add.text(cx, 60, ' HIGH SCORES ', {
+      fontSize: '72px', fontFamily: '"Londrina Solid", sans-serif',
+      color: COLORS.text.primary, align: 'center',
+      shadow: { offsetX: -3, offsetY: 3, blur: 0, color: '#000000', fill: true }
+    }).setOrigin(0.5, 0.5);
+
+    // Dark box
+    const BOX_W = 560, BOX_H = 380;
+    const BOX_Y = 110;
+    this.add.rectangle(cx, BOX_Y + BOX_H / 2, BOX_W, BOX_H, COLORS.scrollTrackBg)
+      .setStrokeStyle(1, COLORS.divider);
+
+    // Column headers
+    const headerY = BOX_Y + 20;
+    const colRank = cx - 220;
+    const colScore = cx;
+    const colDate = cx + 180;
+
+    this.add.text(colRank, headerY, 'RANK', {
+      fontSize: '11px', fontFamily: FONT_UI, color: COLORS.text.primary
+    }).setOrigin(0, 0.5);
+    this.add.text(colScore, headerY, 'SCORE', {
+      fontSize: '11px', fontFamily: FONT_UI, color: COLORS.text.primary
+    }).setOrigin(0.5, 0.5);
+    this.add.text(colDate, headerY, 'DATE', {
+      fontSize: '11px', fontFamily: FONT_UI, color: COLORS.text.primary
+    }).setOrigin(0.5, 0.5);
+
+    // Divider under headers
+    this.add.rectangle(cx, headerY + 14, BOX_W - 40, 1, COLORS.divider);
+
+    // Score rows
+    const scores = loadHighScores();
+    const ROW_H = 32;
+    const startY = headerY + 34;
+
+    for (let i = 0; i < 10; i++) {
+      const rowY = startY + i * ROW_H;
+      const isHighlight = (highlightIdx !== undefined && i === highlightIdx);
+      const color = isHighlight ? COLORS.text.gold : COLORS.text.primary;
+      const mutedColor = COLORS.text.muted;
+
+      // Rank (unicorn emoji for $1b+)
+      const rankLabel = (scores[i] && scores[i].score >= 1000000) ? `${i + 1}.  🦄` : `${i + 1}.`;
+      this.add.text(colRank + 12, rowY, rankLabel, {
+        fontSize: '13px', fontFamily: FONT_UI, color: color, fontStyle: isHighlight ? 'bold' : 'normal'
+      }).setOrigin(0, 0.5);
+
+      if (scores[i]) {
+        // Score value
+        this.add.text(colScore, rowY, fmtVal(scores[i].score), {
+          fontSize: '15px', fontFamily: FONT_UI, color: color, fontStyle: 'bold'
+        }).setOrigin(0.5, 0.5);
+
+        // Date
+        this.add.text(colDate, rowY, formatScoreDate(scores[i].date), {
+          fontSize: '12px', fontFamily: FONT_UI, color: color
+        }).setOrigin(0.5, 0.5);
+      } else {
+        // Empty slot
+        this.add.text(colScore, rowY, '—', {
+          fontSize: '15px', fontFamily: FONT_UI, color: mutedColor
+        }).setOrigin(0.5, 0.5);
+        this.add.text(colDate, rowY, '—', {
+          fontSize: '12px', fontFamily: FONT_UI, color: mutedColor
+        }).setOrigin(0.5, 0.5);
+      }
+
+      // Row divider (subtle)
+      if (i < 9) {
+        this.add.rectangle(cx, rowY + ROW_H / 2, BOX_W - 60, 1, COLORS.divider).setAlpha(0.3);
+      }
+    }
+
+    // PLAY AGAIN button
+    const btnY = GAME_H - 50;
+    const btn = this.add.rectangle(cx, btnY, 220, 44, COLORS.sceneBtnPrimary)
+      .setInteractive({ useHandCursor: true });
+    this.add.text(cx, btnY, 'PLAY AGAIN', {
+      fontSize: '14px', fontFamily: FONT_UI, color: '#000000', fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5);
+    btn.on('pointerover', () => btn.setFillStyle(COLORS.sceneBtnPrimaryHov));
+    btn.on('pointerout',  () => btn.setFillStyle(COLORS.sceneBtnPrimary));
+    btn.on('pointerdown', () => fadeToScene(this, 'WelcomeScene', {}));
+  }
+}
+
+// ============================================================
 // PHASER CONFIG — must come after all scene class definitions
 // ============================================================
 const config = {
@@ -5512,7 +5653,7 @@ const config = {
   width:           GAME_W,
   height:          GAME_H,
   backgroundColor: COLORS.bg,
-  scene:           [BootScene, IrisOverlayScene, WelcomeScene, TutorialScene, RoundTitleScene, GameScene, MarketForceScene, ValuationScene],
+  scene:           [BootScene, IrisOverlayScene, WelcomeScene, TutorialScene, RoundTitleScene, GameScene, MarketForceScene, ValuationScene, HighScoresScene],
   parent:          document.body,
   roundPixels: true,
   scale: {
