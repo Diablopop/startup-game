@@ -638,13 +638,21 @@ class WelcomeScene extends Phaser.Scene {
     tutBtn.on('pointerout',  () => tutBtn.setFillStyle(COLORS.sceneBg));
     tutBtn.on('pointerdown', () => this.scene.start('TutorialScene'));
 
-    // HIGH SCORES link (tertiary — text-only with chevron, no box)
-    const hsLink = this.add.text(cx, cy + 144, 'HIGH SCORES \u203A', {
+    // YOUR HIGH SCORES link (tertiary — text-only with chevron, no box)
+    const hsLink = this.add.text(cx, cy + 180, 'YOUR HIGH SCORES \u203A', {
       fontSize: '18px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'bold'
     }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
     hsLink.on('pointerover', () => hsLink.setColor('#e0e0e0'));
     hsLink.on('pointerout',  () => hsLink.setColor(COLORS.text.primary));
     hsLink.on('pointerdown', () => fadeToScene(this, 'HighScoresScene', {}));
+
+    // ABOUT link (tertiary — text-only with chevron, no box)
+    const aboutLink = this.add.text(cx, cy + 214, 'ABOUT THIS GAME ›', {
+      fontSize: '18px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
+    aboutLink.on('pointerover', () => aboutLink.setColor('#e0e0e0'));
+    aboutLink.on('pointerout',  () => aboutLink.setColor(COLORS.text.primary));
+    aboutLink.on('pointerdown', () => this.showAboutModal(cx));
 
     // Disclaimer
     this.add.text(cx, GAME_H - 56,
@@ -670,6 +678,89 @@ class WelcomeScene extends Phaser.Scene {
         fsText.destroy();
       });
     }
+  }
+
+  showAboutModal(cx) {
+    const cy = GAME_H / 2;
+    const modalGroup = this.add.container(0, 0).setDepth(50);
+
+    // Dimmed backdrop
+    const backdrop = this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000, 0.7)
+      .setInteractive();
+    modalGroup.add(backdrop);
+
+    // Modal panel
+    const panelW = 500, panelH = 380;
+    const panel = this.add.rectangle(cx, cy, panelW, panelH, COLORS.bg)
+      .setStrokeStyle(1, COLORS.divider);
+    modalGroup.add(panel);
+
+    // Title
+    const title = this.add.text(cx, cy - 150, 'ABOUT THIS GAME', {
+      fontSize: '28px', fontFamily: '"Londrina Solid", sans-serif',
+      color: '#000000'
+    }).setOrigin(0.5, 0.5);
+    modalGroup.add(title);
+
+    // Divider
+    const div = this.add.rectangle(cx, cy - 124, panelW - 60, 1, COLORS.divider);
+    modalGroup.add(div);
+
+    // Body text
+    const lines = [
+      'Startup is an engine-building card game.',
+      'Raise cash, hire talent, and ship products to build',
+      'your company to an absurd valuation.',
+      '',
+      'Built with Phaser 3 and Claude Code',
+      'Designed and developed by Andrew Schauer',
+    ];
+    const body = this.add.text(cx, cy - 34, lines.join('\n'), {
+      fontSize: '14px', fontFamily: FONT_UI, color: '#000000',
+      align: 'center', lineSpacing: 6
+    }).setOrigin(0.5, 0.5);
+    modalGroup.add(body);
+
+    // LinkedIn link button (secondary — black stroke, black text, bg fill)
+    const linkBtnY = cy + 68;
+    const linkBtn = this.add.rectangle(cx, linkBtnY, 260, 44, COLORS.bg)
+      .setStrokeStyle(2, 0x000000)
+      .setInteractive({ useHandCursor: true });
+    modalGroup.add(linkBtn);
+    const linkText = this.add.text(cx, linkBtnY, 'CONNECT ON LINKEDIN', {
+      fontSize: '14px', fontFamily: FONT_UI, color: '#000000', fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5);
+    modalGroup.add(linkText);
+    linkBtn.on('pointerover', () => linkBtn.setFillStyle(COLORS.buttonHover));
+    linkBtn.on('pointerout',  () => linkBtn.setFillStyle(COLORS.bg));
+    linkBtn.on('pointerdown', () => {
+      window.open('https://www.linkedin.com/in/andrewschauer/', '_blank');
+    });
+
+    // Version + copyright
+    const footerLines = [
+      'Version: Prototype',
+      '© 2026 Andrew Schauer. All rights reserved.',
+    ];
+    const footer = this.add.text(cx, cy + 130, footerLines.join('\n'), {
+      fontSize: '14px', fontFamily: FONT_UI, color: COLORS.text.secondary,
+      align: 'center', lineSpacing: 6
+    }).setOrigin(0.5, 0.5);
+    modalGroup.add(footer);
+
+    // Close — X in top-right corner
+    const closeX = cx + panelW / 2 - 24;
+    const closeY = cy - panelH / 2 + 24;
+    const closeBtn = this.add.text(closeX, closeY, '✕', {
+      fontSize: '20px', fontFamily: FONT_UI, color: '#000000', fontStyle: 'bold'
+    }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
+    modalGroup.add(closeBtn);
+    closeBtn.on('pointerover', () => closeBtn.setColor(COLORS.text.secondary));
+    closeBtn.on('pointerout',  () => closeBtn.setColor('#000000'));
+    closeBtn.on('pointerdown', () => modalGroup.destroy());
+
+    // Also close on backdrop click
+    backdrop.on('pointerdown', () => modalGroup.destroy());
   }
 }
 
@@ -5479,7 +5570,7 @@ class ValuationScene extends Phaser.Scene {
     const btnY   = GAME_H - 64;
 
     const btnW   = isEndGame ? 200 : 160;
-    const btnLbl = isEndGame ? 'HIGH SCORES' : 'NEXT';
+    const btnLbl = isEndGame ? 'YOUR HIGH SCORES' : 'NEXT';
 
     const btn = this.add.rectangle(cx, btnY, btnW, 44, COLORS.sceneBtnPrimary)
       .setInteractive();
@@ -5514,7 +5605,7 @@ class ValuationScene extends Phaser.Scene {
 }
 
 // ============================================================
-// HIGH SCORES SCENE
+// YOUR HIGH SCORES SCENE
 // ============================================================
 function loadHighScores() {
   try {
