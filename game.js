@@ -1644,7 +1644,7 @@ class TutorialScene extends Phaser.Scene {
     const STEP_DELAY = 700;
 
     // Flash base
-    this._tutShowFloat(this._tutShipTile.x, this._tutShipTile.y - 90, 'BASE ×1', COLORS.text.purple, 900);
+    this._tutShowFloat(this._tutShipTile.x, this._tutShipTile.y - 12, 'BASE ×1', COLORS.text.purple, 900);
     this._tutShipTile.tileBg.setFillStyle(COLORS.productTileHover);
 
     const processCard = (index) => {
@@ -1671,7 +1671,7 @@ class TutorialScene extends Phaser.Scene {
       const label = op.type === 'multiply'
         ? `×${op.value}  →  ×${score}`
         : `+${op.value}  →  ×${score}`;
-      this._tutShowFloat(slot.x, slot.y - 90, label, COLORS.text.purple, 900);
+      this._tutShowFloat(slot.x, slot.y - 12, label, COLORS.text.purple, 900);
 
       this.time.delayedCall(STEP_DELAY, () => processCard(index + 1));
     };
@@ -1742,13 +1742,13 @@ class TutorialScene extends Phaser.Scene {
     this._tutHudTeamValue.setText(fmtVal(teamVal));
   }
 
-  _tutShowFloat(x, y, text, color, duration = 800) {
+  _tutShowFloat(x, y, text, color, duration = 800, direction = 'up') {
     const t = this.add.text(x, y, text, {
       fontSize: '13px', fontFamily: FONT_BOARD, color, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
     this.pageObjects.push(t);
     this.tweens.add({
-      targets: t, y: y - 35, alpha: 0, duration, ease: 'Power2',
+      targets: t, y: direction === 'down' ? y + 35 : y - 35, alpha: 0, duration, ease: 'Power2',
       onComplete: () => t.destroy()
     });
   }
@@ -3015,6 +3015,7 @@ class GameScene extends Phaser.Scene {
     const subtitle = this.add.text(0, -18, 'Base: 1×', {
       fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.productSub, align: 'center'
     }).setOrigin(0.5, 0.5);
+    this.productSubtitle = subtitle;
 
     const btnBg = this.add.rectangle(0, 20, 96, 36, COLORS.productTile);
     const btnText = this.add.text(0, 20, 'SHIP', {
@@ -3224,6 +3225,7 @@ class GameScene extends Phaser.Scene {
     const subtitle = this.add.text(0, -18, 'Base: 1 draw', {
       fontSize: '9px', fontFamily: FONT_BOARD, color: COLORS.text.resSub, align: 'center'
     }).setOrigin(0.5, 1);
+    this.hireSubtitle = subtitle;
 
     // Button
     const btnBg = this.add.rectangle(0, 20, 96, 36, COLORS.resTile);
@@ -3751,7 +3753,7 @@ class GameScene extends Phaser.Scene {
                                  : existingRowKey === 'productRow' ? this.productSlotObjects
                                  : this.resSlotObjects;
           const existingSlotObj = existingSlotList[existingSlotIdx];
-          this.showFloat(existingSlotObj.x, existingSlotObj.y - 90, `REPLACE ${card.role}`, COLORS.text.negative);
+          this.showFloat(existingSlotObj.x, existingSlotObj.y - 12, `REPLACE ${card.role}`, COLORS.text.negative);
           this.snapBack(cardId);
           return;
         }
@@ -3765,13 +3767,13 @@ class GameScene extends Phaser.Scene {
     const slot = slotList[targetSlotIndex] || slotList[0];
 
     if (targetSlotIndex === -1) {
-      this.showFloat(slot.x, slot.y - 90, 'ROW FULL', COLORS.text.negative);
+      this.showFloat(slot.x, slot.y - 12, 'ROW FULL', COLORS.text.negative);
       this.snapBack(cardId);
       return;
     }
 
     if (state.cash < finalCost) {
-      this.showFloat(slot.x, slot.y - 90, `NEED $${finalCost}k`, COLORS.text.negative);
+      this.showFloat(slot.x, slot.y - 12, `NEED $${finalCost}k`, COLORS.text.negative);
       this.snapBack(cardId);
       return;
     }
@@ -4166,12 +4168,12 @@ class GameScene extends Phaser.Scene {
       const diff  = payout - before;
       const label = op.type === 'multiply' ? `×${op.value}  →  $${payout}k` : `+$${diff}k`;
 
-      this.showFloat(slot.x, slot.y - 90, label, COLORS.text.cashSub, 900);
+      this.showFloat(slot.x, slot.y - 12, label, COLORS.text.cashSub, 900);
 
       const card = this.cardsData.find(c => c.id === cardId);
       if (card.triggerEffect) {
         card._slotX = slot.x;
-        card._slotY = slot.y;
+        card._slotY = slot.y + 30;
         this.showTriggerModal(card, payout, (updatedPayout, pendingDraws) => {
           payout = updatedPayout;
           if (pendingDraws) this.pendingDrawCount += pendingDraws;
@@ -4387,7 +4389,7 @@ class GameScene extends Phaser.Scene {
     const effectiveOps = this._computeActivationOps(this.state.productRow.filter(Boolean));
 
     this.productActivateTile.tileBg.setFillStyle(COLORS.productTileHover);
-    this.showFloat(this.productActivateTile.x, this.productActivateTile.y - 90, `BASE ×${BASE}`, COLORS.text.purple, 900);
+    this.showFloat(this.productActivateTile.x, this.productActivateTile.y - 12, `BASE ×${BASE}`, COLORS.text.purple, 900);
 
     const STEP_DELAY = 700;
 
@@ -4415,12 +4417,12 @@ class GameScene extends Phaser.Scene {
         ? `×${op.value}  →  ×${score}`
         : `+${op.value}  →  ×${score}`;
 
-      this.showFloat(slot.x, slot.y - 90, label, COLORS.text.purple, 900);
+      this.showFloat(slot.x, slot.y - 12, label, COLORS.text.purple, 900);
 
       const card = this.cardsData.find(c => c.id === cardId);
       if (card.triggerEffect) {
         card._slotX = slot.x;
-        card._slotY = slot.y;
+        card._slotY = slot.y + 30;
         // Pass cash (not score) so cash-earning triggers update the bank, not the ship score
         // Capture cashBefore so we can apply a delta; modals that directly mutate state.cash
         // (e.g. spend_cash_boost_op) return the original payout unchanged, so delta = 0 and
@@ -4523,12 +4525,12 @@ class GameScene extends Phaser.Scene {
       const label = op.type === 'multiply'
         ? `×${op.value}  →  ${drawCount} draws`
         : `+${diff} draw`;
-      this.showFloat(slot.x, slot.y - 90, label, COLORS.text.resSub, 900);
+      this.showFloat(slot.x, slot.y - 12, label, COLORS.text.resSub, 900);
 
       const card = this.cardsData.find(c => c.id === cardId);
       if (card.triggerEffect) {
         card._slotX = slot.x;
-        card._slotY = slot.y;
+        card._slotY = slot.y + 30;
         const CASH_TRIGGER_TYPES = ['gain_cash', 'gain_cash_per_type', 'gain_cash_per_discard'];
         if (CASH_TRIGGER_TYPES.includes(card.triggerEffect.type)) {
           // Cash-earning triggers: pass state.cash as payout, write delta back on resolve.
@@ -6013,7 +6015,24 @@ class GameScene extends Phaser.Scene {
       }
     });
     this.hudCash.setText(fmtVal(state.cash));
-    if (this.cashSubtitle) this.cashSubtitle.setText(`Base: $${BASE_CASH_PER_ROUND[state.round - 1]}k`);
+    const cashBase = BASE_CASH_PER_ROUND[state.round - 1];
+    const cashMult = (state.marketForces || [])
+      .filter(f => f.type === 'activation_multiplier' && f.target === 'cash')
+      .reduce((acc, f) => acc * f.value, 1);
+    const cashSuffix = cashMult !== 1 ? ` (×${cashMult})` : '';
+    if (this.cashSubtitle) this.cashSubtitle.setText(`Base: $${cashBase}k${cashSuffix}`);
+
+    const prodMult = (state.marketForces || [])
+      .filter(f => f.type === 'activation_multiplier' && f.target === 'product')
+      .reduce((acc, f) => acc * f.value, 1);
+    const prodSuffix = prodMult !== 1 ? ` (×${prodMult})` : '';
+    if (this.productSubtitle) this.productSubtitle.setText(`Base: 1×${prodSuffix}`);
+
+    const resMult = (state.marketForces || [])
+      .filter(f => f.type === 'activation_multiplier' && f.target === 'resources')
+      .reduce((acc, f) => acc * f.value, 1);
+    const resSuffix = resMult !== 1 ? ` (×${resMult})` : '';
+    if (this.hireSubtitle) this.hireSubtitle.setText(`Base: 1 draw${resSuffix}`);
 
     // Goal tracking: peak values
     if (state.cash > state.peakCash) state.peakCash = state.cash;
@@ -6174,12 +6193,12 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  showFloat(x, y, text, color = COLORS.text.primary, duration = 800) {
+  showFloat(x, y, text, color = COLORS.text.primary, duration = 800, direction = 'up') {
     const t = this.add.text(x, y, text, {
       fontSize: '13px', fontFamily: FONT_BOARD, color, fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5, 0.5);
     this.tweens.add({
-      targets: t, y: y - 35, alpha: 0, duration, ease: 'Power2',
+      targets: t, y: direction === 'down' ? y + 35 : y - 35, alpha: 0, duration, ease: 'Power2',
       onComplete: () => t.destroy()
     });
   }
