@@ -877,7 +877,7 @@ class TutorialScene extends Phaser.Scene {
 
   // ── Screen 2: UNDERSTANDING CARDS ─────────────────────────────
   _buildPage2(cx) {
-    const exCard = this.cardsData.find(c => c.id === 37); // Crypto Bro
+    const exCard = this.cardsData.find(c => c.id === 23); // Sandbagger
 
     this.pageObjects.push(
       this.add.text(cx, 40, ' UNDERSTANDING CARDS ', {
@@ -1012,7 +1012,7 @@ class TutorialScene extends Phaser.Scene {
     const triMarker = this.add.text(dlgX - 18, dialogueY + 2, '▶', {
       fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.primary
     }).setOrigin(0.5, 0);
-    const dialogueText = this.add.text(dlgX, dialogueY, 'Press and hold the Crypto Bro card to see its details.', {
+    const dialogueText = this.add.text(dlgX, dialogueY, 'Press and hold the Sandbagger card to see its details.', {
       fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'left',
       wordWrap: { width: 500 }
     }).setOrigin(0, 0);
