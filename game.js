@@ -847,9 +847,9 @@ class TutorialScene extends Phaser.Scene {
 
     const actions = [
       { label: 'PLACE A CARD', desc: 'Drag a card from your hand into the first open spot in any row. Placing a card requires cash.' },
-      { label: 'RAISE $', desc: 'Activate your Cash row to generate funding. The base payout starts small and grows each round.' },
-      { label: 'RECRUIT', desc: 'Activate your Resources row to draw more cards into your hand.' },
-      { label: 'SHIP', desc: 'Activate your Product row to ship your product. Each ship adds to your product multiplier for valuation.' },
+      { label: 'RAISE $', desc: 'Activate the Cash row to generate funding. The base payout starts small and grows each round.' },
+      { label: 'RECRUIT', desc: 'Activate the Resources row to draw more cards into your hand.' },
+      { label: 'SHIP', desc: 'Activate the Product row to ship your product. Each ship adds to your product multiplier for valuation.' },
     ];
 
     actions.forEach(a => {
@@ -1012,7 +1012,7 @@ class TutorialScene extends Phaser.Scene {
     const triMarker = this.add.text(dlgX - 18, dialogueY + 2, '▶', {
       fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.primary
     }).setOrigin(0.5, 0);
-    const dialogueText = this.add.text(dlgX, dialogueY, 'Press and hold a card to see its details.', {
+    const dialogueText = this.add.text(dlgX, dialogueY, 'Press and hold the Crypto Bro card to see its details.', {
       fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'left',
       wordWrap: { width: 500 }
     }).setOrigin(0, 0);
