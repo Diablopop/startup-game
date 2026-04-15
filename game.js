@@ -55,8 +55,8 @@ const ROUND_GOALS = [
       rewardType: 'csuite',
     },
     {
-      id: 'r1_val200', desc: 'Reach $200k valuation',
-      check: s => s.finalValuation >= 200,
+      id: 'r1_val100', desc: 'Reach $100k valuation',
+      check: s => s.finalValuation >= 100,
       progressText: null,   // valuation computed at end only
       rewardType: 'csuite',
     },
@@ -178,7 +178,7 @@ const MARKET_FORCES = [
   {
     id: 'job_apocalypse',
     name: 'Job Apocalypse',
-    description: "700 applicants for 1 open role? That's salary negotiating power.",
+    description: "50,000 tech layoffs in the last month is bad news. Unless you're hiring.",
     effectText: 'Base resources activation ×1.5',
     type: 'activation_multiplier', target: 'resources', value: 1.5,
     sentiment: 'positive',
@@ -557,7 +557,13 @@ class IrisOverlayScene extends Phaser.Scene {
 class BootScene extends Phaser.Scene {
   constructor() { super({ key: 'BootScene' }); }
 
-  preload() { this.load.json('cards', 'cards.json'); }
+  preload() {
+    this.load.json('cards', 'cards.json');
+    MARKET_FORCES.forEach(f => {
+      this.load.image(`force_${f.id}`, `assets/market-forces/force_${f.id}.png`);
+    });
+    this.load.image('tutorial_strategy', 'assets/tutorial_strategy.png');
+  }
 
   create() {
     // Launch the persistent iris overlay (runs in parallel, always on top)
@@ -639,7 +645,7 @@ class WelcomeScene extends Phaser.Scene {
     tutBtn.on('pointerdown', () => this.scene.start('TutorialScene'));
 
     // YOUR HIGH SCORES link (tertiary — text-only with chevron, no box)
-    const hsLink = this.add.text(cx, cy + 180, 'YOUR HIGH SCORES \u203A', {
+    const hsLink = this.add.text(cx, GAME_H - 122, 'YOUR HIGH SCORES \u203A', {
       fontSize: '18px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'bold'
     }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
     hsLink.on('pointerover', () => hsLink.setColor('#e0e0e0'));
@@ -647,7 +653,7 @@ class WelcomeScene extends Phaser.Scene {
     hsLink.on('pointerdown', () => fadeToScene(this, 'HighScoresScene', {}));
 
     // ABOUT link (tertiary — text-only with chevron, no box)
-    const aboutLink = this.add.text(cx, cy + 214, 'ABOUT THIS GAME ›', {
+    const aboutLink = this.add.text(cx, GAME_H - 90, 'ABOUT THIS GAME ›', {
       fontSize: '18px', fontFamily: FONT_UI, color: COLORS.text.primary, fontStyle: 'bold'
     }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
     aboutLink.on('pointerover', () => aboutLink.setColor('#e0e0e0'));
@@ -739,7 +745,7 @@ class WelcomeScene extends Phaser.Scene {
 
     // Version + copyright
     const footerLines = [
-      'Version: Prototype',
+      'Prototype v1.0',
       '© 2026 Andrew Schauer. All rights reserved.',
     ];
     const footer = this.add.text(cx, cy + 130, footerLines.join('\n'), {
@@ -806,6 +812,7 @@ class TutorialScene extends Phaser.Scene {
     if (page === 1) this._buildPage1(cx);
     if (page === 2) this._buildPage2(cx);
     if (page === 3) this._buildPage3();
+    if (page === 4) this._buildPage4(cx);
 
     this._buildNavBar(page);
   }
@@ -957,6 +964,7 @@ class TutorialScene extends Phaser.Scene {
           this._page2Dialogue2Shown = true;
           this._page2DialogueTexts[0].setText('Good. Now let\'s learn how to grow your company...');
           if (this._page2TriMarker) this._page2TriMarker.setVisible(false);
+          if (this._page2TriTween)  { this._page2TriTween.stop(); this._page2TriTween = null; }
           if (this._page2NextBtn) {
             this._page2NextBtn.setFillStyle(COLORS.sceneBtnPrimary);
             this._page2NextBtn.setInteractive({ useHandCursor: true });
@@ -1011,6 +1019,16 @@ class TutorialScene extends Phaser.Scene {
     this.pageObjects.push(triMarker, dialogueText);
     this._page2DialogueTexts = [dialogueText];
     this._page2TriMarker = triMarker;
+    if (!this._page2LongPressed) {
+      this._page2TriTween = this.tweens.add({
+        targets: triMarker,
+        x: triMarker.x + 5,
+        duration: 400,
+        ease: 'Sine.easeInOut',
+        yoyo: true,
+        repeat: -1,
+      });
+    }
 
     // Preserve completed state if player already did the long-press this session
     if (this._page2LongPressed) {
@@ -1039,7 +1057,7 @@ class TutorialScene extends Phaser.Scene {
     }).setOrigin(0.5, 0);
     const descText = this.add.text(0, 0, card.description, {
       fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, fontStyle: 'italic',
-      align: 'center', wordWrap: { width: PW - PAD * 2 }
+      align: 'center', wordWrap: { width: PW - PAD * 2 }, padding: { right: 6 }
     }).setOrigin(0.5, 0);
 
     const GAP = 8, DIV_H = 1, TOP_PAD = 14, BOTTOM_PAD = 14;
@@ -1155,7 +1173,7 @@ class TutorialScene extends Phaser.Scene {
     const handY = rowY + SLOT_H / 2 + CARD_H / 2 + 20;  // hand below row
     const insetBottom = handY + CARD_H / 2 + 10;
     this._dialogueStartY = insetBottom + 30;  // breathing room below inset
-    const insetLeft = 30, insetRight = GAME_W - 30;
+    const insetLeft = 108, insetRight = GAME_W - 108;
     const insetBg = this.add.rectangle(
       (insetLeft + insetRight) / 2, (insetTop + insetBottom) / 2,
       insetRight - insetLeft, insetBottom - insetTop,
@@ -1164,7 +1182,7 @@ class TutorialScene extends Phaser.Scene {
     this.pageObjects.push(insetBg);
 
     // ── Simplified HUD (left side of inset, vertically centered) ──
-    const hudX = 140;
+    const hudX = 237;
     const hudPanel = this.add.rectangle(hudX, (insetTop + insetBottom) / 2, 200, insetBottom - insetTop - 8, COLORS.panel);
     this.pageObjects.push(hudPanel);
 
@@ -1206,10 +1224,10 @@ class TutorialScene extends Phaser.Scene {
     this.pageObjects.push(this._tutHudCash);
 
     // ── Product row ──
-    const slotStartX = 473;
+    const slotStartX = 570;
 
     // Activation tile (SHIP)
-    this._tutShipTile = this._buildTutShipTile(353, rowY);
+    this._tutShipTile = this._buildTutShipTile(450, rowY);
 
     // 5 product slots
     this._tutSlots = [];
@@ -1380,7 +1398,7 @@ class TutorialScene extends Phaser.Scene {
     const ids = this.tut.hand;
     const handY = this._tutHandY;
     const totalW = ids.length * (CARD_W + 8) - 8;
-    const startX = (GAME_W - totalW) / 2 + 33;
+    const startX = (GAME_W - totalW) / 2 + 130;
 
     ids.forEach((id, i) => {
       const card = this._getTutCard(id);
@@ -1694,7 +1712,7 @@ class TutorialScene extends Phaser.Scene {
         // Position joke line snug below the last dialogue line
         const lastText = this._dialogueLines.filter(t => t.style && t.style.fontSize === '16px').pop();
         const jokeY = lastText ? (lastText.y + lastText.height + 10) : (this._dialogueAreaY + 10 + this._dialogueLines.length * 28);
-        const leftMargin = 260;
+        const leftMargin = 360;
         const jokeLine = this.add.text(leftMargin, jokeY, 'You know this is just a tutorial, right?', {
           fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'left',
           wordWrap: { width: GAME_W - leftMargin * 2 }
@@ -1811,7 +1829,7 @@ class TutorialScene extends Phaser.Scene {
       4: {
         lines: [
           'Here\'s some more cash.',
-          'Example Card 2 has a multiplier op of ×2.',
+          'Example Card 2 has an op of x2.',
           'Add it to the Product row and press SHIP again.',
         ],
         markerLines: [2],
@@ -1848,7 +1866,7 @@ class TutorialScene extends Phaser.Scene {
             const card3 = this._getTutCard(-3);
             const ids = this.tut.hand;
             const totalW = ids.length * (CARD_W + 8) - 8;
-            const startX = (GAME_W - totalW) / 2 + 33;
+            const startX = (GAME_W - totalW) / 2 + 130;
             const targetX = startX + (ids.length - 1) * (CARD_W + 8) + CARD_W / 2;
             const obj = this._buildTutCardVisual(card3, GAME_W + CARD_W, this._tutHandY, true);
             obj.setAlpha(0);
@@ -1886,7 +1904,7 @@ class TutorialScene extends Phaser.Scene {
       10: {
         lines: [
           'Some of your cards have value to VCs — you can see that value in silver.',
-          'Your valuation is determined by the total value of your cards times your product multiplier.',
+          'Your valuation is determined by your TEAM VALUE times your PRODUCT MULT.',
           'If you never ship, your valuation is $0.',
           'When you\'re ready, click NEXT to run your valuation.',
         ],
@@ -1973,7 +1991,7 @@ class TutorialScene extends Phaser.Scene {
 
   _tutAppendLine(text, marker = false) {
     const lineY = this._dialogueAreaY + 10 + this._dialogueLines.length * 28;
-    const leftMargin = 260;
+    const leftMargin = 360;
     const lineText = this.add.text(leftMargin, lineY, text, {
       fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'left',
       wordWrap: { width: GAME_W - leftMargin * 2 }
@@ -1987,6 +2005,16 @@ class TutorialScene extends Phaser.Scene {
       }).setOrigin(0.5, 0);
       this._dialogueContainer.add(tri);
       this._dialogueLines.push(tri);
+      const triTween = this.tweens.add({
+        targets: tri,
+        x: tri.x + 5,
+        duration: 400,
+        ease: 'Sine.easeInOut',
+        yoyo: true,
+        repeat: -1,
+      });
+      if (!this._triTweens) this._triTweens = [];
+      this._triTweens.push(triTween);
     }
 
     // Adjust for multi-line text wrapping
@@ -1997,6 +2025,7 @@ class TutorialScene extends Phaser.Scene {
   }
 
   _clearDialogue() {
+    if (this._triTweens) { this._triTweens.forEach(t => t.stop()); this._triTweens = []; }
     this._dialogueLines.forEach(t => t.destroy());
     this._dialogueLines = [];
     this._dialogueAreaY = this._dialogueStartY;
@@ -2028,23 +2057,63 @@ class TutorialScene extends Phaser.Scene {
     this.pageObjects.push(this._tutNextBtn, this._tutNextLbl);
   }
 
-  _showPlayGameButton() {
-    const cx = GAME_W / 2;
-    const btnY = GAME_H - 90;
-
-    this._tutPlayBtn = this.add.rectangle(cx, btnY, 200, 48, COLORS.sceneBtnPrimary)
-      .setInteractive({ useHandCursor: true });
-    this._tutPlayLbl = this.add.text(cx, btnY, 'PLAY GAME', {
-      fontSize: '16px', fontFamily: FONT_UI, color: '#000000', fontStyle: 'bold'
-    }).setOrigin(0.5, 0.5);
-
-    this._tutPlayBtn.on('pointerover', () => this._tutPlayBtn.setFillStyle(COLORS.sceneBtnPrimaryHov));
-    this._tutPlayBtn.on('pointerout', () => this._tutPlayBtn.setFillStyle(COLORS.sceneBtnPrimary));
-    this._tutPlayBtn.on('pointerdown', () => {
-      this.scene.start('WelcomeScene');
+  _upgradeSkipToNext() {
+    if (!this._skipBtn || !this._skipLbl) return;
+    this._skipLbl.setText('NEXT →').setColor('#000000');
+    this._skipBtn.removeAllListeners();
+    this._skipBtn.setStrokeStyle(0).setFillStyle(COLORS.sceneBtnPrimary);
+    this._skipBtn.setInteractive({ useHandCursor: true });
+    this._skipBtn.on('pointerover', () => this._skipBtn.setFillStyle(COLORS.sceneBtnPrimaryHov));
+    this._skipBtn.on('pointerout',  () => this._skipBtn.setFillStyle(COLORS.sceneBtnPrimary));
+    this._skipBtn.on('pointerdown', () => {
+      this.currentPage = 4;
+      this._buildPage(4);
     });
+  }
 
-    this.pageObjects.push(this._tutPlayBtn, this._tutPlayLbl);
+  _buildPage4(cx) {
+    // ── Title ──
+    this.pageObjects.push(
+      this.add.text(cx, 20, ' STRATEGY TIPS ', {
+        fontSize: '48px', fontFamily: '"Londrina Solid", sans-serif',
+        color: COLORS.text.primary, align: 'center', padding: { right: 16 },
+        shadow: { offsetX: -3, offsetY: 3, blur: 0, color: '#000000', fill: true },
+      }).setOrigin(0.5, 0)
+    );
+
+    // ── Parts 1 & 2: side by side, slightly above vertical center ──
+    const CENTER_Y = 320;
+    const PART_W   = 400;
+    const GAP      = 60;
+    const leftX    = cx - PART_W - GAP / 2;   // 220 — left edge of text block
+    const rightCX  = cx + GAP / 2 + PART_W / 2; // 860 — center of image
+
+    // Part 1: copy
+    const copyText = [
+      'Each row benefits from having cards with good op numbers, but you have to start small and build up.',
+      'In early rounds, focus on raising cash and placing cards so you can raise more cash and draw more cards. In later rounds, ship a lot.',
+      'Complete STRETCH GOALS to get C-Suite cards — they are key to get high valuations. You can only have one of each kind on the board (CEO, COO, etc.), but you can replace ones you\'ve already played.',
+      'More powerful and higher value cards are unlocked each round. You can even draw C-Suite cards in the 4th round.',
+    ].join('\n\n');
+
+    this.pageObjects.push(
+      this.add.text(leftX, CENTER_Y, copyText, {
+        fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary,
+        wordWrap: { width: PART_W }, lineSpacing: 4,
+      }).setOrigin(0, 0.5)
+    );
+
+    // Part 2: strategy diagram
+    this.pageObjects.push(
+      this.add.image(rightCX, CENTER_Y, 'tutorial_strategy').setOrigin(0.5, 0.5)
+    );
+
+    // ── Part 3: tagline ──
+    this.pageObjects.push(
+      this.add.text(cx, 560, 'Find synergies between cards to scale.', {
+        fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center',
+      }).setOrigin(0.5, 0.5)
+    );
   }
 
   _showValuationReveal() {
@@ -2097,14 +2166,14 @@ class TutorialScene extends Phaser.Scene {
       });
     });
 
-    // "You did it" line centered above PLAY GAME button
+    // "You did it" line, then upgrade SKIP THIS → NEXT
     this.time.delayedCall(2600, () => {
-      const youDidIt = this.add.text(cx, btnY - 50, 'You did it. Ready for the real thing?', {
+      const youDidIt = this.add.text(cx, btnY - 50, 'You did it. Now a few tips about strategy...', {
         fontSize: '16px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center',
       }).setOrigin(0.5, 0.5);
       this._dialogueContainer.add(youDidIt);
       this._dialogueLines.push(youDidIt);
-      this._showPlayGameButton();
+      this._upgradeSkipToNext();
     });
   }
 
@@ -2114,7 +2183,7 @@ class TutorialScene extends Phaser.Scene {
     const cx = GAME_W / 2;
 
     // Page indicator
-    const indicator = this.add.text(cx, navY, `${page} / 3`, {
+    const indicator = this.add.text(cx, navY, `${page} / 4`, {
       fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
     }).setOrigin(0.5, 0.5);
     this.pageObjects.push(indicator);
@@ -2122,8 +2191,11 @@ class TutorialScene extends Phaser.Scene {
     // Back button
     const NAV_LEFT = 220;
     const NAV_RIGHT = GAME_W - 220;
-    const backLabel = page === 2 ? '← THE BASICS' : page === 3 ? '← UNDERSTANDING CARDS' : '← BACK';
-    const backW = page === 3 ? 200 : 170;
+    const backLabel = page === 2 ? '← THE BASICS'
+                    : page === 3 ? '← UNDERSTANDING CARDS'
+                    : page === 4 ? '← ACTIVATING ROWS'
+                    : '← BACK';
+    const backW = (page === 3 || page === 4) ? 200 : 170;
     const backBg = this.add.rectangle(NAV_LEFT, navY, backW, 40, COLORS.sceneBg)
       .setStrokeStyle(1, 0xffffff).setInteractive({ useHandCursor: true });
     const backLbl = this.add.text(NAV_LEFT, navY, backLabel, {
@@ -2185,16 +2257,29 @@ class TutorialScene extends Phaser.Scene {
       });
       this.pageObjects.push(nextBg, nextLbl);
     } else if (page === 3) {
-      // SKIP THIS
+      // SKIP THIS (upgrades to NEXT → after all dialogue completes)
       const skipBg = this.add.rectangle(NAV_RIGHT, navY, 140, 40, COLORS.sceneBg)
         .setStrokeStyle(1, 0xffffff).setInteractive({ useHandCursor: true });
       const skipLbl = this.add.text(NAV_RIGHT, navY, 'SKIP THIS →', {
         fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.primary
       }).setOrigin(0.5, 0.5);
+      this._skipBtn = skipBg;
+      this._skipLbl = skipLbl;
       skipBg.on('pointerover', () => skipBg.setFillStyle(COLORS.sceneBtnSecondHov));
       skipBg.on('pointerout',  () => skipBg.setFillStyle(COLORS.sceneBg));
-      skipBg.on('pointerdown', () => this.scene.start('WelcomeScene'));
+      skipBg.on('pointerdown', () => { this.currentPage = 4; this._buildPage(4); });
       this.pageObjects.push(skipBg, skipLbl);
+    } else if (page === 4) {
+      // PLAY GAME (last screen)
+      const playBg = this.add.rectangle(NAV_RIGHT, navY, 150, 40, COLORS.sceneBtnPrimary)
+        .setInteractive({ useHandCursor: true });
+      const playLbl = this.add.text(NAV_RIGHT, navY, 'PLAY GAME →', {
+        fontSize: '13px', fontFamily: FONT_UI, color: '#000000'
+      }).setOrigin(0.5, 0.5);
+      playBg.on('pointerover', () => playBg.setFillStyle(COLORS.sceneBtnPrimaryHov));
+      playBg.on('pointerout',  () => playBg.setFillStyle(COLORS.sceneBtnPrimary));
+      playBg.on('pointerdown', () => this.scene.start('WelcomeScene'));
+      this.pageObjects.push(playBg, playLbl);
     }
   }
 }
@@ -2775,43 +2860,18 @@ class GameScene extends Phaser.Scene {
 
     const panelX   = GAME_W - 110;   // same center-x as goal panel
     const CARD_W_F = 170;
-    const CARD_H_F = 60;
+    const CARD_H_F = 86;
     const GAP      = 8;
     const START_Y  = 215;            // just below goal panel bottom edge (~190)
+
+    this.add.text(panelX, START_Y - 8, 'MARKET FORCES', {
+      fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, align: 'center'
+    }).setOrigin(0.5, 1);
 
     forces.forEach((force, i) => {
       const cardY = START_Y + i * (CARD_H_F + GAP) + CARD_H_F / 2;
 
-      const sentimentFill   = force.sentiment === 'positive' ? 0xd4edda
-                            : force.sentiment === 'negative' ? 0xf8d7da
-                            : 0xe2e3e5;
-      const sentimentStroke = force.sentiment === 'positive' ? 0x2a7a3b
-                            : force.sentiment === 'negative' ? 0x8b1a1a
-                            : 0x6c757d;
-      const sentimentHex    = force.sentiment === 'positive' ? '#2a7a3b'
-                            : force.sentiment === 'negative' ? '#8b1a1a'
-                            : '#555577';
-
-      const bg = this.add.graphics();
-      bg.fillStyle(sentimentFill);
-      bg.fillRoundedRect(panelX - CARD_W_F / 2, cardY - CARD_H_F / 2, CARD_W_F, CARD_H_F, 6);
-      bg.lineStyle(1.5, sentimentStroke);
-      bg.strokeRoundedRect(panelX - CARD_W_F / 2, cardY - CARD_H_F / 2, CARD_W_F, CARD_H_F, 6);
-
-      const arrow = force.sentiment === 'positive' ? '▲' : force.sentiment === 'negative' ? '▼' : '—';
-      this.add.text(panelX - CARD_W_F / 2 + 14, cardY, arrow, {
-        fontSize: '14px', fontFamily: FONT_BOARD, color: sentimentHex, fontStyle: 'bold'
-      }).setOrigin(0.5, 0.5);
-
-      this.add.text(panelX - CARD_W_F / 2 + 28, cardY - 10, force.name, {
-        fontSize: '10px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold',
-        wordWrap: { width: CARD_W_F - 36 }
-      }).setOrigin(0, 0.5);
-
-      this.add.text(panelX - CARD_W_F / 2 + 28, cardY + 10, force.effectText, {
-        fontSize: '9px', fontFamily: FONT_UI, color: sentimentHex,
-        wordWrap: { width: CARD_W_F - 36 }
-      }).setOrigin(0, 0.5);
+      this.add.image(panelX, cardY, `force_${force.id}`);
 
       // Long-press popup (to the left since card is on right edge)
       const hitArea = this.add.rectangle(panelX, cardY, CARD_W_F, CARD_H_F, 0x000000, 0)
@@ -2862,7 +2922,7 @@ class GameScene extends Phaser.Scene {
 
     const descText = this.add.text(0, 0, force.description, {
       fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, fontStyle: 'italic',
-      align: 'center', wordWrap: { width: PW - PAD * 2 }
+      align: 'center', wordWrap: { width: PW - PAD * 2 }, padding: { right: 6 }
     }).setOrigin(0.5, 0);
 
     const effectText = this.add.text(0, 0, force.effectText, {
@@ -3486,7 +3546,7 @@ class GameScene extends Phaser.Scene {
 
     const descText = this.add.text(0, 0, card.description, {
       fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.secondary, fontStyle: 'italic',
-      align: 'center', wordWrap: { width: PW - PAD * 2 }
+      align: 'center', wordWrap: { width: PW - PAD * 2 }, padding: { right: 6 }
     }).setOrigin(0.5, 0);
 
     let specialText = null, bonusText = null, triggerText = null;
@@ -6073,6 +6133,7 @@ class GameScene extends Phaser.Scene {
 
   showFreePlayBanner(rowType) {
     if (this.freePlayBanner) this.freePlayBanner.destroy();
+    if (this.freePlayCancelLink) this.freePlayCancelLink.destroy();
     const bannerText = rowType === null
       ? 'NEXT CARD IS FREE — PLAY ANYWHERE'
       : `PLAY ANOTHER CARD TO ${rowType === 'product' ? 'PRODUCT' : rowType === 'resources' ? 'RESOURCES' : 'CASH'} ROW`;
@@ -6083,12 +6144,33 @@ class GameScene extends Phaser.Scene {
       bannerText,
       { fontSize: '16px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold' }
     ).setOrigin(0.5).setDepth(100);
+
+    // Cancel link — right-aligned below the banner
+    const bannerRight = slot4X + this.freePlayBanner.width / 2;
+    this.freePlayCancelLink = this.add.text(
+      bannerRight, bannerY + 18,
+      '✕ Cancel',
+      { fontSize: '11px', fontFamily: FONT_BOARD, color: '#555555', fontStyle: 'italic' }
+    ).setOrigin(1, 0).setDepth(100).setInteractive({ useHandCursor: true });
+    this.freePlayCancelLink.on('pointerover', () => this.freePlayCancelLink.setStyle({ color: '#000000' }));
+    this.freePlayCancelLink.on('pointerout',  () => this.freePlayCancelLink.setStyle({ color: '#555555' }));
+    this.freePlayCancelLink.on('pointerdown', () => {
+      this.state.freePlay = false;
+      this.state.freePlayRow = null;
+      this.state.freePlacement = false;
+      this.clearFreePlayBanner();
+      this.advanceTurn();
+    });
   }
 
   clearFreePlayBanner() {
     if (this.freePlayBanner) {
       this.freePlayBanner.destroy();
       this.freePlayBanner = null;
+    }
+    if (this.freePlayCancelLink) {
+      this.freePlayCancelLink.destroy();
+      this.freePlayCancelLink = null;
     }
   }
 
@@ -6141,27 +6223,27 @@ class MarketForceScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // ── Force card dimensions ────────────────────────────────
-    const FORCE_W = 160;
-    const FORCE_H = 200;
+    const FORCE_W = 170;
+    const FORCE_H = 86;
     const SPACING = 40;
-    const CARD_Y  = 310;
+    const CARD_Y  = 320;
 
     this.add.text(cx, CARD_Y - FORCE_H / 2 - 20, 'Pick a card to change the economy of the game.', {
       fontSize: '14px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
     }).setOrigin(0.5, 1);
 
     // ── Info panel (hidden until selection) ─────────────────
-    this._infoName = this.add.text(cx, 456, '', {
+    this._infoName = this.add.text(cx, 430, '', {
       fontSize: '22px', fontFamily: FONT_BOARD, color: COLORS.text.primary,
       fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5).setAlpha(0);
 
-    this._infoDesc = this.add.text(cx, 490, '', {
+    this._infoDesc = this.add.text(cx, 464, '', {
       fontSize: '13px', fontFamily: FONT_UI, color: COLORS.text.primary,
       fontStyle: 'italic', align: 'center', wordWrap: { width: 480 }
     }).setOrigin(0.5).setAlpha(0);
 
-    this._infoEffect = this.add.text(cx, 530, '', {
+    this._infoEffect = this.add.text(cx, 500, '', {
       fontSize: '14px', fontFamily: FONT_BOARD,
       color: COLORS.text.cardOp, align: 'center'
     }).setOrigin(0.5).setAlpha(0);
@@ -6219,6 +6301,23 @@ class MarketForceScene extends Phaser.Scene {
         });
       })(i);
     }
+
+    // ── Sequential glow animation (1→2→3→repeat) ────────────
+    // Each card glows for 500ms (200ms fade in, 100ms hold, 200ms fade out).
+    // Cards are staggered 700ms apart → full cycle = 2100ms.
+    this._glowTweens = this._cardContainers.map((container, i) =>
+      this.tweens.add({
+        targets: container.glowGraphics,
+        alpha: { from: 0, to: 1 },
+        duration: 200,
+        ease: 'Quad.easeInOut',
+        hold: 100,
+        yoyo: true,
+        delay: i * 700,
+        repeat: -1,
+        repeatDelay: 1600,
+      })
+    );
   }
 
   _buildFaceDownCard(x, y, w, h) {
@@ -6230,59 +6329,22 @@ class MarketForceScene extends Phaser.Scene {
     bg.lineStyle(2, 0x1a6e74);
     bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 8);
 
+    const glow = this.add.graphics().setAlpha(0);
+    glow.lineStyle(3, 0x7ef8ff);
+    glow.strokeRoundedRect(-w / 2, -h / 2, w, h, 8);
+
     const qMark = this.add.text(0, 0, '?', {
       fontSize: '64px', fontFamily: FONT_BOARD, color: '#1a6e74', fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    container.add([bg, qMark]);
+    container.add([bg, glow, qMark]);
+    container.glowGraphics = glow;
     return container;
   }
 
-  _buildFaceUpCard(force, w, h) {
-    const sentimentColor = force.sentiment === 'positive' ? 0x2a7a3b
-                         : force.sentiment === 'negative' ? 0x8b1a1a
-                         : 0x3a3a5c;
-    const sentimentHex   = force.sentiment === 'positive' ? '#2a7a3b'
-                         : force.sentiment === 'negative' ? '#8b1a1a'
-                         : '#3a3a5c';
-
+  _buildFaceUpCard(force) {
     const container = this.add.container(0, 0);
-
-    const bg = this.add.graphics();
-    bg.fillStyle(0xffffff);
-    bg.fillRoundedRect(-w / 2, -h / 2, w, h, 8);
-    bg.lineStyle(3, sentimentColor);
-    bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 8);
-
-    const headerBg = this.add.graphics();
-    headerBg.fillStyle(sentimentColor);
-    headerBg.fillRoundedRect(-w / 2, -h / 2, w, 28, { tl: 8, tr: 8, bl: 0, br: 0 });
-
-    const typeLabel = this.add.text(0, -h / 2 + 14, 'MARKET FORCE', {
-      fontSize: '9px', fontFamily: FONT_BOARD, color: '#ffffff', fontStyle: 'bold'
-    }).setOrigin(0.5);
-
-    const nameText = this.add.text(0, -h / 2 + 50, force.name, {
-      fontSize: '13px', fontFamily: FONT_CARD_NAME, color: '#000000', fontStyle: 'bold',
-      align: 'center', wordWrap: { width: w - 16 }
-    }).setOrigin(0.5);
-
-    const divider = this.add.rectangle(0, -h / 2 + 86, w - 20, 1, 0xd1d1d1);
-
-    const arrow = force.sentiment === 'positive' ? '▲'
-                : force.sentiment === 'negative' ? '▼' : '—';
-    const arrowColor = force.sentiment === 'positive' ? '#2a7a3b'
-                     : force.sentiment === 'negative' ? '#8b1a1a' : '#555577';
-    const arrowText = this.add.text(0, -h / 2 + 108, arrow, {
-      fontSize: '28px', fontFamily: FONT_BOARD, color: arrowColor, fontStyle: 'bold'
-    }).setOrigin(0.5);
-
-    const effectText = this.add.text(0, -h / 2 + 148, force.effectText, {
-      fontSize: '11px', fontFamily: FONT_UI, color: sentimentHex,
-      fontStyle: 'bold', align: 'center', wordWrap: { width: w - 16 }
-    }).setOrigin(0.5);
-
-    container.add([bg, headerBg, typeLabel, nameText, divider, arrowText, effectText]);
+    container.add(this.add.image(0, 0, `force_${force.id}`));
     return container;
   }
 
@@ -6290,6 +6352,13 @@ class MarketForceScene extends Phaser.Scene {
     this._selected = idx;
     const force = MARKET_FORCES.find(f => f.id === this._drawn[idx]);
     const container = this._cardContainers[idx];
+
+    // Stop glow animations
+    if (this._glowTweens) {
+      this._glowTweens.forEach(t => t.stop());
+      this._cardContainers.forEach(c => c.glowGraphics && c.glowGraphics.setAlpha(0));
+      this._glowTweens = null;
+    }
 
     // Return container to baseline y before flip
     this.tweens.killTweensOf(container);
@@ -6322,7 +6391,7 @@ class MarketForceScene extends Phaser.Scene {
 
     const effectColor = force.sentiment === 'positive' ? COLORS.text.positive
                       : force.sentiment === 'negative' ? COLORS.text.negative
-                      : COLORS.text.muted;
+                      : '#aaaacc';
     this._infoEffect.setText(force.effectText).setColor(effectColor);
 
     this.tweens.add({ targets: [this._infoName, this._infoDesc, this._infoEffect], alpha: 1, duration: 300, delay: 250 });
@@ -6658,6 +6727,9 @@ class ValuationScene extends Phaser.Scene {
 
   resultMessage(val, isEndGame) {
     const suffix = isEndGame ? ' Final score.' : '';
+    if (val >= 50000000) return `${fmtVal(val)}. It's time to buy your own island.${suffix}`;
+    if (val >= 10000000) return `${fmtVal(val)}. From scrappy startup to evil empire.${suffix}`;
+    if (val >= 5000000)  return `${fmtVal(val)}. Now all you have to do is be profitable.${suffix}`;
     if (val >= 1000000) return `${fmtVal(val)}. Unicorn territory.${suffix}`;
     if (val >= 500000)  return `${fmtVal(val)}. You're finally popular at parties.${suffix}`;
     if (val >= 100000)  return `${fmtVal(val)}. Technically not a failure.${suffix}`;

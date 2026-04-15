@@ -252,7 +252,7 @@
     },
     {
       "id": 23,
-      "name": "The Sandbagger",
+      "name": "Sandbagger",
       "type": "Engineering",
       "cost": 1,
       "operation": { "type": "add", "value": 0.5 },
@@ -576,12 +576,12 @@
       "id": 45,
       "name": "Swag Drop",
       "type": "Services/Tech",
-      "cost": 1,
-      "operation": { "type": "add", "value": 1.5 },
+      "cost": 0.5,
+      "operation": { "type": "add", "value": 1 },
       "eligibleRows": ["cash", "product", "resources"],
       "baseValue": 0,
       "triggerEffect": { "type": "trade_draw", "discard": 1, "draws": 2 },
-      "description": "Three hundred waterbottles that break if you stare too hard."
+      "description": "Three hundred water bottles that shatter if you stare too hard."
     },
     {
       "id": 46,
