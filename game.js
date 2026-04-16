@@ -1825,7 +1825,7 @@ class TutorialScene extends Phaser.Scene {
     const DIALOGUES = {
       1: {
         lines: [
-          'The game has three rows, but we\'ll just use one to demonstrate the mechanic.',
+          'The game has three rows, but we\'ll use one to demonstrate the mechanic.',
           'You can place cards in the first open slot of any row as long as you can afford them.',
           'Place Example Card 1 in the Product row.',
         ],
@@ -2114,7 +2114,7 @@ class TutorialScene extends Phaser.Scene {
     const copyText = [
       'Each row benefits from having cards with good op numbers, but you have to start small and build up.',
       'In early rounds, focus on raising cash and placing cards so you can raise more cash and draw more cards. In later rounds, ship a lot.',
-      'Complete STRETCH GOALS to get C-Suite cards — they are key to get high valuations. You can only have one of each kind on the board (CEO, COO, etc.), but you can replace ones you\'ve already played.',
+      'Complete STRETCH GOALS to get C-Suite cards — they are key for high valuations. You can only have one of each kind on the board (CEO, COO, etc.), but you can replace ones you\'ve already played.',
       'More powerful and higher value cards are unlocked each round. You can even draw C-Suite cards in the 4th round.',
     ].join('\n\n');
 
