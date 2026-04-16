@@ -1850,7 +1850,7 @@ class TutorialScene extends Phaser.Scene {
       },
       3: {
         lines: [
-          'The card\'s operator value (op) is added to the base amount.',
+          'The card\'s operator (op) is added to the base amount.',
           '1 + 1.5 = 2.5',
           '2.5 has been added to your product multiplier.',
         ],
@@ -1933,8 +1933,8 @@ class TutorialScene extends Phaser.Scene {
       },
       10: {
         lines: [
-          'Some of your cards have value to VCs — you can see that value in silver.',
-          'Your valuation is determined by your TEAM VALUE times your PRODUCT MULT.',
+          'Some cards have value to VCs (shown in silver). Cards in every row add to your TEAM VALUE.',
+          'Your company\'s valuation is the TEAM VALUE times the PRODUCT MULT.',
           'If you never ship, your valuation is $0.',
           'When you\'re ready, click NEXT to run your valuation.',
         ],
