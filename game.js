@@ -9,6 +9,7 @@ const FONT_CARD_NAME = '"Roboto", sans-serif';
 const GAME_W = 1280;
 const GAME_H = 720;
 const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+let _recommendedLabelShown = false;
 
 function tryFullscreen() {
   const el = document.documentElement;
@@ -563,6 +564,7 @@ class BootScene extends Phaser.Scene {
       this.load.image(`force_${f.id}`, `assets/market-forces/force_${f.id}.png`);
     });
     this.load.image('tutorial_strategy', 'assets/tutorial_strategy.png');
+    this.load.image('recommended-label', 'assets/recommended-label.png');
   }
 
   create() {
@@ -670,6 +672,12 @@ class WelcomeScene extends Phaser.Scene {
     this.add.text(cx, GAME_H - 36, '© 2026 Andrew Schauer', {
       fontSize: '10px', fontFamily: FONT_UI, color: COLORS.text.primary, align: 'center'
     }).setOrigin(0.5, 0.5);
+
+    // Recommended-for-beginners label (shown once per session, first load only)
+    if (!_recommendedLabelShown) {
+      _recommendedLabelShown = true;
+      this.add.image(755, 370, 'recommended-label').setOrigin(0, 0).setDepth(10);
+    }
 
     // Mobile: fullscreen tap prompt
     if (IS_MOBILE) {
