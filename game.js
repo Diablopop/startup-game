@@ -5167,7 +5167,7 @@ class GameScene extends Phaser.Scene {
       acceptBtn.on('pointerdown', () => {
         this.state.cash -= fx.cost;
         this.updateHUD();
-        cleanup(); acceptLabel.destroy();
+        cleanup(); acceptLabel.destroy(); skipLabel.destroy();
         resumeCallback(payout, fx.draws);
       });
     }
