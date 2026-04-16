@@ -1933,7 +1933,7 @@ class TutorialScene extends Phaser.Scene {
       },
       10: {
         lines: [
-          'Some cards have value to VCs (shown in silver). Cards in every row add to your TEAM VALUE.',
+          'Some cards have value to VCs (in silver) \u2014 they add to your TEAM VALUE.',
           'Your company\'s valuation is the TEAM VALUE times the PRODUCT MULT.',
           'If you never ship, your valuation is $0.',
           'When you\'re ready, click NEXT to run your valuation.',
