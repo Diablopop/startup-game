@@ -1063,30 +1063,52 @@ class TutorialScene extends Phaser.Scene {
     const GAP = 8, DIV_H = 1, TOP_PAD = 14, BOTTOM_PAD = 14;
     let contentH = typeText.height + 6 + nameText.height + 10 + DIV_H + 8 + descText.height;
 
+    const _sfxLabel = (f) => {
+      if (!f) return '';
+      if (f.type === 'immediate_play') return 'Play another card now';
+      if (f.type === 'free_placement') return 'Play another card now for free';
+      if (f.type === 'modify_type') {
+        const target = f.targetRole || f.targetType || '?';
+        const parts = [];
+        if (f.operationBonus) {
+          const b = f.operationBonus;
+          parts.push(b.type === 'multiply' ? `×${b.value} ${target} ops` : `${b.value >= 0 ? '+' : ''}${b.value} to ${target} ops`);
+        }
+        if (f.valueBonus)   parts.push(`${f.valueBonus >= 0 ? '+' : ''}$${Math.abs(f.valueBonus)}k ${target} val`);
+        if (f.costDiscount) parts.push(`-$${f.costDiscount}k ${target} cost`);
+        return parts.join(' ') || '';
+      }
+      return '';
+    };
+    const _tfxLabel = (f) => {
+      if (!f) return '';
+      if (Array.isArray(f)) return f.map(_tfxLabel).filter(Boolean).join(', ');
+      if (f.type === 'gain_cash')               return `+$${f.amount}k on trigger`;
+      if (f.type === 'gain_cash_per_type')      return `+$${f.amount}k per ${f.targetType}`;
+      if (f.type === 'gain_cash_per_discard')   return `+$${f.amount}k per discard`;
+      if (f.type === 'draw')                    return `Draw ${f.count} card${f.count !== 1 ? 's' : ''}`;
+      if (f.type === 'spend_cash_draw')         return `Pay $${f.cost}k → draw ${f.draws}`;
+      if (f.type === 'spend_cash_draw_resource')return `Pay $${f.cost}k → draw ${f.draws}`;
+      if (f.type === 'spend_cash_boost_op')     return `Pay $${f.cost}k → ${f.target} +${f.value} op`;
+      if (f.type === 'boost_op')                return `${f.target}: +${f.value} op`;
+      if (f.type === 'boost_value')             return `${f.target}: +$${f.value}k val`;
+      if (f.type === 'trade_draw')              return `Trade 1 card → draw ${f.draws}`;
+      if (f.type === 'self_boost_per_type')     return `+${f.value} op per ${f.targetType}`;
+      return 'trigger effect';
+    };
+
     let specialText = null, triggerText = null;
     if (card.specialEffect) {
-      const sfx = card.specialEffect;
-      let label = sfx.type;
-      if (sfx.type === 'modify_type') {
-        label = `${sfx.operationBonus.value >= 0 ? '+' : ''}${sfx.operationBonus.value} to ${sfx.targetType} ops`;
-      } else if (sfx.type === 'immediate_play') {
-        label = 'Play another card now';
-      } else if (sfx.type === 'free_placement') {
-        label = 'Play another card now for free';
-      }
-      specialText = this.add.text(0, 0, `★ ${label}`, {
+      const sfxArr = Array.isArray(card.specialEffect) ? card.specialEffect : [card.specialEffect];
+      const sfxLabel = sfxArr.map(_sfxLabel).filter(Boolean).join('\n');
+      specialText = this.add.text(0, 0, `★ ${sfxLabel}`, {
         fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.gold,
         align: 'center', wordWrap: { width: PW - PAD * 2 }
       }).setOrigin(0.5, 0);
       contentH += GAP + DIV_H + 8 + specialText.height;
     }
     if (card.triggerEffect) {
-      const tfx = card.triggerEffect;
-      let label = 'trigger effect';
-      if (tfx.type === 'gain_cash') label = `+$${tfx.amount}k on trigger`;
-      else if (tfx.type === 'draw') label = `Draw ${tfx.count} card${tfx.count !== 1 ? 's' : ''}`;
-      else if (tfx.type === 'spend_cash_draw') label = `Pay $${tfx.cost}k → draw ${tfx.draws}`;
-      triggerText = this.add.text(0, 0, `⚡ ${label}`, {
+      triggerText = this.add.text(0, 0, `⚡ ${_tfxLabel(card.triggerEffect)}`, {
         fontSize: '12px', fontFamily: FONT_BOARD, color: COLORS.text.cyan,
         align: 'center', wordWrap: { width: PW - PAD * 2 }
       }).setOrigin(0.5, 0);
