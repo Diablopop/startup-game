@@ -246,7 +246,7 @@ const MARKET_FORCES = [
   // ── Null effect ──────────────────────────────────────────
   {
     id: 'big_tech_hearing',
-    name: 'Big Tech Congressional Hearing',
+    name: 'Big Tech Congressional Hearings',
     description: 'Public outrage is growing, and representatives in Washington are going to do something about it.',
     effectText: 'Literally nothing changes.',
     type: 'null_effect', target: null, value: 0,
