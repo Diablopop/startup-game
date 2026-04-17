@@ -995,7 +995,7 @@ class TutorialScene extends Phaser.Scene {
     const labelDefs = [
       { label: 'TYPE',              desc: 'There are 7 types of cards. Card effects may help or hinder different types.' },
       { label: 'NAME',              desc: "The card's identity — every card brings something different." },
-      { label: 'OPERATOR (OP)',     desc: "When a row activates, each card's op modifies the row's running score left to right." },
+      { label: 'OPERATOR (OP)',     desc: "When a row is activated, each card's op modifies the running tally, left to right." },
       { label: '★ SPECIAL EFFECT', desc: 'A persistent bonus that applies as long as the card is on the board.' },
       { label: '⚡\uFE0E TRIGGER EFFECT', desc: 'An effect that fires in sequence when its row is activated.' },
       { label: 'COST (RED OR GREEN)', desc: 'The cash required to place this card. Green if you can afford it.' },
