@@ -363,13 +363,13 @@
     },
     {
       "id": 31,
-      "name": "D3",
+      "name": "Double Dipper",
       "type": "Product/Design",
       "cost": 1,
       "operation": { "type": "add", "value": 1.5 },
       "eligibleRows": ["cash", "product", "resources"],
       "baseValue": 0,
-      "description": "The double-dipping designer."
+      "description": "Always gives 110%, so that's 55% for you."
     },
     {
       "id": 32,
