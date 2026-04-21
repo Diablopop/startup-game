@@ -170,7 +170,7 @@
       "operation": { "type": "add", "value": 1 },
       "eligibleRows": ["cash", "product", "resources"],
       "baseValue": 0,
-      "description": "Real art lives at the union of aesthetics and equity."
+      "description": "Real art represents the union of aesthetics and equity."
     },
     {
       "id": 16,
