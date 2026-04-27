@@ -1097,11 +1097,14 @@ class TutorialScene extends Phaser.Scene {
       if (f.type === 'draw')                    return `Draw ${f.count} card${f.count !== 1 ? 's' : ''}`;
       if (f.type === 'spend_cash_draw')         return `Pay $${f.cost}k → draw ${f.draws}`;
       if (f.type === 'spend_cash_draw_resource')return `Pay $${f.cost}k → draw ${f.draws}`;
-      if (f.type === 'spend_cash_boost_op')     return `Pay $${f.cost}k → ${f.target} +${f.value} op`;
-      if (f.type === 'boost_op')                return `${f.target}: +${f.value} op`;
-      if (f.type === 'boost_value')             return `${f.target}: +$${f.value}k val`;
-      if (f.type === 'trade_draw')              return `Trade 1 card → draw ${f.draws}`;
-      if (f.type === 'self_boost_per_type')     return `+${f.value} op per ${f.targetType}`;
+      if (f.type === 'spend_cash_boost_op')         return `Pay $${f.cost}k → ${f.target} +${f.value} op`;
+      if (f.type === 'spend_cash_boost_value')      return `Pay $${f.cost}k → ${f.target} +$${f.value}k val`;
+      if (f.type === 'boost_op')                    return `${f.target}: +${f.value} op`;
+      if (f.type === 'boost_value')                 return `${f.target}: +$${f.value}k val`;
+      if (f.type === 'trade_draw')                  return `Trade 1 card → draw ${f.draws}`;
+      if (f.type === 'self_boost_per_type')         return `+${f.value} op per ${f.targetType}`;
+      if (f.type === 'swap_card')                   return `Swap ${f.boardType} → ${f.handType}`;
+      if (f.type === 'gain_self_value_per_discard') return `+$${f.amount}k self val per discard`;
       return 'trigger effect';
     };
 
@@ -3547,6 +3550,7 @@ class GameScene extends Phaser.Scene {
     if (fx.type === 'spend_cash_draw_resource')return `Pay $${fx.cost}k → draw ${fx.draws}`;
     if (fx.type === 'spend_cash_draw')         return `Pay $${fx.cost}k → draw ${fx.draws}`;
     if (fx.type === 'spend_cash_boost_op')     return `Pay $${fx.cost}k → ${fx.target} +${fx.value} op`;
+    if (fx.type === 'spend_cash_boost_value')  return `Pay $${fx.cost}k → ${fx.target} +$${fx.value}k val`;
     if (fx.type === 'spend_cash_swap')         return `Pay $${fx.cost}k → swap for ${fx.handType}`;
     if (fx.type === 'boost_op')                return `${fx.target}: +${fx.value} op`;
     if (fx.type === 'boost_value')             return `${fx.target}: +$${fx.value}k val`;

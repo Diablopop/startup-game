@@ -1236,7 +1236,7 @@
         "targetType": "Product/Design",
         "operationBonus": { "type": "add", "value": 2 }
       },
-      "triggerEffect": { "type": "spend_cash_boost_op", "cost": 50, "target": "C-Suite", "value": 2 },
+      "triggerEffect": { "type": "spend_cash_boost_op", "cost": 50, "target": "C-Suite", "value": 1 },
       "description": "Their Dribbble has 40k followers. Their last shipped feature has 12 users."
     },
     {
