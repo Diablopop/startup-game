@@ -3739,7 +3739,7 @@ class GameScene extends Phaser.Scene {
   }
 
   // ── Card Placement ────────────────────────────────────────
-  tryPlaceCard(cardId, _slotIndex, rowType) {
+  tryPlaceCard(cardId, _slotIndex, rowType, { bypassReplaceConfirm = false } = {}) {
     const { state } = this;
     if (state.phase !== 'playing') return;
 
@@ -3791,7 +3791,19 @@ class GameScene extends Phaser.Scene {
           this.snapBack(cardId);
           return;
         }
-        // Same row — target the existing role's slot directly (override next-slot logic)
+        // Same row — show confirm modal before replacing (unless already confirmed)
+        if (!bypassReplaceConfirm) {
+          if (state.cash < finalCost) {
+            this.showFloat(slotList[existingSlotIdx].x, slotList[existingSlotIdx].y - 12, `NEED $${finalCost}k`, COLORS.text.negative);
+            this.snapBack(cardId);
+            return;
+          }
+          const oldCardId = state[existingRowKey][existingSlotIdx];
+          this.snapBack(cardId);
+          this._showReplaceConfirmModal(cardId, oldCardId, rowType, existingSlotIdx, finalCost);
+          return;
+        }
+        // bypassReplaceConfirm: player confirmed — proceed with replacement
         targetSlotIndex = existingSlotIdx;
         state[existingRowKey][existingSlotIdx] = null;
       }
@@ -5035,6 +5047,67 @@ class GameScene extends Phaser.Scene {
     skipBg.on('pointerover', () => skipBg.setFillStyle(COLORS.buttonHover));
     skipBg.on('pointerout',  () => skipBg.setFillStyle(COLORS.bg));
     skipBg.on('pointerdown', skipCallback);
+  }
+
+  _showReplaceConfirmModal(newCardId, oldCardId, rowType, slotIdx, finalCost) {
+    const cx = GAME_W / 2, cy = GAME_H / 2;
+    const PW = 340, PH = 216;
+    const modal = this.add.container(0, 0).setDepth(50);
+
+    const oldCard = this.cardsData.find(c => c.id === oldCardId);
+    const newCard = this.cardsData.find(c => c.id === newCardId);
+
+    // Backdrop + shadow + panel
+    modal.add(this.add.rectangle(cx, cy, GAME_W, GAME_H, 0x000000, 0.60).setInteractive());
+    modal.add(this.add.rectangle(cx - 3, cy + 5, PW, PH, 0x000000, 0.60));
+    modal.add(this.add.rectangle(cx, cy, PW, PH, COLORS.bg).setStrokeStyle(1, COLORS.divider));
+
+    const top = cy - PH / 2;
+
+    modal.add(this.add.text(cx, top + 22, `REPLACE ${newCard.role}?`, {
+      fontSize: '16px', fontFamily: FONT_BOARD, color: '#000000', fontStyle: 'bold'
+    }).setOrigin(0.5, 0));
+
+    modal.add(this.add.rectangle(cx, top + 52, PW - 40, 1, COLORS.popupDivider));
+
+    modal.add(this.add.text(cx, top + 64, oldCard.name, {
+      fontSize: '14px', fontFamily: FONT_BOARD, color: COLORS.text.negative, fontStyle: 'bold'
+    }).setOrigin(0.5, 0));
+
+    modal.add(this.add.text(cx, top + 86, 'is already on the board. Replace with', {
+      fontSize: '13px', fontFamily: FONT_BOARD, color: COLORS.text.secondary
+    }).setOrigin(0.5, 0));
+
+    modal.add(this.add.text(cx, top + 106, newCard.name + '?', {
+      fontSize: '14px', fontFamily: FONT_BOARD, color: COLORS.text.gold, fontStyle: 'bold'
+    }).setOrigin(0.5, 0));
+
+    modal.add(this.add.rectangle(cx, top + 136, PW - 40, 1, COLORS.popupDivider));
+
+    const btnY = top + 172;
+
+    const replaceBg = this.add.rectangle(cx + 70, btnY, 96, 36, 0x000000)
+      .setInteractive({ useHandCursor: true });
+    modal.add(replaceBg);
+    modal.add(this.add.text(cx + 70, btnY, 'REPLACE', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: '#ffffff'
+    }).setOrigin(0.5, 0.5));
+    replaceBg.on('pointerover', () => replaceBg.setFillStyle(COLORS.buttonHoverDark));
+    replaceBg.on('pointerout',  () => replaceBg.setFillStyle(0x000000));
+    replaceBg.on('pointerdown', () => {
+      modal.destroy();
+      this.tryPlaceCard(newCardId, slotIdx, rowType, { bypassReplaceConfirm: true });
+    });
+
+    const cancelBg = this.add.rectangle(cx - 70, btnY, 96, 36, COLORS.bg)
+      .setStrokeStyle(1, 0x000000).setInteractive({ useHandCursor: true });
+    modal.add(cancelBg);
+    modal.add(this.add.text(cx - 70, btnY, 'CANCEL', {
+      fontSize: '12px', fontFamily: FONT_BOARD, color: '#000000'
+    }).setOrigin(0.5, 0.5));
+    cancelBg.on('pointerover', () => cancelBg.setFillStyle(COLORS.buttonHover));
+    cancelBg.on('pointerout',  () => cancelBg.setFillStyle(COLORS.bg));
+    cancelBg.on('pointerdown', () => { modal.destroy(); });
   }
 
   _renderGainCashModal(modal, cx, cy, PH, payout, fx, resumeCallback) {
