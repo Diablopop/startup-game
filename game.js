@@ -5493,7 +5493,7 @@ class GameScene extends Phaser.Scene {
     const totalLabel = this.add.text(640, 245, 'Earn: $0k', {
       fontSize: '16px', fontFamily: FONT_BOARD, color: COLORS.text.cashSub
     }).setOrigin(0.5).setDepth(32);
-    const pageLabel  = this.add.text(640, 406, '', {
+    const pageLabel  = this.add.text(640, 425, '', {
       fontSize: '11px', fontFamily: FONT_BOARD, color: COLORS.text.hint
     }).setOrigin(0.5).setDepth(32);
     const leftArrow  = this.add.text(280, 340, '◀', {
