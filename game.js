@@ -6591,8 +6591,8 @@ class MarketForceScene extends Phaser.Scene {
 // ============================================================
 function fmtVal(kVal) {
   if (kVal >= 1000000000) {
-    const t = Math.round(kVal / 100000000) / 10;
-    return `$${t}t`;
+    const t = Math.round(kVal / 10000000) / 100;
+    return `$${t.toFixed(2)}t`;
   }
   if (kVal >= 1000000) {
     const b = Math.round(kVal / 100000) / 10;
