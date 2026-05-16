@@ -56,8 +56,8 @@ const ROUND_GOALS = [
       rewardType: 'csuite',
     },
     {
-      id: 'r1_val100', desc: 'Reach $100k valuation',
-      check: s => s.finalValuation >= 100,
+      id: 'r1_val50', desc: 'Reach $50k valuation',
+      check: s => s.finalValuation >= 50,
       progressText: null,   // valuation computed at end only
       rewardType: 'csuite',
     },
@@ -6590,6 +6590,10 @@ class MarketForceScene extends Phaser.Scene {
 // VALUATION SCENE
 // ============================================================
 function fmtVal(kVal) {
+  if (kVal >= 1000000000) {
+    const t = Math.round(kVal / 100000000) / 10;
+    return `$${t}t`;
+  }
   if (kVal >= 1000000) {
     const b = Math.round(kVal / 100000) / 10;
     return `$${b}b`;
@@ -6954,8 +6958,10 @@ class HighScoresScene extends Phaser.Scene {
       const color = isHighlight ? COLORS.text.gold : COLORS.text.primary;
       const mutedColor = COLORS.text.muted;
 
-      // Rank (unicorn emoji for $1b+)
-      const rankLabel = (scores[i] && scores[i].score >= 1000000) ? `${i + 1}.  🦄` : `${i + 1}.`;
+      // Rank (crown for $1t+, unicorn for $1b+)
+      const rankLabel = (scores[i] && scores[i].score >= 1000000000) ? `${i + 1}.  👑`
+                      : (scores[i] && scores[i].score >= 1000000) ? `${i + 1}.  🦄`
+                      : `${i + 1}.`;
       this.add.text(colRank + 12, rowY, rankLabel, {
         fontSize: '13px', fontFamily: FONT_UI, color: color, fontStyle: isHighlight ? 'bold' : 'normal'
       }).setOrigin(0, 0.5);
